@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+        PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+<generatorConfiguration>
+    <properties resource="generator.properties" />
+    <context id="DB2Tables"    targetRuntime="MyBatis3">
+
+        <property name="jdbcType" value="true" />
+
+        <plugin type="com.jghmall.common.tool.Mybatis3MVCPlugin">
+            <property name="serviceTargetProject" value="${service.target.project}"/>
+            <property name="servicePackage" value="${service.package}"/>
+            <property name="serviceRootInterface" value="${service.root.interface}&lt;${entity.package}.${entity.name}&gt;"/>
+
+            <property name="serviceImplTargetProject" value="${serviceImpl.target.project}"/>
+            <property name="serviceImplPackage" value="${serviceImpl.package}"/>
+            <property name="serviceImplRootClass" value="${serviceImpl.root.class}&lt;${entity.package}.${entity.name}&gt;"/>
+
+            <property name="controllerTargetProject" value="${controller.target.project}"/>
+            <property name="controllerPackage" value="${controller.package}"/>
+            <property name="controllerRootClass" value="${controller.root.class}"/>
+        </plugin>
+
+        <!-- generate entity时，生成serialVersionUID -->
+        <plugin type="org.mybatis.generator.plugins.SerializablePlugin" />
+        <!-- 这个插件只会增加字符串字段映射到一个JDBC字符的方法 -->
+        <plugin type="org.mybatis.generator.plugins.CaseInsensitiveLikePlugin" />
+
+        <commentGenerator>
+            <property name="suppressDate" value="true"/>
+            <property name="suppressAllComments" value="true"/>
+        </commentGenerator>
+        <!--数据库链接地址账号密码-->
+        <jdbcConnection driverClass="${generator.jdbc.driverClassName}"
+                        connectionURL="${generator.jdbc.url}"
+                        userId="${generator.jdbc.username}"
+                        password="${generator.jdbc.password}" >
+        </jdbcConnection>
+        <javaTypeResolver>
+            <property name="forceBigDecimals" value="false"/>
+        </javaTypeResolver>
+        <!--生成Model类存放位置-->
+        <javaModelGenerator targetPackage="${entity.package}" targetProject="src/main/java">
+            <property name="enableSubPackages" value="false"/>
+            <property name="trimStrings" value="true"/>
+        </javaModelGenerator>
+        <!--生成映射文件存放位置-->
+        <sqlMapGenerator targetPackage="${xml.package}" targetProject="src/main/resources">
+            <property name="enableSubPackages" value="true"/>
+        </sqlMapGenerator>
+        <!--生成Dao类存放位置-->
+        <!-- 客户端代码，生成易于使用的针对Model对象和XML配置文件 的代码
+                type="ANNOTATEDMAPPER",生成Java Model 和基于注解的Mapper对象
+                type="MIXEDMAPPER",生成基于注解的Java Model 和相应的Mapper对象
+                type="XMLMAPPER",生成SQLMap XML文件和独立的Mapper接口
+        -->
+        <javaClientGenerator type="XMLMAPPER" targetPackage="${mapper.package}" targetProject="src/main/java">
+            <property name="rootInterface" value="${mapper.super.interface}&lt;${entity.package}.${entity.name}&gt;"/>
+            <property name="enableSubPackages" value="true"/>
+        </javaClientGenerator>
+        <!--生成对应表及类名-->
+        <table tableName="${table.name}" enableCountByExample="false"  enableUpdateByExample="false"
+               enableDeleteByExample="false"  enableSelectByExample="false" selectByExampleQueryId="false"
+               domainObjectName="${entity.name}">
+            <generatedKey column="id" sqlStatement="JDBC" identity="true"/>
+        </table>
+
+
+    </context>
+</generatorConfiguration>
