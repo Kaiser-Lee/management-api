@@ -9,9 +9,9 @@
         <module name="commonconfig" />
         <module name="commonframework" />
         <module name="commonutils" />
-        <module name="interface" />
-        <module name="module" />
-        <module name="po" />
+        <module name="interfacemanagement" />
+        <module name="modulemanagement" />
+        <module name="pomanagement" />
         <module name="tool" />
         <module name="web" />
         <module name="webservice" />

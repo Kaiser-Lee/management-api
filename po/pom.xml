@@ -10,6 +10,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>po</artifactId>
+    <packaging>pom</packaging>
+    <modules>
+        <module>po-management</module>
+    </modules>
 
 
 </project>

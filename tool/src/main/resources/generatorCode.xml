@@ -8,7 +8,7 @@
 
         <property name="jdbcType" value="true" />
 
-        <plugin type="com.jghmall.common.tool.Mybatis3MVCPlugin">
+        <plugin type="com.mybatis.generator.Mybatis3MVCPlugin">
             <property name="serviceTargetProject" value="${service.target.project}"/>
             <property name="servicePackage" value="${service.package}"/>
             <property name="serviceRootInterface" value="${service.root.interface}&lt;${entity.package}.${entity.name}&gt;"/>
@@ -41,12 +41,12 @@
             <property name="forceBigDecimals" value="false"/>
         </javaTypeResolver>
         <!--生成Model类存放位置-->
-        <javaModelGenerator targetPackage="${entity.package}" targetProject="src/main/java">
+        <javaModelGenerator targetPackage="${entity.package}" targetProject="${entity.target.project}">
             <property name="enableSubPackages" value="false"/>
             <property name="trimStrings" value="true"/>
         </javaModelGenerator>
         <!--生成映射文件存放位置-->
-        <sqlMapGenerator targetPackage="${xml.package}" targetProject="src/main/resources">
+        <sqlMapGenerator targetPackage="${xml.package}" targetProject="${xml.target.project}">
             <property name="enableSubPackages" value="true"/>
         </sqlMapGenerator>
         <!--生成Dao类存放位置-->
@@ -55,7 +55,7 @@
                 type="MIXEDMAPPER",生成基于注解的Java Model 和相应的Mapper对象
                 type="XMLMAPPER",生成SQLMap XML文件和独立的Mapper接口
         -->
-        <javaClientGenerator type="XMLMAPPER" targetPackage="${mapper.package}" targetProject="src/main/java">
+        <javaClientGenerator type="XMLMAPPER" targetPackage="${mapper.package}" targetProject="${mapper.target.project}">
             <property name="rootInterface" value="${mapper.super.interface}&lt;${entity.package}.${entity.name}&gt;"/>
             <property name="enableSubPackages" value="true"/>
         </javaClientGenerator>
