@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xsi:schemaLocation="
+	            http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+	            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+	            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+	            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+	            http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.0.xsd">
+
+    <!-- 让Spring通过自动扫描来查询和管理BO -->
+    <context:component-scan base-package="com.management"/>
+    <tx:annotation-driven transaction-manager="txManager"/>
+
+    <!--启用aop切面支持-->
+    <aop:aspectj-autoproxy proxy-target-class="true"/>
+    <aop:aspectj-autoproxy expose-proxy="true"/>
+
+    <bean id="threadPoolTaskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor"
+          scope="singleton">
+        <!-- 线程池维护线程的最小数量 -->
+        <property name="corePoolSize" value="10"/>
+        <!-- 线程池维护线程的最大数量 -->
+        <property name="maxPoolSize" value="100"/>
+        <!-- 线程池所使用的缓冲队列容量，默认为Integer.MAX_VALUE -->
+        <property name="queueCapacity" value="100"/>
+        <!-- 是否允许线程池超时自动缩减 -->
+        <!--<property name="allowCoreThreadTimeOut" value="true" />-->
+        <!-- 线程池维护线程所允许的空闲时间，秒  -->
+        <property name="keepAliveSeconds" value="30"/>
+    </bean>
+
+    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="fileEncoding" value="utf-8"/>
+        <property name="locations">
+            <list>
+                <value>classpath:/application-positec.properties</value>
+            </list>
+        </property>
+    </bean>
+
+    <!--<bean-->
+    <!--class="com.coracle.yk.xframework.zookeeper.config.client.ZookeeperPropertyPlaceholderConfigurerLoader"-->
+    <!--init-method="init"-->
+    <!--destroy-method="destroy">-->
+    <!--<property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />-->
+    <!--<property name="ignoreResourceNotFound" value="true" />-->
+    <!--<property name="fileEncoding" value="UTF-8" />-->
+    <!--<property name="ignoreUnresolvablePlaceholders"><value>true</value></property>-->
+    <!--<property name="locations">-->
+    <!--<list>-->
+    <!--<value>classpath:config/application-positec.properties</value>-->
+    <!--</list>-->
+    <!--</property>-->
+    <!--</bean>-->
+    <!-- 全面更换成alibaba的druid -->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+        <!-- 基本属性 url、user、password -->
+        <property name="url" value="${druid.url.bsdmxm}"/>
+        <property name="username" value="${druid.username.bsdmxm}"/>
+        <property name="password" value="${druid.password.bsdmxm}"/>
+        <!-- 配置初始化大小、最小、最大 -->
+        <property name="initialSize" value="${druid.initialSize}"/>
+        <property name="minIdle" value="${druid.minIdle}"/>
+        <property name="maxActive" value="${druid.maxActive}"/>
+        <!-- 配置获取连接等待超时的时间 -->
+        <property name="maxWait" value="${druid.maxWait}"/>
+        <!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+        <property name="timeBetweenEvictionRunsMillis" value="${druid.timeBetweenEvictionRunsMillis}"/>
+        <!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+        <property name="minEvictableIdleTimeMillis" value="${druid.minEvictableIdleTimeMillis}"/>
+        <property name="validationQuery" value="${druid.validationQuery}"/>
+        <property name="testWhileIdle" value="${druid.testWhileIdle}"/>
+        <property name="testOnBorrow" value="${druid.testOnBorrow}"/>
+        <property name="testOnReturn" value="${druid.testOnReturn}"/>
+        <!-- 打开PSCache，并且指定每个连接上PSCache的大小 -->
+        <property name="poolPreparedStatements" value="${druid.poolPreparedStatements}"/>
+        <property name="maxPoolPreparedStatementPerConnectionSize"
+                  value="${druid.maxPoolPreparedStatementPerConnectionSize}"/>
+        <!-- 配置监控统计拦截的filters -->
+        <property name="filters" value="${druid.filters}"/>
+    </bean>
+    <!-- MyBatis3配置开始 -->
+    <!-- mybatis注解方式配置 -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.management.dao"/>
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"></property>
+    </bean>
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="configLocation" value="classpath:config/mybatis/mybatis-configuration.xml"></property>
+        <property name="mapperLocations">
+            <list>
+                <value>classpath*:/config/mybatis/map/*Mapper.xml</value>
+               <!-- <value>classpath*:/config/mybatis/map/tz/*Mapper.xml</value>-->
+            </list>
+        </property>
+        <property name="configurationProperties">
+            <props>
+                <!-- 全局映射器启用缓存 -->
+                <prop key="cacheEnabled">true</prop>
+                <!-- 查询时，关闭关联对象即时加载以提高性能 -->
+                <prop key="lazyLoadingEnabled">true</prop>
+                <!-- 设置关联对象加载的形态，此处为按需加载字段(加载字段由SQL指定)，不会加载关联表的所有字段，以提高性能 -->
+                <prop key="aggressiveLazyLoading">false</prop>
+                <!-- 对于未知的SQL查询，允许返回不同的结果集以达到通用的效果 -->
+                <prop key="multipleResultSetsEnabled">true</prop>
+                <!-- 允许使用列标签代替列名 -->
+                <prop key="useColumnLabel">true</prop>
+                <!-- 允许使用自定义的主键值(比如由程序生成的UUID 32位编码作为键值)，数据表的PK生成策略将被覆盖 -->
+                <prop key="useGeneratedKeys">true</prop>
+                <!-- 给予被嵌套的resultMap以字段-属性的映射支持 -->
+                <prop key="autoMappingBehavior">FULL</prop>
+                <!-- 对于批量更新操作缓存SQL以提高性能  -->
+                <prop key="defaultExecutorType">BATCH</prop>
+                <!-- 数据库超过25000秒仍未响应则超时 -->
+                <prop key="defaultStatementTimeout">25000</prop>
+            </props>
+        </property>
+    </bean>
+    <bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+        <constructor-arg index="0" ref="sqlSessionFactory"/>
+    </bean>
+    <!-- MyBatis3配置结束 -->
+    <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="nestedTransactionAllowed" value="true"/>
+    </bean>
+    <!-- 配置事务传播特性 -->
+    <tx:advice id="txAdvice" transaction-manager="txManager">
+        <tx:attributes>
+            <tx:method name="create*" propagation="REQUIRED" rollback-for="java.lang.Throwable"/>
+            <tx:method name="insert*" propagation="REQUIRED" rollback-for="java.lang.Throwable"/>
+            <tx:method name="save*" propagation="REQUIRED" rollback-for="java.lang.Throwable"/>
+            <tx:method name="add*" propagation="REQUIRED" rollback-for="java.lang.Throwable"/>
+            <tx:method name="del*" propagation="REQUIRED" rollback-for="java.lang.Throwable"/>
+            <tx:method name="remove*" propagation="REQUIRED" rollback-for="java.lang.Throwable"/>
+            <tx:method name="update*" propagation="REQUIRED" rollback-for="java.lang.Throwable"/>
+            <tx:method name="confirm*" propagation="REQUIRED" rollback-for="java.lang.Throwable"/>
+            <tx:method name="cancel*" propagation="REQUIRED" rollback-for="java.lang.Throwable"/>
+            <tx:method name="audit*" propagation="REQUIRED" rollback-for="java.lang.Throwable"/>
+            <tx:method name="deal*" propagation="REQUIRED" rollback-for="java.lang.Throwable"/>
+            <tx:method name="list*" propagation="REQUIRED" rollback-for="java.lang.Throwable"/>
+
+            <!-- 除以上方法其它只读 -->
+            <!--
+            REQUIRED：支持当前事务，如果当前没有事务，就新建一个事务。这是最常见的选择。
+            SUPPORTS：支持当前事务，如果当前没有事务，就以非事务方式执行。
+            MANDATORY：支持当前事务，如果当前没有事务，就抛出异常。
+            REQUIRES_NEW：新建事务，如果当前存在事务，把当前事务挂起。
+            NOT_SUPPORTED：以非事务方式执行操作，如果当前存在事务，就把当前事务挂起。
+            NEVER：以非事务方式执行，如果当前存在事务，则抛出异常。
+            NESTED：支持当前事务，如果当前事务存在，则执行一个嵌套事务，如果当前没有事务，就新建一个事务
+            -->
+            <tx:method name="*" propagation="SUPPORTS" read-only="true"/>
+        </tx:attributes>
+    </tx:advice>
+    <!-- 配置参与事务的类 -->
+    <aop:config>
+        <aop:pointcut id="interceptorPointCuts" expression="execution(* com.management.service.*.*(..))"/>
+        <aop:advisor pointcut-ref="interceptorPointCuts" advice-ref="txAdvice"/>
+    </aop:config>
+</beans>

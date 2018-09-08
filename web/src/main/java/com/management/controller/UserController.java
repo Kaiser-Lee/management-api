@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/api/user")
@@ -22,6 +24,7 @@ public class UserController extends BaseController {
     public Object list(){
         User user = userService.selectByPrimaryKey(141L);
         System.out.println(user);
-        return userService.selectByPrimaryKey("141");
+        Map<String, Object> map = new HashMap<String, Object>();
+        return userService.list(map);
     }
 }

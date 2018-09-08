@@ -7,9 +7,10 @@ public class ManagementApplication {
 
     public static void main(String[] args){
         ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
-
-                    "classpath:/provider-dubbo.xml"
-
+            new String [] {
+                    "classpath:/provider-dubbo.xml",
+                    "classpath:/applicationContext-positec.xml"
+            }
         );
         try{
             System.out.println("management MicroServce provided, main thead wait!");
