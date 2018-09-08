@@ -22,10 +22,6 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
 
     @Override
     public List<User> list(Map<String, Object> map) {
-        List<User> list =  new ArrayList<User>();
-        User user = new User();
-        user.setName("张三");
-        list.add(user);
         return userMapper.list(map);
     }
 }
