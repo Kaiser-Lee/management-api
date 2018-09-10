@@ -22,8 +22,6 @@ public class UserController extends BaseController {
     @RequestMapping(value = "/list", method = RequestMethod.GET)
     @ResponseBody
     public Object list(){
-        User user = userService.selectByPrimaryKey(141L);
-        System.out.println(user);
         Map<String, Object> map = new HashMap<String, Object>();
         return userService.list(map);
     }

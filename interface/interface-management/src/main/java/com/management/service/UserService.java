@@ -8,4 +8,6 @@ import java.util.Map;
 
 public interface UserService extends BaseService<User> {
     List<User> list (Map<String, Object> map);
+
+
 }
