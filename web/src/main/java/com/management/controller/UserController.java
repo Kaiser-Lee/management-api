@@ -25,4 +25,10 @@ public class UserController extends BaseController {
         Map<String, Object> map = new HashMap<String, Object>();
         return userService.list(map);
     }
+
+    @RequestMapping( value = "/userLogin", method = RequestMethod.GET)
+    @ResponseBody
+    public Object userLogin(){
+        return "登录成功！";
+    }
 }
