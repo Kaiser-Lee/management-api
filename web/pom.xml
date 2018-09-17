@@ -8,6 +8,7 @@
     <artifactId>management-web</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
+
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -86,10 +87,14 @@
             <version>0.2</version>
         </dependency>
         <dependency>
-            <groupId>com.management</groupId>
+            <groupId>com.management.interface.management</groupId>
             <artifactId>interface-management</artifactId>
             <version>1.0-SNAPSHOT</version>
-            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.management.common.framework</groupId>
+            <artifactId>management-common-framework</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
     </dependencies>

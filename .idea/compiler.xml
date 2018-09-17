@@ -6,9 +6,7 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="commonconfig" />
         <module name="commonframework" />
-        <module name="commonutils" />
         <module name="interfacemanagement" />
         <module name="modulemanagement" />
         <module name="pomanagement" />
@@ -17,5 +15,9 @@
         <module name="webservice" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="commonconfig" target="1.7" />
+      <module name="commonutils" target="1.7" />
+    </bytecodeTargetLevel>
   </component>
 </project>

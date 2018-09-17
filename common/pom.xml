@@ -9,8 +9,6 @@
     <version>0.0.1-SNAPSHOT</version>
     <modules>
         <module>common-framework</module>
-        <module>common-utils</module>
-        <module>common-config</module>
     </modules>
     <packaging>pom</packaging>
 

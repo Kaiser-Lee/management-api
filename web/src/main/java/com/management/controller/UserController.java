@@ -15,7 +15,7 @@ import java.util.Map;
 
 @Controller
 @RequestMapping("/api/user")
-public class UserController extends BaseController {
+public class UserController{
     @Resource
     private UserService userService;
 

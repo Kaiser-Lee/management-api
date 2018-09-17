@@ -9,6 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <groupId>com.management.po.po-management</groupId>
     <artifactId>po-management</artifactId>
     <packaging>jar</packaging>
 

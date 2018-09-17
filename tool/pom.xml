@@ -13,7 +13,7 @@
     <dependencies>
 
         <dependency>
-            <groupId>com.management.common</groupId>
+            <groupId>com.management.common.framework</groupId>
             <artifactId>management-common-framework</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
