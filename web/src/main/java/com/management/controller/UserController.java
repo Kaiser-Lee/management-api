@@ -1,20 +1,19 @@
 package com.management.controller;
 
-import com.management.po.User;
 import com.management.service.UserService;
-import com.management.xcontroller.BaseController;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.management.utils.IPUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 
 @Controller
-@RequestMapping("/api/user")
+@RequestMapping("/xweb/api/user")
 public class UserController{
     @Resource
     private UserService userService;
@@ -28,7 +27,8 @@ public class UserController{
 
     @RequestMapping( value = "/userLogin", method = RequestMethod.GET)
     @ResponseBody
-    public Object userLogin(){
-        return "登录成功！";
+    public Object userLogin(String username, String password, HttpServletRequest request){
+        String ip = IPUtils.getIpAddr(request);
+        return "登录测试";
     }
 }

@@ -23,6 +23,16 @@
 
     <dependencies>
 
+        <dependency>
+            <groupId>com.management.interface.management</groupId>
+            <artifactId>interface-management</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.management.common.framework</groupId>
+            <artifactId>management-common-framework</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
         <!-- 热部署模块 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -87,16 +97,16 @@
             <version>0.2</version>
         </dependency>
         <dependency>
-            <groupId>com.management.interface.management</groupId>
-            <artifactId>interface-management</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.management.common.framework</groupId>
-            <artifactId>management-common-framework</artifactId>
+            <groupId>com.management.common</groupId>
+            <artifactId>common-utils</artifactId>
             <version>0.0.1-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
