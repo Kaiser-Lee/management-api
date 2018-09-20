@@ -1,5 +1,24 @@
 server:
   port: 8080
-security:
-  basic:
-    enabled: false
+  session-timeout: 1800
+spring:
+  cache:
+    type: ehcache
+    ehcache:
+      config: config/ehcache.xml
+  redis:
+    host: 122.114.110.171
+    port: 6379
+    password: lufangpu
+    database: 1
+    # 连接超时时间 毫秒
+    timeout: 1000
+    pool:
+      # 连接池中最大空闲连接
+      max-idle: 8
+      # 连接池中最小空闲连接
+      min-idle: 10
+      # 连接池最大连接数 （负数表示没有限制）
+      max-active: 100
+      # 连接池最大阻塞等待时间（使用负值表示没有限制）
+      max-wait: -1
