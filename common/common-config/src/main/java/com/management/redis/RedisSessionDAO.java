@@ -18,6 +18,14 @@ public class RedisSessionDAO extends AbstractSessionDAO {
 
     private String keyPrefix = "shiro_redis_session";
 
+    public RedisManager getRedisManager() {
+        return redisManager;
+    }
+
+    public void setRedisManager(RedisManager redisManager) {
+        this.redisManager = redisManager;
+    }
+
     @Override
     protected Serializable doCreate(Session session) {
         Serializable sessionId = this.generateSessionId(session);

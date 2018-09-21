@@ -2,18 +2,27 @@ package com.management.common.config;
 
 import com.management.brower.Constant;
 import com.management.common.authorization.UserRealm;
+import com.management.redis.BDSessionListeners;
 import com.management.redis.RedisCacheManager;
 import com.management.redis.RedisManager;
 import com.management.redis.RedisSessionDAO;
+import net.sf.ehcache.CacheManager;
+import org.apache.shiro.cache.ehcache.EhCacheManager;
+import org.apache.shiro.mgt.SecurityManager;
+import org.apache.shiro.session.SessionListener;
 import org.apache.shiro.session.mgt.eis.MemorySessionDAO;
 import org.apache.shiro.session.mgt.eis.SessionDAO;
 import org.apache.shiro.spring.LifecycleBeanPostProcessor;
+import org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
 import org.apache.shiro.web.session.mgt.DefaultWebSessionManager;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 @Configuration
 public class ShiroConfig {
@@ -51,8 +60,11 @@ public class ShiroConfig {
         DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
         securityManager.setRealm(userRealm());
         if (Constant.CACHE_TYPE_REDIS.equals(cacheType)){
-            //securityManager.setCacheManager();
+            securityManager.setCacheManager(cacheManager());
+        }else{
+            securityManager.setCacheManager(ehCacheManager());
         }
+        securityManager.setSessionManager(sessionManager());
         return securityManager;
     }
 
@@ -68,12 +80,6 @@ public class ShiroConfig {
         }
         return new MemorySessionDAO();
     }
-
-    @Bean
-    public DefaultWebSessionManager sessionManager () {
-        return null;
-    }
-
 
     @Bean
     public LifecycleBeanPostProcessor getlifecycleBeanPostProcessor () {
@@ -101,5 +107,47 @@ public class ShiroConfig {
         return redisCacheManager;
     }
 
+    @Bean
+    public EhCacheManager ehCacheManager(){
+        EhCacheManager ehCacheManager = new EhCacheManager();
+        ehCacheManager.setCacheManager(CacheManager.create());
+        return ehCacheManager;
+    }
+
+    /**
+     * 开启shiro aop注解支持.
+     * 使用代理方式;所以需要开启代码支持;
+     *
+     * @param securityManager
+     * @return
+     */
+    @Bean
+    public AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor(SecurityManager securityManager) {
+        AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor = new AuthorizationAttributeSourceAdvisor();
+        authorizationAttributeSourceAdvisor.setSecurityManager(securityManager);
+        return authorizationAttributeSourceAdvisor;
+    }
+
+    /**
+     * RedisSessionDAO shiro sessionDao层的实现 通过redis
+     * 使用的是shiro-redis开源插件
+     */
+    @Bean
+    public RedisSessionDAO redisSessionDAO() {
+        RedisSessionDAO redisSessionDAO = new RedisSessionDAO();
+        redisSessionDAO.setRedisManager(redisManager());
+        return redisSessionDAO;
+    }
+
+    @Bean
+    public DefaultWebSessionManager sessionManager(){
+        DefaultWebSessionManager sessionManager = new DefaultWebSessionManager();
+        sessionManager.setGlobalSessionTimeout(tomcatTimeOut*1000);
+        sessionManager.setSessionDAO(sessionDAO());
+        Collection<SessionListener> listeners = new ArrayList<SessionListener>();
+        listeners.add(new BDSessionListeners());
+        sessionManager.setSessionListeners(listeners);
+        return sessionManager;
+    }
 
 }
