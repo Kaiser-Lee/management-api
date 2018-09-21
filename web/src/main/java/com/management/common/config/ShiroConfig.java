@@ -2,6 +2,9 @@ package com.management.common.config;
 
 import com.management.brower.Constant;
 import com.management.common.authorization.UserRealm;
+import com.management.redis.RedisCacheManager;
+import com.management.redis.RedisSessionDAO;
+import org.apache.shiro.session.mgt.eis.MemorySessionDAO;
 import org.apache.shiro.session.mgt.eis.SessionDAO;
 import org.apache.shiro.spring.LifecycleBeanPostProcessor;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
@@ -31,7 +34,9 @@ public class ShiroConfig {
     public DefaultWebSecurityManager securityManager () {
         DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
         securityManager.setRealm(userRealm());
-
+        if (Constant.CACHE_TYPE_REDIS.equals(cacheType)){
+            //securityManager.setCacheManager();
+        }
         return securityManager;
     }
 
@@ -43,9 +48,9 @@ public class ShiroConfig {
     @Bean
     public SessionDAO sessionDAO () {
         if (Constant.CACHE_TYPE_REDIS.equals(cacheType)) {
-
+            return new RedisSessionDAO();
         }
-        return null;
+        return new MemorySessionDAO();
     }
 
     @Bean
@@ -57,6 +62,12 @@ public class ShiroConfig {
     @Bean
     public LifecycleBeanPostProcessor getlifecycleBeanPostProcessor () {
         return new LifecycleBeanPostProcessor();
+    }
+
+    public RedisCacheManager cacheManager (){
+        RedisCacheManager redisCacheManager = new RedisCacheManager();
+        //redisCacheManager.setR
+        return redisCacheManager;
     }
 
 
