@@ -13,4 +13,7 @@
     <!--使用 dubbo 协议调用定义好的 api.PermissionService 接口-->
    <!-- <dubbo:reference id="userService" interface="com.anjoy.pm.task.service.ThinkTaskService"/>-->
     <dubbo:reference id="userService" interface="com.management.service.UserService"/>
+
+    <!--系统菜单服务-->
+    <dubbo:reference id="menuService" interface="com.management.service.MenuService"/>
 </beans>

@@ -1,6 +1,6 @@
 server:
   port: 8080
-  session-timeout: 1800
+  session-timeout: 7200
 spring:
   cache:
     type: ehcache

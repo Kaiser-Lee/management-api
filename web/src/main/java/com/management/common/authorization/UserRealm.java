@@ -10,9 +10,9 @@ import org.apache.shiro.authc.*;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
-import org.springframework.beans.factory.annotation.Autowired;
 
 
+import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,8 +20,8 @@ import java.util.Set;
 
 public class UserRealm extends AuthorizingRealm {
 
-    @Autowired
-    UserService userService;
+    @Resource
+    private UserService userService;
 
     /**
      * 为当前subject授权
@@ -45,9 +45,10 @@ public class UserRealm extends AuthorizingRealm {
         String username = (String) authenticationToken.getPrincipal();
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("username",username);
-        UserMapper userMapper = ApplicationContextRegister.getBean(UserMapper.class);
-        String password = (String) authenticationToken.getCredentials();
-        List<User> list  = userMapper.list(params);
+        //UserMapper userMapper = ApplicationContextRegister.getBean(UserMapper.class);
+        //Object password = authenticationToken.getCredentials();
+        String password = new String((char[])authenticationToken.getCredentials());
+        List<User> list  = userService.list(params);
         User user = null;
         if (list.size()>0) {
             user = list.get(0);

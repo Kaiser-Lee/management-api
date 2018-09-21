@@ -15,6 +15,9 @@ public class MenuServiceImpl extends BaseServiceImpl<Menu> implements MenuServic
 
     @Autowired
     private MenuMapper menuMapper;
+    public IMybatisDao<Menu> getBaseDao() {
+        return menuMapper;
+    }
 
     @Override
     public List<String> listPerms(Long id) {

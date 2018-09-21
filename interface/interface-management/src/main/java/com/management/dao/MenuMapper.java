@@ -2,9 +2,11 @@ package com.management.dao;
 
 import com.management.po.Menu;
 import com.management.xdao.IMybatisDao;
+import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
 
+@Mapper
 public interface MenuMapper extends IMybatisDao<Menu> {
     int deleteByPrimaryKey(Long menuId);
 

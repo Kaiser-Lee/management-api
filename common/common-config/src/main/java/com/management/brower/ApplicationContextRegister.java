@@ -5,34 +5,58 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanExpressionException;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ApplicationContextRegister {
-
-    private static Logger logger = LoggerFactory.getLogger(ApplicationContextRegister.class);
-
-    private static ApplicationContext APPLICATION_CONTEXT;
-
+public class ApplicationContextRegister implements ApplicationContextAware
+{
     /**
-     * 设置spring的上下文
-     * @param applicationContext spring上下文
-     * @throws BeansException
+     * 上下文对象实例
      */
-    public void setApplicationContext (ApplicationContext applicationContext) throws BeansException {
-        logger.debug("application register -->",applicationContext);
-        APPLICATION_CONTEXT = applicationContext;
+    private static ApplicationContext applicationContext;
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
     }
 
     /**
-     * 获取容器
+     * 获取applicationContext
      * @return
      */
-    public ApplicationContext getApplicationContext(){
-        return APPLICATION_CONTEXT;
+    public static ApplicationContext getApplicationContext() {
+        return applicationContext;
     }
 
-    public static <T> T getBean (Class<T> type) {
-        return APPLICATION_CONTEXT.getBean(type);
+    /**
+     * 通过name获取 Bean.
+     * @param name
+     * @return
+     */
+    public static Object getBean(String name){
+        return getApplicationContext().getBean(name);
+    }
+
+    /**
+     * 通过class获取Bean.
+     * @param clazz
+     * @param <T>
+     * @return
+     */
+    public static <T> T getBean(Class<T> clazz){
+        return getApplicationContext().getBean(clazz);
+    }
+
+    /**
+     * 通过name,以及Clazz返回指定的Bean
+     * @param name
+     * @param clazz
+     * @param <T>
+     * @return
+     */
+    public static <T> T getBean(String name,Class<T> clazz){
+        return getApplicationContext().getBean(name, clazz);
     }
 }
+

@@ -28,10 +28,10 @@ import java.util.Collection;
 public class ShiroConfig {
 
     @Value("${server.session-timeout}")
-    private int tomcatTimeOut;
+    private int tomcatTimeOut = 7200;
 
     @Value("${spring.cache.type}")
-    private String cacheType;
+    private String cacheType = "ehcache";
 
     @Value("${spring.redis.host}")
     private String host = "122.114.110.171";
@@ -40,13 +40,10 @@ public class ShiroConfig {
     private int port = 6379;
 
     @Value("${spring.redis.password}")
-    private String password;
+    private String password = "lufanagpu";
 
     @Value("${spring.redis.timeout}")
-    private int timeout;
-
-    @Value("${server.session-timeout}")
-    private String tomcatTimeout;
+    private int timeout = 1000;
 
     @Bean
     public ShiroFilterFactoryBean shiroFilter (SecurityManager securityManager){
@@ -143,6 +140,8 @@ public class ShiroConfig {
     public DefaultWebSessionManager sessionManager(){
         DefaultWebSessionManager sessionManager = new DefaultWebSessionManager();
         sessionManager.setGlobalSessionTimeout(tomcatTimeOut*1000);
+        sessionManager.setDeleteInvalidSessions(true);
+        sessionManager.setSessionValidationSchedulerEnabled(true);
         sessionManager.setSessionDAO(sessionDAO());
         Collection<SessionListener> listeners = new ArrayList<SessionListener>();
         listeners.add(new BDSessionListeners());
