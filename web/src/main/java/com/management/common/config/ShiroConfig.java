@@ -3,6 +3,7 @@ package com.management.common.config;
 import com.management.brower.Constant;
 import com.management.common.authorization.UserRealm;
 import com.management.redis.RedisCacheManager;
+import com.management.redis.RedisManager;
 import com.management.redis.RedisSessionDAO;
 import org.apache.shiro.session.mgt.eis.MemorySessionDAO;
 import org.apache.shiro.session.mgt.eis.SessionDAO;
@@ -22,6 +23,21 @@ public class ShiroConfig {
 
     @Value("${spring.cache.type}")
     private String cacheType;
+
+    @Value("${spring.redis.host}")
+    private String host = "122.114.110.171";
+
+    @Value("${spring.redis.port}")
+    private int port = 6379;
+
+    @Value("${spring.redis.password}")
+    private String password;
+
+    @Value("${spring.redis.timeout}")
+    private int timeout;
+
+    @Value("${server.session-timeout}")
+    private String tomcatTimeout;
 
     @Bean
     public ShiroFilterFactoryBean shiroFilter (SecurityManager securityManager){
@@ -64,9 +80,24 @@ public class ShiroConfig {
         return new LifecycleBeanPostProcessor();
     }
 
+    @Bean
+    public RedisManager redisManager(){
+        RedisManager redisManager = new RedisManager();
+        redisManager.setHost(host);
+        redisManager.setPort(port);
+        redisManager.setPassword(password);
+        redisManager.setExpire(1800);
+        return redisManager;
+    }
+
+    /**
+     * CacheManager 实现redis缓存
+     * 使用的是shiro-redis开源插件
+     * @return
+     */
     public RedisCacheManager cacheManager (){
         RedisCacheManager redisCacheManager = new RedisCacheManager();
-        //redisCacheManager.setR
+        redisCacheManager.setRedisManager(redisManager());
         return redisCacheManager;
     }
 
