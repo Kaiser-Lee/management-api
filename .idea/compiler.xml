@@ -17,5 +17,21 @@
         <module name="webservice" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="common-config" target="1.6" />
+      <module name="common-utils" target="1.6" />
+      <module name="interface" target="1.6" />
+      <module name="interface-management" target="1.6" />
+      <module name="management-api" target="1.6" />
+      <module name="management-common" target="1.6" />
+      <module name="management-common-framework" target="1.8" />
+      <module name="management-tools" target="1.7" />
+      <module name="management-web" target="1.8" />
+      <module name="module" target="1.6" />
+      <module name="module-management" target="1.6" />
+      <module name="po" target="1.6" />
+      <module name="po-management" target="1.6" />
+      <module name="webservice" target="1.6" />
+    </bytecodeTargetLevel>
   </component>
 </project>
