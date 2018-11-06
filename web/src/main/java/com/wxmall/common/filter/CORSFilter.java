@@ -1,4 +1,4 @@
-package com.management.common.filter;
+package com.wxmall.common.filter;
 
 import org.springframework.stereotype.Component;
 

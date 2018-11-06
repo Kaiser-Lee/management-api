@@ -1,4 +1,4 @@
-package com.management.controller;
+package com.wxmall.controller;
 
 import com.management.service.UserService;
 import com.management.utils.IPUtils;

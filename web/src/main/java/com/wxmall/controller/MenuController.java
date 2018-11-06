@@ -1,4 +1,4 @@
-package com.management.controller;
+package com.wxmall.controller;
 
 import com.management.service.MenuService;
 import com.management.xcontroller.BaseController;

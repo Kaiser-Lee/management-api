@@ -1,7 +1,7 @@
-package com.management.common.config;
+package com.wxmall.common.config;
 
 import com.management.brower.Constant;
-import com.management.common.authorization.UserRealm;
+import com.wxmall.common.authorization.UserRealm;
 import com.management.redis.BDSessionListeners;
 import com.management.redis.RedisCacheManager;
 import com.management.redis.RedisManager;

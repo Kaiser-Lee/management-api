@@ -1,4 +1,4 @@
-package com.management.swagger;
+package com.wxmall.swagger;
 
 
 import org.springframework.context.annotation.Bean;

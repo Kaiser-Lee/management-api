@@ -1,7 +1,6 @@
-package com.management.common.authorization;
+package com.wxmall.common.authorization;
 
 import com.management.brower.ApplicationContextRegister;
-import com.management.dao.UserMapper;
 import com.management.po.User;
 import com.management.service.MenuService;
 import com.management.service.UserService;
@@ -16,7 +15,6 @@ import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class UserRealm extends AuthorizingRealm {
 
