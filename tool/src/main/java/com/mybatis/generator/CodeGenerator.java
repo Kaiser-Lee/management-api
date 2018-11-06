@@ -16,8 +16,8 @@ public class CodeGenerator {
 
         List<String> warnings = new ArrayList<String>();
         boolean overwrite = true;
-        //加载配置文件  D:\workspace\jgh_mall\src\main\resources D:\maven project\tool\src\main\resources
-        File configFile = new File("D:\\management-api\\tool\\src\\main\\resources\\generatorCode.xml");
+        //加载配置文件  D:\workspace\jgh_mall\src\main\resources D:\maven project\tool\src\main\resources D:\maven-workspace\management-api
+        File configFile = new File("D:\\maven-workspace\\management-api\\tool\\src\\main\\resources\\generatorCode.xml");
         ConfigurationParser cp = new ConfigurationParser(warnings);
         Configuration config = cp.parseConfiguration(configFile);
         DefaultShellCallback callback = new DefaultShellCallback(overwrite);

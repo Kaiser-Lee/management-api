@@ -5,6 +5,8 @@ import com.management.po.User;
 import com.management.service.MenuService;
 import com.management.service.UserService;
 import com.management.utils.ShiroUtils;
+import com.wxmall.po.SellerUser;
+import com.wxmall.service.SellerUserService;
 import org.apache.shiro.authc.*;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
@@ -20,6 +22,9 @@ public class UserRealm extends AuthorizingRealm {
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private SellerUserService sellerUserService;
 
     /**
      * 为当前subject授权
@@ -46,8 +51,8 @@ public class UserRealm extends AuthorizingRealm {
         //UserMapper userMapper = ApplicationContextRegister.getBean(UserMapper.class);
         //Object password = authenticationToken.getCredentials();
         String password = new String((char[])authenticationToken.getCredentials());
-        List<User> list  = userService.list(params);
-        User user = null;
+        List<SellerUser> list  = sellerUserService.list(params);
+        SellerUser user = null;
         if (list.size()>0) {
             user = list.get(0);
         }
@@ -60,9 +65,9 @@ public class UserRealm extends AuthorizingRealm {
             throw new UnknownAccountException("密码错误！");
         }
         // 账号锁定
-        if(user.getStatus() == 0) {
+        /*if(user.getStatus() == 0) {
             throw new UnknownAccountException("账号已被锁定，请联系管理员");
-        }
+        }*/
         SimpleAuthenticationInfo info = new SimpleAuthenticationInfo(user, password, getName());
         return info;
     }

@@ -10,6 +10,7 @@
     </settings>
     <typeAliases>
         <package name="com.management.po"/>
+        <package name="com.wxmall.po"/>
     </typeAliases>
     <!--<plugins>
         <plugin interceptor="com.coracle.yk.xdatabase.base.mybatis.util.PageHelper"></plugin>

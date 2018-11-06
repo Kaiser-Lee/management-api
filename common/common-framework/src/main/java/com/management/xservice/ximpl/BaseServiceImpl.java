@@ -3,6 +3,9 @@ package com.management.xservice.ximpl;
 import com.management.xservice.BaseService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Map;
+
 @Service
 public class BaseServiceImpl<T> implements BaseService<T> {
     @Override

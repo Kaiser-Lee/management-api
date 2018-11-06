@@ -1,4 +1,4 @@
-package com.management;
+package com;
 
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;

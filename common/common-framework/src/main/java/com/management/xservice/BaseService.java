@@ -1,5 +1,8 @@
 package com.management.xservice;
 
+import java.util.List;
+import java.util.Map;
+
 public interface BaseService<T> {
 
     //	@RedisEvict(type = Object.class)

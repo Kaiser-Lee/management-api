@@ -16,4 +16,7 @@
 
     <!--系统菜单服务-->
     <dubbo:reference id="menuService" interface="com.management.service.MenuService"/>
+
+    <!--系统微商城用户服务-->
+    <dubbo:reference id="sellerUserService" interface="com.wxmall.service.SellerUserService"/>
 </beans>

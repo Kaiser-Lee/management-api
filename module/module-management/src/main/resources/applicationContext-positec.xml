@@ -12,7 +12,7 @@
 	            http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.0.xsd">
 
     <!-- 让Spring通过自动扫描来查询和管理BO -->
-    <context:component-scan base-package="com.management"/>
+    <context:component-scan base-package="com.*"/>
     <tx:annotation-driven transaction-manager="txManager"/>
 
     <!--启用aop切面支持-->
@@ -86,7 +86,7 @@
     <!-- MyBatis3配置开始 -->
     <!-- mybatis注解方式配置 -->
     <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
-        <property name="basePackage" value="com.management.dao"/>
+        <property name="basePackage" value="com.*.dao"/>
         <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"></property>
     </bean>
     <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
@@ -160,7 +160,7 @@
     </tx:advice>
     <!-- 配置参与事务的类 -->
     <aop:config>
-        <aop:pointcut id="interceptorPointCuts" expression="execution(* com.management.service.*.*(..))"/>
+        <aop:pointcut id="interceptorPointCuts" expression="execution(* com.*.service.*.*(..))"/>
         <aop:advisor pointcut-ref="interceptorPointCuts" advice-ref="txAdvice"/>
     </aop:config>
 </beans>

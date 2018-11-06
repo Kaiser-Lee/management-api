@@ -18,7 +18,11 @@
     <bean id="userServiceImpl" class="com.management.service.impl.UserServiceImpl"/>
 
     <!--使用 dubbo 协议实现定义好的 api.PermissionService 接口-->
-    <dubbo:service interface="com.management.service.MenuService" ref="MenuServiceImpl" protocol="dubbo" register="true"/>
-    <bean id="MenuServiceImpl" class="com.management.service.impl.MenuServiceImpl"/>
+    <dubbo:service interface="com.management.service.MenuService" ref="menuServiceImpl" protocol="dubbo" register="true"/>
+    <bean id="menuServiceImpl" class="com.management.service.impl.MenuServiceImpl"/>
+
+    <!--使用 dubbo 协议实现定义好的 api.PermissionService 接口-->
+    <dubbo:service interface="com.wxmall.service.SellerUserService" ref="sellerUserServiceImpl" protocol="dubbo" register="true"/>
+    <bean id="sellerUserServiceImpl" class="com.wxmall.service.impl.SellerUserServiceImpl"/>
 
 </beans>
