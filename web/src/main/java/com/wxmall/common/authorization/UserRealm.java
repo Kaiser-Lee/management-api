@@ -47,7 +47,7 @@ public class UserRealm extends AuthorizingRealm {
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException {
         String username = (String) authenticationToken.getPrincipal();
         Map<String, Object> params = new HashMap<String, Object>();
-        params.put("username",username);
+        params.put("phone",username);
         //UserMapper userMapper = ApplicationContextRegister.getBean(UserMapper.class);
         //Object password = authenticationToken.getCredentials();
         String password = new String((char[])authenticationToken.getCredentials());
