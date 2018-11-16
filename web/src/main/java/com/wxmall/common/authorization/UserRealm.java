@@ -1,9 +1,6 @@
 package com.wxmall.common.authorization;
 
 import com.management.brower.ApplicationContextRegister;
-import com.management.po.User;
-import com.management.service.MenuService;
-import com.management.service.UserService;
 import com.management.utils.ShiroUtils;
 import com.wxmall.po.SellerUser;
 import com.wxmall.service.SellerUserService;
@@ -21,9 +18,6 @@ import java.util.Map;
 public class UserRealm extends AuthorizingRealm {
 
     @Resource
-    private UserService userService;
-
-    @Resource
     private SellerUserService sellerUserService;
 
     /**
@@ -35,10 +29,10 @@ public class UserRealm extends AuthorizingRealm {
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principalCollection) {
         Long userId = ShiroUtils.getUserId();
         Map<String, Object> params = new HashMap<String, Object>();
-        MenuService menuService = ApplicationContextRegister.getBean(MenuService.class);
-        PrincipalCollection perms = (PrincipalCollection) menuService.listPerms(userId);
+        //MenuService menuService = ApplicationContextRegister.getBean(MenuService.class);
+       // PrincipalCollection perms = (PrincipalCollection) menuService.listPerms(userId);
         SimpleAuthenticationInfo info = new SimpleAuthenticationInfo();
-        info.setPrincipals(perms);
+        //info.setPrincipals(perms);
         //info.setStringPermissions(perms);
         return (AuthorizationInfo) info;
     }

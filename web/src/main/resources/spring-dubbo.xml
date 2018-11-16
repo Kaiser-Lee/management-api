@@ -12,11 +12,6 @@
     <dubbo:provider delay="-1" timeout="600000" retries="0"/>
     <!--使用 dubbo 协议调用定义好的 api.PermissionService 接口-->
    <!-- <dubbo:reference id="userService" interface="com.anjoy.pm.task.service.ThinkTaskService"/>-->
-    <dubbo:reference id="userService" interface="com.management.service.UserService"/>
-
-    <!--系统菜单服务-->
-    <dubbo:reference id="menuService" interface="com.management.service.MenuService"/>
-
     <!--系统微商城用户服务-->
     <dubbo:reference id="sellerUserService" interface="com.wxmall.service.SellerUserService"/>
 </beans>
