@@ -23,6 +23,13 @@ public class LoginController extends BaseController {
 
     private Logger logger = LoggerFactory.getLogger(LoginController.class);
 
+    /**
+     * 用户登录
+     * @param username
+     * @param password
+     * @param request
+     * @return
+     */
     @RequestMapping( value = "/userLogin", method = RequestMethod.GET)
     @ResponseBody
     public Object userLogin(String username, String password, HttpServletRequest request){
