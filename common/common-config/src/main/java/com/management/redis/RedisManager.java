@@ -9,6 +9,8 @@ import java.util.Set;
 
 public class RedisManager {
 
+    volatile static RedisManager redisSingleton;
+
     @Value("${spring.redis.host}")
     private String host = "122.114.110.171";
 
@@ -42,6 +44,15 @@ public class RedisManager {
                 jedisPool = new JedisPool(new JedisPoolConfig(),host, port);
             }
         }
+    }
+
+    public static RedisManager getRedisSingleton() {
+        if(redisSingleton == null) {
+            synchronized (RedisManager.class) {
+                if(redisSingleton == null) return new RedisManager();
+            }
+        }
+        return redisSingleton;
     }
 
     public byte[] get(byte[] key){

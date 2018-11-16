@@ -1,5 +1,7 @@
 package com.wxmall.common.config;
 
+import com.alibaba.dubbo.common.logger.Logger;
+import com.alibaba.dubbo.common.logger.LoggerFactory;
 import com.management.brower.Constant;
 import com.wxmall.common.authorization.UserRealm;
 import com.management.redis.BDSessionListeners;
@@ -26,6 +28,8 @@ import java.util.Collection;
 
 @Configuration
 public class ShiroConfig {
+
+    private Logger log = LoggerFactory.getLogger(ShiroConfig.class);
 
     @Value("${server.session-timeout}")
     private int tomcatTimeOut = 7200;
@@ -72,6 +76,7 @@ public class ShiroConfig {
 
     @Bean
     public SessionDAO sessionDAO () {
+        log.info("是否使用redis缓存！");
         if (Constant.CACHE_TYPE_REDIS.equals(cacheType)) {
             return new RedisSessionDAO();
         }
@@ -90,6 +95,7 @@ public class ShiroConfig {
         redisManager.setPort(port);
         redisManager.setPassword(password);
         redisManager.setExpire(1800);
+        log.info("配置redis连接设置###"+ host + ":" + port);
         return redisManager;
     }
 
@@ -149,4 +155,21 @@ public class ShiroConfig {
         return sessionManager;
     }
 
+    @Bean
+    SecurityManager securityManager(UserRealm userRealm) {
+        DefaultWebSecurityManager manager = new DefaultWebSecurityManager();
+        manager.setRealm(userRealm);
+        if (Constant.CACHE_TYPE_REDIS.equals(cacheType)) {
+            manager.setCacheManager(ehCacheManager());
+            log.info("设置getEhCacheManager");
+        }
+        log.info("设置sessionManager");
+        manager.setSessionManager(sessionManager());
+        return manager;
+    }
+
+    @Bean
+    public static LifecycleBeanPostProcessor lifecycleBeanPostProcessor() {
+        return new LifecycleBeanPostProcessor();
+    }
 }
