@@ -88,8 +88,9 @@ public class RedisManager {
     }
 
     public byte[] set(byte[] key, byte[] value, int expire) {
-        Jedis jedis = jedisPool.getResource();
+        Jedis jedis = null;
         try{
+            jedis = jedisPool.getResource();
             jedis.set(key, value);
             if(this.expire != 0){
                 jedis.expire(key, this.expire);
