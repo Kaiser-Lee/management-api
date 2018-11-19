@@ -1,5 +1,7 @@
 package com.management.redis;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -8,6 +10,8 @@ import redis.clients.jedis.JedisPoolConfig;
 import java.util.Set;
 
 public class RedisManager {
+
+    private Logger logger = LoggerFactory.getLogger(RedisManager.class);
 
     volatile static RedisManager redisSingleton;
 
@@ -18,7 +22,7 @@ public class RedisManager {
     private int port = 6379;
 
     @Value("${spring.redis.password}")
-    private String password = "";
+    private String password = "lufangpu";
 
     @Value("${spring.redis.timeout}")
     private int timeout = 0;
@@ -35,6 +39,7 @@ public class RedisManager {
      * 初始化方法
      */
     public void init(){
+        logger.info("jedisPool开始初始化：" + host + ":" + port);
         if(jedisPool == null) {
             if(password != null && !"".equals(password)){
                 jedisPool = new JedisPool(new JedisPoolConfig(), host, port, timeout, password);

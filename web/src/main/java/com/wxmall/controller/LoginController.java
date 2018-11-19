@@ -67,9 +67,9 @@ public class LoginController extends BaseController {
             Serializable id = subject.getSession().getId();
             //将token放入redis
             RedisManager manager = RedisManager.getRedisSingleton();
-            /*manager.set(("sys:login:user_token" + id).getBytes(), list.get(0).getId().toString().getBytes() , 60*30);
-            manager.set(("sys:user:id_" + list.get(0).getId()).getBytes(),id.toString().getBytes(), 60*30);
-            manager.set(("sys:user:user_info" + list.get(0).getId()).getBytes(), JSONObject.toJSONString(list.get(0)).toString().getBytes(), 60*30);*/
+           // manager.set(("sys:login:user_token" + id), list.get(0).getId().toString() , 60*30);
+           // manager.set(("sys:user:id_" + list.get(0).getId()),id.toString(), 60*30);
+           // manager.set(("sys:user:user_info" + list.get(0).getId()), JSONObject.toJSONString(list.get(0)).toString(), 60*30);
 
             return "登录成功";
         } catch (AuthenticationException e) {

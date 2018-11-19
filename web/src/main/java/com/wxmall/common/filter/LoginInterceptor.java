@@ -26,7 +26,7 @@ public class LoginInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o) throws Exception {
         try{
-           /* logger.info("登录拦截验证！");
+            logger.info("登录拦截验证！");
             Subject subject = SecurityUtils.getSubject();
             Serializable token = subject.getSession().getId();
             RedisManager redisManager = RedisManager.getRedisSingleton();
@@ -46,7 +46,7 @@ public class LoginInterceptor implements HandlerInterceptor {
             }else {
                 // 重定向
                 return false;
-            }*/
+            }
         }catch (Exception e){
             logger.info("preHandle=" + e.getMessage());
         }
