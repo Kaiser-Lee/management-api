@@ -1,5 +1,6 @@
 package com.management.redis;
 
+import com.management.utils.SerializeUtils;
 import org.apache.shiro.cache.Cache;
 import org.apache.shiro.cache.CacheException;
 import org.apache.shiro.util.CollectionUtils;

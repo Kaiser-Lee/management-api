@@ -1,4 +1,4 @@
-package com.management.redis;
+package com.management.utils;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.slf4j.Logger;

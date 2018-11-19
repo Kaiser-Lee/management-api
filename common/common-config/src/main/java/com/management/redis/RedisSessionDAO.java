@@ -1,5 +1,6 @@
 package com.management.redis;
 
+import com.management.utils.SerializeUtils;
 import org.apache.shiro.session.Session;
 import org.apache.shiro.session.UnknownSessionException;
 import org.apache.shiro.session.mgt.eis.AbstractSessionDAO;
