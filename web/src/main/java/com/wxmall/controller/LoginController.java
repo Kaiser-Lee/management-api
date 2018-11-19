@@ -56,17 +56,20 @@ public class LoginController extends BaseController {
             token.setRememberMe(false);
             Subject subject = SecurityUtils.getSubject();
             subject.login(token);
+
             //获取用户
             Map<String, Object> map = new HashMap<>();
             map.put("phone",username);
             List<SellerUser> list = sellerUserService.list(map);
+            // 设置session
+            request.getSession().setAttribute("sellerUser",list.get(0));
             //token
             Serializable id = subject.getSession().getId();
             //将token放入redis
             RedisManager manager = RedisManager.getRedisSingleton();
-            manager.set(("sys:login:user_token" + id).getBytes(), list.get(0).getId().toString().getBytes() , 60*30);
+            /*manager.set(("sys:login:user_token" + id).getBytes(), list.get(0).getId().toString().getBytes() , 60*30);
             manager.set(("sys:user:id_" + list.get(0).getId()).getBytes(),id.toString().getBytes(), 60*30);
-            manager.set(("sys:user:user_info" + list.get(0).getId()).getBytes(), JSONObject.toJSONString(list.get(0)).toString().getBytes(), 60*30);
+            manager.set(("sys:user:user_info" + list.get(0).getId()).getBytes(), JSONObject.toJSONString(list.get(0)).toString().getBytes(), 60*30);*/
 
             return "登录成功";
         } catch (AuthenticationException e) {
