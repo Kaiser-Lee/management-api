@@ -78,6 +78,7 @@ public class ShiroConfig {
     public SessionDAO sessionDAO () {
         log.info("是否使用redis缓存！");
         if (Constant.CACHE_TYPE_REDIS.equals(cacheType)) {
+            log.info("RedisSessionDAO :" + cacheType);
             return new RedisSessionDAO();
         }
         return new MemorySessionDAO();

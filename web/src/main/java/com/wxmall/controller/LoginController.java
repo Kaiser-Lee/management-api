@@ -3,6 +3,7 @@ package com.wxmall.controller;
 import com.alibaba.dubbo.common.logger.Logger;
 import com.alibaba.dubbo.common.logger.LoggerFactory;
 import com.alibaba.fastjson.JSONObject;
+import com.management.brower.ApplicationContextRegister;
 import com.management.redis.RedisManager;
 import com.management.utils.IPUtils;
 import com.management.xcontroller.BaseController;
@@ -66,8 +67,9 @@ public class LoginController extends BaseController {
             //token
             Serializable id = subject.getSession().getId();
             //将token放入redis
-            RedisManager manager = RedisManager.getRedisSingleton();
-           // manager.set(("sys:login:user_token" + id), list.get(0).getId().toString() , 60*30);
+            //RedisManager manager = RedisManager.getRedisSingleton();
+            RedisManager manager = ApplicationContextRegister.getBean(RedisManager.class);
+            manager.set(("sys:login:user_token" + id).getBytes(), list.get(0).getId().toString().getBytes() , 60*30);
            // manager.set(("sys:user:id_" + list.get(0).getId()),id.toString(), 60*30);
            // manager.set(("sys:user:user_info" + list.get(0).getId()), JSONObject.toJSONString(list.get(0)).toString(), 60*30);
 
