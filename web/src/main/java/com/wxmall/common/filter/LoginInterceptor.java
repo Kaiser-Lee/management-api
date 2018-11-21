@@ -18,7 +18,9 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -36,9 +38,11 @@ public class LoginInterceptor extends  HandlerInterceptorAdapter  {
             logger.info("登录拦截验证！");
             String basePath = request.getContextPath();
             String path = request.getRequestURI();
-            if(!notLoginIntercept(path, basePath)){
+            if(notLoginIntercept(path, basePath)){
+                logger.info("不需要被拦截：" + path);
                 return true;
             }
+            logger.info("需要被拦截：" + path);
             Subject subject = SecurityUtils.getSubject();
             Serializable token = subject.getSession().getId();
             RedisManager redisManager = ApplicationContextRegister.getBean(RedisManager.class);
@@ -57,7 +61,7 @@ public class LoginInterceptor extends  HandlerInterceptorAdapter  {
                 }
             }else {
                 // 重定向
-                //logger.info("尚未登录,请重新登录！");
+                logger.info("尚未登录,请重新登录！");
                 //response.sendRedirect("尚未登录,请重新登录！");
                 return true;
             }
@@ -84,11 +88,14 @@ public class LoginInterceptor extends  HandlerInterceptorAdapter  {
 
     public boolean notLoginIntercept(String path, String basePath){
         path = path.substring(basePath.length());
-        Set<String> notLoginPaths = new HashSet<String>();
+        List<String> notLoginPaths = new ArrayList<>();
         notLoginPaths.add("/login");
         notLoginPaths.add("/index");
-        if(notLoginPaths.contains(path)){
-            return true;
+        for (int i = 0; i < notLoginPaths.size(); i++){
+            String strPath = notLoginPaths.get(i);
+            if(path.indexOf(strPath) != -1){
+                return true;
+            }
         }
         return false;
     }

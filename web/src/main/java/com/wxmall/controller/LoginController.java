@@ -76,7 +76,7 @@ public class LoginController extends BaseController {
             manager.set(("sys:user:id_" + list.get(0).getId()).getBytes(),id.toString().getBytes(), 60*30);
             manager.set(("sys:user:user_info_" + list.get(0).getId()).getBytes(), JSONObject.toJSONString(list.get(0)).toString().getBytes(), 60*30);
 
-            return R.ok();
+            return R.ok("登录成功！");
         } catch (AuthenticationException e) {
             logger.info(e.getMessage());
         }
