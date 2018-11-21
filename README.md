@@ -4,6 +4,8 @@ java 项目 采用前后端分离的模式
 
 本地接口测试：http://localhost:8080/swagger-ui.html#/
 
-前端：vue + vuex
+dubbo地址：http://122.114.110.171:8080/governance/services
 
-本地前端测试：http://localhost:8089/#/
+#前端：vue + vuex
+
+#本地前端测试：http://localhost:8089/#/
