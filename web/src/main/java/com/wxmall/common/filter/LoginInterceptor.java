@@ -24,8 +24,9 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * 登录验证拦截
- *
+ * 登录拦截验证
+ * @date 2018-11-21
+ * @author 卢方谱
  */
 
 public class LoginInterceptor extends  HandlerInterceptorAdapter  {
@@ -86,6 +87,12 @@ public class LoginInterceptor extends  HandlerInterceptorAdapter  {
         super.afterConcurrentHandlingStarted(request, response, handler);
     }
 
+    /**
+     * 被需要进拦截验证
+     * @param path
+     * @param basePath
+     * @return
+     */
     public boolean notLoginIntercept(String path, String basePath){
         path = path.substring(basePath.length());
         List<String> notLoginPaths = new ArrayList<>();
