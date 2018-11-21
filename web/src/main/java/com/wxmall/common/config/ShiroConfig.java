@@ -44,7 +44,7 @@ public class ShiroConfig {
     private int port = 6379;
 
     @Value("${spring.redis.password}")
-    private String password = "lufanagpu";
+    private String password = "";
 
     @Value("${spring.redis.timeout}")
     private int timeout = 1000;
