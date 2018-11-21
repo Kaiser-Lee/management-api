@@ -106,6 +106,7 @@ public class ShiroConfig {
      * @return
      */
     public RedisCacheManager cacheManager (){
+        log.info("CacheManager 实现redis缓存");
         RedisCacheManager redisCacheManager = new RedisCacheManager();
         redisCacheManager.setRedisManager(redisManager());
         return redisCacheManager;
@@ -113,6 +114,7 @@ public class ShiroConfig {
 
     @Bean
     public EhCacheManager ehCacheManager(){
+        log.info("ehCacheManager ");
         EhCacheManager ehCacheManager = new EhCacheManager();
         ehCacheManager.setCacheManager(CacheManager.create());
         return ehCacheManager;
@@ -127,6 +129,7 @@ public class ShiroConfig {
      */
     @Bean
     public AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor(SecurityManager securityManager) {
+        log.info("开启shiro aop注解支持.");
         AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor = new AuthorizationAttributeSourceAdvisor();
         authorizationAttributeSourceAdvisor.setSecurityManager(securityManager);
         return authorizationAttributeSourceAdvisor;
@@ -138,6 +141,7 @@ public class ShiroConfig {
      */
     @Bean
     public RedisSessionDAO redisSessionDAO() {
+        log.info("RedisSessionDAO shiro sessionDao层的实现 通过redis");
         RedisSessionDAO redisSessionDAO = new RedisSessionDAO();
         redisSessionDAO.setRedisManager(redisManager());
         return redisSessionDAO;
@@ -145,6 +149,7 @@ public class ShiroConfig {
 
     @Bean
     public DefaultWebSessionManager sessionManager(){
+        log.info("sessionManager 初始化");
         DefaultWebSessionManager sessionManager = new DefaultWebSessionManager();
         sessionManager.setGlobalSessionTimeout(tomcatTimeOut*1000);
         sessionManager.setDeleteInvalidSessions(true);
@@ -169,8 +174,4 @@ public class ShiroConfig {
         return manager;
     }
 
-    @Bean
-    public static LifecycleBeanPostProcessor lifecycleBeanPostProcessor() {
-        return new LifecycleBeanPostProcessor();
-    }
 }

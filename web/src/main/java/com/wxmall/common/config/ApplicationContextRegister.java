@@ -1,9 +1,8 @@
-package com.management.brower;
+package com.wxmall.common.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanExpressionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
@@ -11,14 +10,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class ApplicationContextRegister implements ApplicationContextAware
 {
+    private static Logger logger = LoggerFactory.getLogger(ApplicationContextRegister.class);
     /**
      * 上下文对象实例
      */
-    private static ApplicationContext applicationContext;
+    private static ApplicationContext APPLICATION_CONTEXT;
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
+        logger.info("初始化上下文");
+        this.APPLICATION_CONTEXT = applicationContext;
     }
 
     /**
@@ -26,7 +27,7 @@ public class ApplicationContextRegister implements ApplicationContextAware
      * @return
      */
     public static ApplicationContext getApplicationContext() {
-        return applicationContext;
+        return APPLICATION_CONTEXT;
     }
 
     /**
@@ -45,7 +46,8 @@ public class ApplicationContextRegister implements ApplicationContextAware
      * @return
      */
     public static <T> T getBean(Class<T> clazz){
-        return getApplicationContext().getBean(clazz);
+        logger.info("通过class获取Bean");
+        return APPLICATION_CONTEXT.getBean(clazz);
     }
 
     /**
@@ -56,7 +58,7 @@ public class ApplicationContextRegister implements ApplicationContextAware
      * @return
      */
     public static <T> T getBean(String name,Class<T> clazz){
-        return getApplicationContext().getBean(name, clazz);
+        return APPLICATION_CONTEXT.getBean(name, clazz);
     }
 }
 

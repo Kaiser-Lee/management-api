@@ -1,7 +1,7 @@
 package com.wxmall.common.authorization;
 
-import com.management.brower.ApplicationContextRegister;
 import com.management.utils.ShiroUtils;
+import com.wxmall.common.config.ApplicationContextRegister;
 import com.wxmall.po.SellerUser;
 import com.wxmall.service.SellerUserService;
 import org.apache.shiro.authc.*;
