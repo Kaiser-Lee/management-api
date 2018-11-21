@@ -90,7 +90,7 @@ public class LoginController extends BaseController {
      */
     @RequestMapping(value = "/logout", method = RequestMethod.GET)
     public Object logout(HttpSession session){
-        session.invalidate();
+        session.removeAttribute("sellerUser");
         return session.getId();
     }
 }
