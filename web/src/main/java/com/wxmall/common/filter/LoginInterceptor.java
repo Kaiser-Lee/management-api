@@ -88,7 +88,7 @@ public class LoginInterceptor extends  HandlerInterceptorAdapter  {
     }
 
     /**
-     * 被需要进拦截验证
+     * 不需要进拦截验证
      * @param path
      * @param basePath
      * @return
