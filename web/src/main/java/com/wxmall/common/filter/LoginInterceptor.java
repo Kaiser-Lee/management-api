@@ -13,25 +13,38 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
-public class LoginInterceptor implements HandlerInterceptor {
+/**
+ * 登录验证拦截
+ *
+ */
+
+public class LoginInterceptor extends  HandlerInterceptorAdapter  {
 
     private static Logger logger = LoggerFactory.getLogger(LoginInterceptor.class);
 
     @Override
-    public boolean preHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o) throws Exception {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object o) throws Exception {
         try{
             logger.info("登录拦截验证！");
+            String basePath = request.getContextPath();
+            String path = request.getRequestURI();
+            if(!notLoginIntercept(path, basePath)){
+                return true;
+            }
             Subject subject = SecurityUtils.getSubject();
             Serializable token = subject.getSession().getId();
             RedisManager redisManager = ApplicationContextRegister.getBean(RedisManager.class);
             byte[] userId = redisManager.get(("sys:login:user_token_" + token).getBytes());
             if(userId != null){
-                String tokenPre = redisManager.get(("sys:user:id_"+ userId).getBytes()).toString();
+                String tokenPre = redisManager.get(("sys:user:id_"+ userId.toString()).getBytes()).toString();
                 if(!token.equals(tokenPre)){
                     // 进行重定向
                     return false;
@@ -42,9 +55,10 @@ public class LoginInterceptor implements HandlerInterceptor {
                         redisManager.setExpire(60 * 30);
                     }
                 }
-
             }else {
                 // 重定向
+                //logger.info("尚未登录,请重新登录！");
+                //response.sendRedirect("尚未登录,请重新登录！");
                 return true;
             }
         }catch (Exception e){
@@ -61,5 +75,21 @@ public class LoginInterceptor implements HandlerInterceptor {
     @Override
     public void afterCompletion(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o, Exception e) throws Exception {
 
+    }
+
+    @Override
+    public void afterConcurrentHandlingStarted(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        super.afterConcurrentHandlingStarted(request, response, handler);
+    }
+
+    public boolean notLoginIntercept(String path, String basePath){
+        path = path.substring(basePath.length());
+        Set<String> notLoginPaths = new HashSet<String>();
+        notLoginPaths.add("/login");
+        notLoginPaths.add("/index");
+        if(notLoginPaths.contains(path)){
+            return true;
+        }
+        return false;
     }
 }
