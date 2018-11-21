@@ -11,7 +11,7 @@ import java.util.Set;
 
 public class RedisManager {
 
-    private Logger logger = LoggerFactory.getLogger(RedisManager.class);
+    private static Logger logger = LoggerFactory.getLogger(RedisManager.class);
 
     volatile static RedisManager redisSingleton;
 

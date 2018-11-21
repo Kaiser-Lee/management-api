@@ -29,7 +29,7 @@ import java.util.Collection;
 @Configuration
 public class ShiroConfig {
 
-    private Logger log = LoggerFactory.getLogger(ShiroConfig.class);
+    private static Logger log = LoggerFactory.getLogger(ShiroConfig.class);
 
     @Value("${server.session-timeout}")
     private int tomcatTimeOut = 7200;
