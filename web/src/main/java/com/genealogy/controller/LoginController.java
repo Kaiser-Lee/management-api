@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.Serializable;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +55,7 @@ public class LoginController extends BaseController {
     @ApiOperation(value = "登录接口")
     public R userLogin(@ApiParam("账号") @RequestParam String username, @ApiParam("密码") @RequestParam String password, HttpServletRequest request){
         try {
+            Long startTime = System.currentTimeMillis();
             String ip = IPUtils.getIpAddr(request);
             //password = MD5Utils.encrypt(username, password);
             RedisManager redisManager = RedisManager.getRedisSingleton();
@@ -78,7 +80,11 @@ public class LoginController extends BaseController {
             manager.set(("sys:user:id_" + list.get(0).getId()).getBytes(),id.toString().getBytes(), 60*30);
             manager.set(("sys:user:user_info_" + list.get(0).getId()).getBytes(), JSONObject.toJSONString(list.get(0)).toString().getBytes(), 60*30);
 
-            return R.ok("登录成功！");
+            Long stopTime = System.currentTimeMillis();
+            double time = (double) ((stopTime - startTime) / 1000);
+            DecimalFormat df = new DecimalFormat("#.000");
+            logger.info("登录接口耗时:" + df.format(time));
+            return R.ok("登录成功！").put("responseSeconds", df.format(time));
         } catch (AuthenticationException e) {
             logger.info(e.getMessage());
         }
