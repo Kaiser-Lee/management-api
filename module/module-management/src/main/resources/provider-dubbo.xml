@@ -14,7 +14,7 @@
     <dubbo:protocol name="dubbo" port="20880" />
 
     <!--使用 dubbo 协议实现定义好的 api.PermissionService 接口-->
-    <dubbo:service interface="com.wxmall.service.SellerUserService" ref="sellerUserServiceImpl" protocol="dubbo" register="true"/>
-    <bean id="sellerUserServiceImpl" class="com.wxmall.service.impl.SellerUserServiceImpl"/>
+    <dubbo:service interface="com.genealogy.service.UserService" ref="userServiceImpl" protocol="dubbo" register="true"/>
+    <bean id="userServiceImpl" class="com.genealogy.service.impl.UserServiceImpl"/>
 
 </beans>

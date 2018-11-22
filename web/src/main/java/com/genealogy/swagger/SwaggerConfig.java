@@ -1,4 +1,4 @@
-package com.wxmall.swagger;
+package com.genealogy.swagger;
 
 
 import org.springframework.context.annotation.Bean;
@@ -24,7 +24,7 @@ public class SwaggerConfig {
         return new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(apiInfo())
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("com.wxmall.controller"))
+                .apis(RequestHandlerSelectors.basePackage("com.genealogy.controller"))
                 .paths(PathSelectors.any())
                 .build();
     }

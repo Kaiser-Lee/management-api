@@ -1,15 +1,15 @@
-package com.wxmall.controller;
+package com.genealogy.controller;
 
 import com.alibaba.dubbo.common.logger.Logger;
 import com.alibaba.dubbo.common.logger.LoggerFactory;
 import com.alibaba.fastjson.JSONObject;
+import com.genealogy.common.config.ApplicationContextRegister;
+import com.genealogy.po.User;
+import com.genealogy.service.UserService;
 import com.management.redis.RedisManager;
 import com.management.utils.IPUtils;
 import com.management.utils.R;
 import com.management.xcontroller.BaseController;
-import com.wxmall.common.config.ApplicationContextRegister;
-import com.wxmall.po.SellerUser;
-import com.wxmall.service.SellerUserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -40,7 +40,7 @@ public class LoginController extends BaseController {
     private static Logger logger = LoggerFactory.getLogger(LoginController.class);
 
     @Autowired
-    private SellerUserService sellerUserService;
+    private UserService userService;
 
     /**
      * 用户登录
@@ -64,10 +64,12 @@ public class LoginController extends BaseController {
 
             //获取用户　
             Map<String, Object> map = new HashMap<>();
-            map.put("phone",username);
-            List<SellerUser> list = sellerUserService.list(map);
+            map.put("number",username);
+            //List<SellerUser> list = sellerUserService.list(map);
+            List<User> list = userService.list(map);
+
             // 设置session
-            request.getSession().setAttribute("sellerUser",list.get(0));
+            request.getSession().setAttribute("user",list.get(0));
             //token
             Serializable id = subject.getSession().getId();
             //将token放入redis
@@ -90,7 +92,7 @@ public class LoginController extends BaseController {
      */
     @RequestMapping(value = "/logout", method = RequestMethod.GET)
     public Object logout(HttpSession session){
-        session.removeAttribute("sellerUser");
+        session.removeAttribute("user");
         return session.getId();
     }
 }

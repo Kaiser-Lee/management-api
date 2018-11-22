@@ -1,4 +1,4 @@
-package com.wxmall;
+package com.genealogy;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;

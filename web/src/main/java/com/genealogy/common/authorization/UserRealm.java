@@ -1,9 +1,8 @@
-package com.wxmall.common.authorization;
+package com.genealogy.common.authorization;
 
+import com.genealogy.po.User;
+import com.genealogy.service.UserService;
 import com.management.utils.ShiroUtils;
-import com.wxmall.common.config.ApplicationContextRegister;
-import com.wxmall.po.SellerUser;
-import com.wxmall.service.SellerUserService;
 import org.apache.shiro.authc.*;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
@@ -18,7 +17,7 @@ import java.util.Map;
 public class UserRealm extends AuthorizingRealm {
 
     @Resource
-    private SellerUserService sellerUserService;
+    private UserService userService;
 
     /**
      * 为当前subject授权
@@ -41,12 +40,12 @@ public class UserRealm extends AuthorizingRealm {
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException {
         String username = (String) authenticationToken.getPrincipal();
         Map<String, Object> params = new HashMap<String, Object>();
-        params.put("phone",username);
+        params.put("number",username);
         //UserMapper userMapper = ApplicationContextRegister.getBean(UserMapper.class);
         //Object password = authenticationToken.getCredentials();
         String password = new String((char[])authenticationToken.getCredentials());
-        List<SellerUser> list  = sellerUserService.list(params);
-        SellerUser user = null;
+        List<User> list  = userService.list(params);
+        User user = null;
         if (list.size()>0) {
             user = list.get(0);
         }

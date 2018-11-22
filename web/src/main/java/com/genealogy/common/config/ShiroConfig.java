@@ -1,9 +1,9 @@
-package com.wxmall.common.config;
+package com.genealogy.common.config;
 
 import com.alibaba.dubbo.common.logger.Logger;
 import com.alibaba.dubbo.common.logger.LoggerFactory;
+import com.genealogy.common.authorization.UserRealm;
 import com.management.brower.Constant;
-import com.wxmall.common.authorization.UserRealm;
 import com.management.redis.BDSessionListeners;
 import com.management.redis.RedisCacheManager;
 import com.management.redis.RedisManager;

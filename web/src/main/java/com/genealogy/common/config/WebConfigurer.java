@@ -1,9 +1,7 @@
-package com.wxmall.common.config;
+package com.genealogy.common.config;
 
-import com.wxmall.common.filter.LoginInterceptor;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.genealogy.common.filter.LoginInterceptor;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;

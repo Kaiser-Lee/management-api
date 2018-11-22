@@ -1,6 +1,6 @@
 package com.management.utils;
 
-import com.wxmall.po.SellerUser;
+import com.genealogy.po.User;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.session.Session;
 import org.apache.shiro.session.mgt.eis.SessionDAO;
@@ -20,9 +20,9 @@ public class ShiroUtils {
         return SecurityUtils.getSubject();
     }
 
-    public static SellerUser getUser() {
+    public static User getUser() {
         Object object = getSubject().getPrincipal();
-        return (SellerUser)object;
+        return (User)object;
     }
 
     public static Long getUserId () {

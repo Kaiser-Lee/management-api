@@ -1,4 +1,4 @@
-package com.wxmall.common.filter;
+package com.genealogy.common.filter;
 
 import org.springframework.stereotype.Component;
 
