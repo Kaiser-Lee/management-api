@@ -62,7 +62,7 @@ public class LoginController extends BaseController {
             Subject subject = SecurityUtils.getSubject();
             subject.login(token);
 
-            //获取用户
+            //获取用户　
             Map<String, Object> map = new HashMap<>();
             map.put("phone",username);
             List<SellerUser> list = sellerUserService.list(map);
