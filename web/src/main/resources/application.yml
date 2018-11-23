@@ -1,3 +1,5 @@
+fileload:
+  uploadPath: /var/genealogy
 server:
   port: 8080
   session-timeout: 7200
