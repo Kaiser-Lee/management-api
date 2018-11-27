@@ -9,7 +9,6 @@ import com.genealogy.service.UserService;
 import com.management.redis.RedisManager;
 import com.management.utils.IPUtils;
 import com.management.utils.R;
-import com.management.xcontroller.BaseController;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -36,7 +35,7 @@ import java.util.Map;
 @Controller
 @RequestMapping("/api/login")
 @Api(description = "用户登录接口")
-public class LoginController extends BaseController {
+public class LoginController {
 
     private static Logger logger = LoggerFactory.getLogger(LoginController.class);
 

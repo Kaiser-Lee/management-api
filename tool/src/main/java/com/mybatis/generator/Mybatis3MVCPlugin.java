@@ -1,7 +1,5 @@
 package com.mybatis.generator;
 
-import com.management.xdao.IMybatisDao;
-import com.management.xservice.BaseService;
 import org.apache.log4j.Logger;
 import org.mybatis.generator.api.GeneratedJavaFile;
 import org.mybatis.generator.api.IntrospectedTable;
@@ -138,12 +136,12 @@ public class Mybatis3MVCPlugin extends PluginAdapter{
 		field.setName(fieldName);
 		topLevelClass.addField(field);
 		
-		FullyQualifiedJavaType iMybatisDao = new FullyQualifiedJavaType(IMybatisDao.class.getName()+"<"+entityClass.getShortName()+">");
+		//FullyQualifiedJavaType iMybatisDao = new FullyQualifiedJavaType(IMybatisDao.class.getName()+"<"+entityClass.getShortName()+">");
 		Method method = new Method();
 		method.addAnnotation("@Override");
 		method.setVisibility(JavaVisibility.PUBLIC);
 		method.setName("getBaseDao");
-		method.setReturnType(iMybatisDao);
+		//method.setReturnType(iMybatisDao);
 		method.addBodyLine("return " + fieldName + ";");
 		topLevelClass.addMethod(method);
 		
@@ -151,7 +149,7 @@ public class Mybatis3MVCPlugin extends PluginAdapter{
 		topLevelClass.addImportedType(serviceInterface);
 		topLevelClass.addImportedType(autowired);
 		topLevelClass.addImportedType(daoInterface);
-		topLevelClass.addImportedType(iMybatisDao);
+		//topLevelClass.addImportedType(iMybatisDao);
 		topLevelClass.addImportedType(new FullyQualifiedJavaType(Service.class.getName()));
 		
 		GeneratedJavaFile gjf = new GeneratedJavaFile(
@@ -209,12 +207,12 @@ public class Mybatis3MVCPlugin extends PluginAdapter{
 		field.setName(fieldName);
 		topLevelClass.addField(field);
 		
-		FullyQualifiedJavaType iBaseService = new FullyQualifiedJavaType(BaseService.class.getName()+"<"+entityClass.getShortName()+">");
+		//FullyQualifiedJavaType iBaseService = new FullyQualifiedJavaType(BaseService.class.getName()+"<"+entityClass.getShortName()+">");
 		Method method = new Method();
 		method.addAnnotation("@Override");
 		method.setVisibility(JavaVisibility.PUBLIC);
 		method.setName("getBaseService");
-		method.setReturnType(iBaseService);
+		//method.setReturnType(iBaseService);
 		method.addBodyLine("return " + fieldName + ";");
 		topLevelClass.addMethod(method);
 		
@@ -222,7 +220,7 @@ public class Mybatis3MVCPlugin extends PluginAdapter{
 		topLevelClass.addImportedType(providerInterface);
 		topLevelClass.addImportedType(autowired);
 		topLevelClass.addImportedType(serviceInterface);
-		topLevelClass.addImportedType(iBaseService);
+		//topLevelClass.addImportedType(iBaseService);
 		topLevelClass.addImportedType(new FullyQualifiedJavaType(Service.class.getName()));
 		
 		GeneratedJavaFile gjf = new GeneratedJavaFile(
