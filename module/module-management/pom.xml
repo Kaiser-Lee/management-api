@@ -7,10 +7,11 @@
     <packaging>jar</packaging>
 
     <parent>
-        <artifactId>management-common</artifactId>
-        <groupId>com.management.common</groupId>
-        <version>0.0.1-SNAPSHOT</version>
-    </parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>1.5.9.RELEASE</version>
+    <relativePath/>
+</parent>
 
     <dependencies>
         <!-- 热部署模块 -->
@@ -81,10 +82,9 @@
             <version>1.0.0</version>
         </dependency>
         <dependency>
-            <groupId>com.management.common</groupId>
+            <groupId>management-common-framework</groupId>
             <artifactId>management-common-framework</artifactId>
             <version>1.0.0</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.management.interface.management</groupId>

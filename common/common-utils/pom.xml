@@ -16,9 +16,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.management.common.framework</groupId>
+            <groupId>management-common-framework</groupId>
             <artifactId>management-common-framework</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.management.po.po-management</groupId>
