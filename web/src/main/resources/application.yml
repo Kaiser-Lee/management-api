@@ -1,5 +1,6 @@
 fileload:
-  uploadPath: /var/genealogy
+  uploadPath: D:/var/genealogy/
+  showPath: /genealogy_img/
 server:
   port: 8088
   session-timeout: 7200

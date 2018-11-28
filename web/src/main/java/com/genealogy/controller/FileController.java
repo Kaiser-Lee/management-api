@@ -1,22 +1,50 @@
 package com.genealogy.controller;
 
+import com.genealogy.common.config.FileConfig;
 import com.management.utils.R;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Controller
 @RequestMapping("/api/file")
 @Api(description = "文件上传接口")
 public class FileController {
 
+    @Autowired
+    private FileConfig fileConfig;
+
     @RequestMapping(value = "/uploadImg", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "图片上传")
-    public R uploadImg(){
+    public R uploadImg(@RequestParam(value = "file", required = false) MultipartFile file){
+        if(file == null){
+            return R.error("上传内容为空！");
+        }
+        String fileName = file.getOriginalFilename();
+        StringBuffer name = new StringBuffer();
+        StringBuffer uploadPath = new StringBuffer(fileConfig.getUploadPath());
+        StringBuffer showPath = new StringBuffer(fileConfig.getShowPath());
+        fileName = fileName.substring(fileName.lastIndexOf("."));
+        if(!".jpg|.png|.jpeg".contains(fileName.toLowerCase())){
+            return R.error("请上传.jpg|.png|.jpeg格式文件");
+        }
+        name.append("img_");
+        Long time = System.currentTimeMillis();
+        name.append(time);
+        name.append(fileName);
+        if(uploadPath.charAt(uploadPath.length()-1) != '/'){
+            uploadPath.append("/");
+        }
+        uploadPath.append("/genealogy/Img/");
+        if (showPath.charAt(showPath.length()-1) != '/'){
+            showPath.append("/");
+        }
+        showPath.append("/genealogy/Img/");
+        showPath.append(name);
         return R.ok();
     }
 }
