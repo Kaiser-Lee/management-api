@@ -9,6 +9,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+/**
+ * @desc 文件上传接口
+ * @author lufangpu
+ * @date 2018-11-28
+ * @since 1.0.0
+ *
+ */
 @Controller
 @RequestMapping("/api/file")
 @Api(description = "文件上传接口")
@@ -17,6 +24,11 @@ public class FileController {
     @Autowired
     private FileConfig fileConfig;
 
+    /**
+     * 图片上传
+     * @param file
+     * @return
+     */
     @RequestMapping(value = "/uploadImg", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "图片上传")
