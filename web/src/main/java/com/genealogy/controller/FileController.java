@@ -1,6 +1,7 @@
 package com.genealogy.controller;
 
 import com.genealogy.common.config.FileConfig;
+import com.management.utils.FileUtils;
 import com.management.utils.R;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -8,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 /**
  * @desc 文件上传接口
@@ -57,6 +60,14 @@ public class FileController {
         }
         showPath.append("/genealogy/Img/");
         showPath.append(name);
+        try{
+            FileUtils.uploadFile(file.getBytes(), uploadPath.toString(), name.toString());
+            return R.ok("文件上传成功！").put("showPath",showPath);
+        }catch (IOException e){
+            e.printStackTrace();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         return R.ok();
     }
 }
