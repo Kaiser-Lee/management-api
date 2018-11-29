@@ -1,5 +1,5 @@
 fileload:
-  uploadPath: D:/var/genealogy/
+  uploadPath: E:/var/genealogy/
   showPath: /genealogy_img/
 server:
   port: 8088

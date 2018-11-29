@@ -54,11 +54,11 @@ public class FileController {
         if(uploadPath.charAt(uploadPath.length()-1) != '/'){
             uploadPath.append("/");
         }
-        uploadPath.append("/genealogy/Img/");
+        //uploadPath.append("/genealogy/Img/");
         if (showPath.charAt(showPath.length()-1) != '/'){
             showPath.append("/");
         }
-        showPath.append("/genealogy/Img/");
+        //showPath.append("genealogy/Img/");
         showPath.append(name);
         try{
             FileUtils.uploadFile(file.getBytes(), uploadPath.toString(), name.toString());
@@ -68,6 +68,13 @@ public class FileController {
         }catch (Exception e){
             e.printStackTrace();
         }
+        return R.ok();
+    }
+
+    @RequestMapping(value = "/uploadVideo", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "视频上传")
+    public R uploadVideo(){
         return R.ok();
     }
 }

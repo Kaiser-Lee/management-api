@@ -32,6 +32,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @desc 用户登录接口
+ * @author lufangpu
+ * @date 2018-11-29
+ * @since 1.0.0
+ *
+ */
 @Controller
 @RequestMapping("/api/login")
 @Api(description = "用户登录接口")

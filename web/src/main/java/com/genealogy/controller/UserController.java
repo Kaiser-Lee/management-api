@@ -15,6 +15,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 
+/**
+ * @desc 系统用户接口
+ * @author lufangpu
+ * @date 2018-11-29
+ * @since 1.0.0
+ *
+ */
 @Controller
 @RequestMapping("/api/user")
 @Api(description = "系统用户接口")
