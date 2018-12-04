@@ -27,7 +27,7 @@ public class LoginInterceptor extends  HandlerInterceptorAdapter  {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object o) throws Exception {
-        try{
+        /*try{
             logger.info("登录拦截验证！");
             String basePath = request.getContextPath();
             String path = request.getRequestURI();
@@ -60,7 +60,7 @@ public class LoginInterceptor extends  HandlerInterceptorAdapter  {
             }
         }catch (Exception e){
             logger.info("preHandle=" + e.getMessage());
-        }
+        }*/
         return true;
     }
 
