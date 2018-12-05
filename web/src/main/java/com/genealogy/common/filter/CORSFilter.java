@@ -13,6 +13,11 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 登录拦截验证
+ * @date 2018-11-21
+ * @author 卢方谱
+ */
 @Component
 public class CORSFilter implements Filter {
     @Override
