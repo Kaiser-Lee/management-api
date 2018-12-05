@@ -137,13 +137,13 @@ public class Mybatis3MVCPlugin extends PluginAdapter{
 		topLevelClass.addField(field);
 		
 		//FullyQualifiedJavaType iMybatisDao = new FullyQualifiedJavaType(IMybatisDao.class.getName()+"<"+entityClass.getShortName()+">");
-		Method method = new Method();
+		/*Method method = new Method();
 		method.addAnnotation("@Override");
 		method.setVisibility(JavaVisibility.PUBLIC);
-		method.setName("getBaseDao");
+		method.setName("getBaseDao");*/
 		//method.setReturnType(iMybatisDao);
-		method.addBodyLine("return " + fieldName + ";");
-		topLevelClass.addMethod(method);
+		//method.addBodyLine("return " + fieldName + ";");
+		//topLevelClass.addMethod(method);
 		
 		topLevelClass.addImportedType(serviceImplRootClass);
 		topLevelClass.addImportedType(serviceInterface);
@@ -208,13 +208,13 @@ public class Mybatis3MVCPlugin extends PluginAdapter{
 		topLevelClass.addField(field);
 		
 		//FullyQualifiedJavaType iBaseService = new FullyQualifiedJavaType(BaseService.class.getName()+"<"+entityClass.getShortName()+">");
-		Method method = new Method();
-		method.addAnnotation("@Override");
-		method.setVisibility(JavaVisibility.PUBLIC);
-		method.setName("getBaseService");
+		//Method method = new Method();
+		//method.addAnnotation("@Override");
+		//method.setVisibility(JavaVisibility.PUBLIC);
+		//method.setName("getBaseService");
 		//method.setReturnType(iBaseService);
-		method.addBodyLine("return " + fieldName + ";");
-		topLevelClass.addMethod(method);
+		//method.addBodyLine("return " + fieldName + ";");
+		//topLevelClass.addMethod(method);
 		
 		topLevelClass.addImportedType(providerImplRootClass);
 		topLevelClass.addImportedType(providerInterface);
