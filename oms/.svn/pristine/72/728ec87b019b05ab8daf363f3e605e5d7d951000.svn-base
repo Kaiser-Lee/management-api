@@ -1,0 +1,71 @@
+package com.iwhalecloud.retail.oms.quartz.sqls;
+
+import com.iwhalecloud.retail.oms.quartz.utils.DBTUtil;
+import com.ztesoft.net.eop.sdk.context.EopSetting;
+import com.ztesoft.net.mall.core.consts.Consts;
+
+/**
+ * 
+ * @author wu.i
+ * 移植CRM代码
+ *
+ */
+public class Sqls_Base extends Sqls {
+
+	
+	
+	public Sqls_Base(){
+		//SqlUtil.initSqls(Sqls_Base.class, this , sqls) ;
+	}
+	
+	
+
+	public String getQUERY_TRIGGER_STATE(){
+		return "select trigger_state from es_qrtz_triggers where job_name =? and job_group = ? and source_from='"+"MM"+"' and rownum=1";
+	}
+	public String getUPDATE_QRTZ_JOB_INFO(){
+		return "update es_qrtz_job_info set job_info_name = ?, start_now = ?, type=? where job_info_id = ? and  source_from='"+"MM"+"'";
+	}
+	public String getQUERY_JOB_LIST(){
+		
+		if(EopSetting.DBTYPE.equals(DBTUtil.DB_TYPE_MYSQL)){
+			return "select b.sched_name,a.job_info_id, a.job_info_name,a.start_now, a.create_date,a.type, b.job_name,b.job_group,"
+					+ "(select p.pname from es_dc_public_ext p where p.pkey=c.trigger_state and  p.stype ='"+ "job_trigger_state"+"' and p.source_from=a.source_from ) trigger_state_name,"
+					+ " case when b.sched_name =:sched_name then 'yes' else 'no' end sched_name_is_my,"
+					//+"DECODE(b.sched_name,:sched_name,'yes','no') sched_name_is_my,"
+					+ "b.job_class_name,b.description,d.cron_expression,c.trigger_state"
+					+ ",date_format(c.next_fire_time / (1000 * 60 * 60 * 24) + str_to_date('1970-01-01 08:00:00', '%Y-%m-%d %T'), '%Y-%m-%d %T') AS next_fire_time_date,"+
+					"date_format(c.prev_fire_time / (1000 * 60 * 60 * 24) +str_to_date('1970-01-01 08:00:00', '%Y-%m-%d %T'), '%Y-%m-%d %T') AS prev_fire_time_date "
+					+ "from es_qrtz_job_info      a, es_qrtz_job_details   b, es_qrtz_triggers      c, es_qrtz_cron_triggers d"+
+					"  where b.job_name = a.job_name and b.job_group = a.job_group and c.job_name = b.job_name"+
+					"    and c.job_group = b.job_group and d.trigger_name = c.trigger_name"+
+					"     and d.trigger_group = c.trigger_group and a.source_from='"+"MM"+"'";
+		} else {
+			return "select b.sched_name,a.job_info_id, a.job_info_name,a.start_now, a.create_date,a.type, b.job_name,b.job_group,"
+					+ "(select p.pname from es_dc_public_ext p where p.pkey=c.trigger_state and  p.stype ='"+"job_trigger_state"+"' and p.source_from=a.source_from ) trigger_state_name,"
+					+"DECODE(b.sched_name,:sched_name,'yes','no') sched_name_is_my,"
+					+ "b.job_class_name,b.description,d.cron_expression,c.trigger_state"
+					+ ",TO_CHAR(c.next_fire_time / (1000 * 60 * 60 * 24) + TO_DATE('1970-01-01 08:00:00', 'YYYY-MM-DD HH:MI:SS'), 'YYYY-MM-DD HH24:MI:SS') AS next_fire_time_date,"+
+					"TO_CHAR(c.prev_fire_time / (1000 * 60 * 60 * 24) +TO_DATE('1970-01-01 08:00:00', 'YYYY-MM-DD HH:MI:SS'), 'YYYY-MM-DD HH24:MI:SS') AS prev_fire_time_date "
+					+ "from es_qrtz_job_info      a, es_qrtz_job_details   b, es_qrtz_triggers      c, es_qrtz_cron_triggers d"+
+					"  where b.job_name = a.job_name and b.job_group = a.job_group and c.job_name = b.job_name"+
+					"    and c.job_group = b.job_group and d.trigger_name = c.trigger_name"+
+					"     and d.trigger_group = c.trigger_group and a.source_from='"+"MM"+"'";
+		}
+		
+		
+	}
+	public String getQUERY_JOB_INSTANCE_LIST(){
+		if(EopSetting.DBTYPE.equals(DBTUtil.DB_TYPE_MYSQL)){
+			return "select a.SCHED_NAME,a.INSTANCE_NAME "
+					+ ",date_format(a.LAST_CHECKIN_TIME / (1000 * 60 * 60 * 24) + str_to_date('1970-01-01 08:00:00', '%Y-%m-%d %T'), '%Y-%m-%d %T') AS LAST_CHECKIN_TIME_date"
+					+ ",a.CHECKIN_INTERVAL AS CHECKIN_INTERVAL_date"+
+					" from es_qrtz_scheduler_state a where  a.source_from is null";
+		} else {
+			return "select a.SCHED_NAME,a.INSTANCE_NAME "
+					+ ",TO_CHAR(a.LAST_CHECKIN_TIME / (1000 * 60 * 60 * 24) + TO_DATE('1970-01-01 08:00:00', 'YYYY-MM-DD HH:MI:SS'), 'YYYY-MM-DD HH24:MI:SS') AS LAST_CHECKIN_TIME_date"
+					+ ",a.CHECKIN_INTERVAL AS CHECKIN_INTERVAL_date"+
+					" from es_qrtz_scheduler_state a where  a.source_from is null";
+		}
+	}
+}

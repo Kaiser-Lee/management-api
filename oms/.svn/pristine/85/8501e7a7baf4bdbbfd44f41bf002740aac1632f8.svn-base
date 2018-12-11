@@ -1,0 +1,34 @@
+package com.iwhalecloud.retail.oms.service;
+
+import zte.params.goodscats.req.CatComplexAddReq;
+import zte.params.goodscats.req.CatsListByIdReq;
+import zte.params.goodscats.req.ComplexGoodsGetReq;
+import zte.params.goodscats.resp.CatAddResp;
+import zte.params.goodscats.resp.CatComplexAddResp;
+import zte.params.goodscats.resp.CatsListByIdResp;
+import zte.params.goodscats.resp.ComplexGoodsGetResp;
+
+public interface GoodsCatsService {
+
+    /**
+     * 获取商品分类（顶级）
+     * @param req
+     * @return
+     */
+    CatsListByIdResp listCats(CatsListByIdReq req);
+
+    /**
+     * 根据分类获取关联商品信息
+     * @param req
+     * @return
+     */
+    ComplexGoodsGetResp getComplexGoods(ComplexGoodsGetReq req);
+
+    /**
+     * 添加分类
+     * @param req
+     * @return
+     */
+    CatComplexAddResp addCatComplex(CatComplexAddReq req);
+
+}

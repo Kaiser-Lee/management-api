@@ -1,0 +1,15 @@
+package com.iwhalecloud.retail.oms.manager;
+
+import org.springframework.stereotype.Component;
+import javax.annotation.Resource;
+import com.iwhalecloud.retail.oms.mapper.ContentVedioctrMapper;
+
+
+@Component
+public class ContentVedioctrManager{
+    @Resource
+    private ContentVedioctrMapper contentVedioctrMapper;
+    
+    
+    
+}

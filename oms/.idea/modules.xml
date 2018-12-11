@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/../goods/goods-client/goods-client.iml" filepath="$PROJECT_DIR$/../goods/goods-client/goods-client.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../goods/goods-datasource/goods-datasource.iml" filepath="$PROJECT_DIR$/../goods/goods-datasource/goods-datasource.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../goods/goods-parent.iml" filepath="$PROJECT_DIR$/../goods/goods-parent.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../goods/goods-service/goods-service.iml" filepath="$PROJECT_DIR$/../goods/goods-service/goods-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../goods/goods-service-boot/goods-service-boot.iml" filepath="$PROJECT_DIR$/../goods/goods-service-boot/goods-service-boot.iml" />
+      <module fileurl="file://$PROJECT_DIR$/oms-client/oms-client.iml" filepath="$PROJECT_DIR$/oms-client/oms-client.iml" />
+      <module fileurl="file://$PROJECT_DIR$/oms-datasource/oms-datasource.iml" filepath="$PROJECT_DIR$/oms-datasource/oms-datasource.iml" />
+      <module fileurl="file://$PROJECT_DIR$/oms-parent.iml" filepath="$PROJECT_DIR$/oms-parent.iml" />
+      <module fileurl="file://$PROJECT_DIR$/oms-service/oms-service.iml" filepath="$PROJECT_DIR$/oms-service/oms-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/oms-service-boot/oms-service-boot.iml" filepath="$PROJECT_DIR$/oms-service-boot/oms-service-boot.iml" />
+      <module fileurl="file://$PROJECT_DIR$/oms-web/oms-web.iml" filepath="$PROJECT_DIR$/oms-web/oms-web.iml" />
+      <module fileurl="file://$PROJECT_DIR$/oms-web-boot/oms-web-boot.iml" filepath="$PROJECT_DIR$/oms-web-boot/oms-web-boot.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../order/order-client/order-client.iml" filepath="$PROJECT_DIR$/../order/order-client/order-client.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../order/order-datasource/order-datasource.iml" filepath="$PROJECT_DIR$/../order/order-datasource/order-datasource.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../order/order-parent.iml" filepath="$PROJECT_DIR$/../order/order-parent.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../order/order-service/order-service.iml" filepath="$PROJECT_DIR$/../order/order-service/order-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../order/order-service-boot/order-service-boot.iml" filepath="$PROJECT_DIR$/../order/order-service-boot/order-service-boot.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../partner/partner-client/partner-client.iml" filepath="$PROJECT_DIR$/../partner/partner-client/partner-client.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../partner/partner-datasource/partner-datasource.iml" filepath="$PROJECT_DIR$/../partner/partner-datasource/partner-datasource.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../partner/partner-parent.iml" filepath="$PROJECT_DIR$/../partner/partner-parent.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../partner/partner-service/partner-service.iml" filepath="$PROJECT_DIR$/../partner/partner-service/partner-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../partner/partner-service-boot/partner-service-boot.iml" filepath="$PROJECT_DIR$/../partner/partner-service-boot/partner-service-boot.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../system/system-client/system-client.iml" filepath="$PROJECT_DIR$/../system/system-client/system-client.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../system/system-datasource/system-datasource.iml" filepath="$PROJECT_DIR$/../system/system-datasource/system-datasource.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../system/system-parent.iml" filepath="$PROJECT_DIR$/../system/system-parent.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../system/system-service/system-service.iml" filepath="$PROJECT_DIR$/../system/system-service/system-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../system/system-service-boot/system-service-boot.iml" filepath="$PROJECT_DIR$/../system/system-service-boot/system-service-boot.iml" />
+    </modules>
+  </component>
+</project>

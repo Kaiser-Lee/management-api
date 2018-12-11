@@ -1,0 +1,61 @@
+package com.iwhalecloud.retail.oms.manager;
+
+import com.iwhalecloud.retail.oms.dto.BindContentDTO;
+import com.iwhalecloud.retail.oms.dto.BindProductDTO;
+import com.iwhalecloud.retail.oms.entity.OperatingPositionBind;
+import com.iwhalecloud.retail.oms.mapper.OperatingPositionBindMapper;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
+import java.util.Date;
+
+/**
+ * @Auther: lin.wh
+ * @Date: 2018/10/22 00:13
+ * @Description:
+ */
+
+@Component
+public class OperatingPositionBindManager {
+
+    @Resource
+    private OperatingPositionBindMapper operatingPositionBindMapper;
+
+    public int createBindProduct(BindProductDTO dto) {
+        int t = operatingPositionBindMapper.createBindProduct(dto);
+        return t;
+    }
+
+    public int createBindContent(BindContentDTO dto) {
+        int t = operatingPositionBindMapper.createBindContent(dto);
+        return t;
+    }
+
+    /**
+     * 新增.
+     *
+     * @param operatingPositionBind
+     * @return
+     * @author Ji.kai
+     * @date 2018/10/31 15:27
+     */
+    public int insert(OperatingPositionBind operatingPositionBind) {
+        operatingPositionBind.setGmtCreate(new Date());
+        operatingPositionBind.setGmtModified(new Date());
+        return operatingPositionBindMapper.insert(operatingPositionBind);
+    }
+
+    /**
+     * 失效.
+     *
+     * @param operatingPositionId
+     * @return
+     * @author Ji.kai
+     * @date 2018/10/31 15:27
+     */
+    public int delete(String operatingPositionId) {
+        return operatingPositionBindMapper.setIsDeleted(operatingPositionId);
+    }
+
+}
+

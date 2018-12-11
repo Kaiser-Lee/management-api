@@ -1,0 +1,101 @@
+package com.iwhalecloud.retail.oms.web.interceptor;
+
+import java.net.URLEncoder;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.iwhalecloud.retail.oms.consts.OmsConst;
+import com.iwhalecloud.retail.oms.web.utils.UserAgentUtil;
+
+
+public class WxUserInterceptor implements HandlerInterceptor {
+	
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
+	
+	@Value("${wechat.mp.notifyServer}")
+	private String notifyServer;
+	
+	@Value("${wechat.mp.appId}")
+    private String appId;
+	
+	@Override
+	public void afterCompletion(HttpServletRequest arg0, HttpServletResponse arg1, Object arg2, Exception arg3)
+			throws Exception {
+
+	}
+
+	@Override
+	public void postHandle(HttpServletRequest arg0, HttpServletResponse arg1, Object arg2, ModelAndView arg3)
+			throws Exception {
+
+	}
+	
+	/**
+	 * 是白名单，直接放过的URL
+	 * @param request
+	 * @param response
+	 * @param handler
+	 * @return
+	 */
+	private boolean isWhiteNames(HttpServletRequest request, HttpServletResponse response, Object handler) {
+		if (request.getServletPath().indexOf("/wechat/dispatch") >= 0) { 
+			return true;
+		}
+		
+		return false;
+	}
+	
+	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+		
+		String reqUrl = request.getServletPath();
+		String qryStr = request.getQueryString();
+		
+		String host = request.getRemoteHost(); 
+		int port = request.getRemotePort();
+		
+		logger.info("当前请求参数 qryStr=>" + qryStr);
+		logger.info("当前当前参数 path:host:port=>" + reqUrl + " : " + host + " : " + port);
+		
+		//1、如果是白名单，则直接跳过
+		if (isWhiteNames(request, response, handler)) {
+			return true;
+		}
+		
+		//2、如果是微信浏览器
+		if (UserAgentUtil.isWechat(request)) {
+			String wxOpenId = (String)request.getSession().getAttribute(OmsConst.SESSION_WX_OPEN_ID);
+			logger.info("session  openid = " + wxOpenId);
+			if (StringUtils.isEmpty(wxOpenId)) {
+				String redirectUrl = request.getServletPath();
+				final String queryString = request.getQueryString();
+				if (!StringUtils.isEmpty(queryString)) {
+					redirectUrl += "?" + request.getQueryString();
+				} 
+				
+				final String encodeRedirectUrl = URLEncoder.encode(redirectUrl, "UTF-8");
+				
+				String url = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=" + appId
+						+"&redirect_uri="+URLEncoder.encode(
+						notifyServer
+						+"/wechat/dispatch?redirectUrl="+URLEncoder.encode(encodeRedirectUrl,"utf-8"),"utf-8") + "&response_type=code&scope=snsapi_base&state=REDIRECT"
+						+"#wechat_redirect";
+				
+				logger.info("去微信授权的url===>" + url);
+				response.sendRedirect(url);
+				return false;
+			}
+		}
+		
+		return true;
+		
+	}
+
+}

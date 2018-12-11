@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/../goods" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../goods/goods-client" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../goods/goods-datasource" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../goods/goods-service" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../goods/goods-service-boot" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/oms-boot" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/oms-client" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/oms-datasource" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/oms-service" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/oms-service-boot" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/oms-web" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/oms-web-boot" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../order" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../order/order-client" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../order/order-datasource" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../order/order-service" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../order/order-service-boot" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../other" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../other/partner-client" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../other/partner-datasource" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../other/partner-service" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../other/partner-service-boot" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../partner" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../partner/partner-client" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../partner/partner-datasource" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../partner/partner-service" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../partner/partner-service-boot" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../system" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../system/system-client" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../system/system-datasource" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../system/system-service" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../system/system-service-boot" charset="UTF-8" />
+  </component>
+</project>

@@ -1,0 +1,244 @@
+package com.iwhalecloud.retail.oms.web.controller.rop;
+
+import com.iwhalecloud.retail.oms.consts.OmsConst;
+import com.iwhalecloud.retail.partner.entity.GoodsRel;
+import com.iwhalecloud.retail.partner.service.GoodsRelService;
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import zte.params.comments.req.CommentsPageListReq;
+import zte.params.comments.resp.CommentsPageListResp;
+import zte.params.goods.req.*;
+import zte.params.goods.resp.GoodsAddResp;
+import zte.params.goods.resp.GoodsDeleteResp;
+import zte.params.goods.resp.GoodsEditResp;
+import zte.params.goods.resp.GoodsIntroResp;
+import zte.params.goods.resp.GoodsPageListResp;
+import zte.params.goods.resp.GoodsSpecListResp;
+import zte.params.goods.resp.UpdateMarketEnableResp;
+import zte.params.goodstype.req.GoodsTypeListReq;
+import zte.params.goodstype.resp.GoodsTypeListResp;
+
+import com.alibaba.dubbo.config.annotation.Reference;
+import com.iwhalecloud.retail.oms.common.ResultCodeEnum;
+import com.iwhalecloud.retail.oms.dto.ResultVO;
+import com.iwhalecloud.retail.oms.service.GoodsService;
+import com.iwhalecloud.retail.oms.web.utils.ResponseComUtil;
+
+import java.util.List;
+
+/**
+ * @author mzl
+ * @date 2018/10/8
+ */
+@RestController
+@RequestMapping("/api/rop/goods")
+@Slf4j
+public class GoodsROPController {
+
+	@Reference
+    private GoodsService goodsService;
+
+    @Reference
+    private GoodsRelService goodsRelService;
+
+    @GetMapping(value="listGoods")
+    public ResultVO listGoods(@RequestParam(value = "pageNo", required = false) Integer pageNo, @RequestParam
+        (value = "pageSize", required = false) Integer pageSize, @RequestParam(value = "catId", required = false)
+        String catId, @RequestParam(value = "searchKey", required = false) String searchKey, @RequestParam(value = "marketEnable",
+        required = false) String marketEnable) {
+        log.info("GoodsController.listGoods pageNo={}, pageSize={}, catId={}, searchKey={}, marketEnable={}", pageNo, pageSize, catId, searchKey, marketEnable);
+        GoodsPageListReq req = new GoodsPageListReq();
+        if (!StringUtils.isEmpty(pageNo) && !StringUtils.isEmpty(pageSize)) {
+            req.setPageNo(pageNo);
+            req.setPageSize(pageSize);
+        }
+        req.setCat_id(catId);
+        req.setSearch_key(searchKey);
+        if (StringUtils.isEmpty(marketEnable)) {
+            marketEnable = OmsConst.MARKET_ENABLE;
+        }
+        req.setMarket_enable(marketEnable);
+        req.setAudit_state(OmsConst.AUDIT_STATE);
+        GoodsPageListResp resp = goodsService.queryGoodsForPage(req);
+        if (StringUtils.isEmpty(resp)) {
+            return ResultVO.error();
+        }
+        if (ResultCodeEnum.SUCCESS.getCode().equals(resp.getError_code())) {
+            return ResultVO.success(ResponseComUtil.page(pageNo,resp.getGoodsPage()));
+        } else {
+            return ResultVO.error(resp.getError_code(),resp.getError_msg());
+        }
+    }
+
+    @GetMapping(value="queryGoodsDetail")
+    public ResultVO queryGoodsDetail(@RequestParam(value = "goodsId") String goodsId) {
+        log.info("GoodsController.queryGoodsDetail goodsId={}", goodsId);
+        GoodsIntroReq req = new GoodsIntroReq();
+        req.setGoods_id(goodsId);
+        GoodsIntroResp resp = goodsService.queryGoodsDetail(req);
+        if (StringUtils.isEmpty(resp)) {
+            return ResultVO.error();
+        }
+        if (ResultCodeEnum.SUCCESS.getCode().equals(resp.getError_code())) {
+            return ResultVO.success(resp.getGoods());
+        } else {
+            return ResultVO.error(resp.getError_code(),resp.getError_msg());
+        }
+    }
+
+    @GetMapping(value="listGoodsComments")
+    public ResultVO listGoodsComments(@RequestParam(value = "pageNo", required = false) Integer pageNo, @RequestParam
+            (value = "pageSize", required = false) Integer pageSize, @RequestParam(value = "goodsId") String goodsId,
+            @RequestParam(value = "commentType") String commentType) {
+        log.info("GoodsController.listGoodsComments pageNo={}, pageSize={}, goodsId={}, commentType={}", pageNo, pageSize, goodsId, commentType);
+        CommentsPageListReq req = new CommentsPageListReq();
+        if (!StringUtils.isEmpty(pageNo) && !StringUtils.isEmpty(pageSize)) {
+            req.setPageNo(pageNo);
+            req.setPageSize(pageSize);
+        }
+        req.setGoods_id(goodsId);
+        req.setComment_type(commentType);
+        CommentsPageListResp resp = goodsService.listGoodsComments(req);
+        if (StringUtils.isEmpty(resp)) {
+            return ResultVO.error();
+        }
+        if (ResultCodeEnum.SUCCESS.getCode().equals(resp.getError_code())) {
+            return ResultVO.success(ResponseComUtil.page(pageNo,resp.getPage()));
+        } else {
+            return ResultVO.error(resp.getError_code(),resp.getError_msg());
+        }
+    }
+
+    @GetMapping(value="listGoodsSpec")
+    public ResultVO listGoodsSpec(@RequestParam(value = "goodsId") String goodsId) {
+        log.info("GoodsController.listGoodsSpec goodsId={}", goodsId);
+        GoodsSpecListReq req = new GoodsSpecListReq();
+        req.setGoods_id(goodsId);
+        GoodsSpecListResp resp = goodsService.listGoodsSpec(req);
+        if (StringUtils.isEmpty(resp)) {
+            return ResultVO.error();
+        }
+        if (ResultCodeEnum.SUCCESS.getCode().equals(resp.getError_code())) {
+            return ResultVO.success(resp.getSpecs());
+        } else {
+            return ResultVO.error(resp.getError_code(),resp.getError_msg());
+        }
+    }
+
+    @GetMapping(value="goodsTypeList")
+    public ResultVO goodsTypeList() {
+        GoodsTypeListReq req = new GoodsTypeListReq();
+        GoodsTypeListResp resp = goodsService.getTypeList(req);
+        if (StringUtils.isEmpty(resp)) {
+            return ResultVO.error();
+        }
+        if (ResultCodeEnum.SUCCESS.getCode().equals(resp.getError_code())) {
+            return ResultVO.success(resp.getTypeList());
+        } else {
+            return ResultVO.error(resp.getError_code(),resp.getError_msg());
+        }
+    }
+
+    @PostMapping(value="addGoods")
+    public ResultVO addGoods(@RequestBody GoodsAddReq req) {
+        log.info("GoodsController.addGoods req={}", req);
+        if (StringUtils.isEmpty(req.getSpecValues())) {
+            return ResultVO.errorEnum(ResultCodeEnum.SPEC_VALUES_CAN_NOT_BE_NULL);
+        }
+        GoodsAddResp resp = goodsService.addGoods(req);
+        if (StringUtils.isEmpty(resp)) {
+            return ResultVO.error();
+        }
+        if (ResultCodeEnum.SUCCESS.getCode().equals(resp.getError_code())) {
+            List<GoodsReq> goodsReqList = req.getRecommendList();
+            if (!CollectionUtils.isEmpty(goodsReqList)) {
+                for (GoodsReq goodsReq : goodsReqList) {
+                    GoodsRel goodsRel = new GoodsRel();
+                    goodsRel.setAGoodsId(goodsReq.getGoods_id());
+                    goodsRel.setZGoodsId(resp.getGoods_id());
+                    goodsRelService.addGoodsRel(goodsRel);
+                }
+            }
+            return ResultVO.success(resp.getGoods_id());
+        } else {
+            return ResultVO.error(resp.getError_code(),resp.getError_msg());
+        }
+    }
+
+    @PostMapping(value="editGoods")
+    public ResultVO editGoods(@RequestBody GoodsEditReq req) {
+        log.info("GoodsController.editGoods req={}", req);
+        GoodsEditResp resp = goodsService.editGoods(req);
+        if (StringUtils.isEmpty(resp)) {
+            return ResultVO.error();
+        }
+        if (ResultCodeEnum.SUCCESS.getCode().equals(resp.getError_code())) {
+            return ResultVO.success();
+        } else {
+            return ResultVO.error(resp.getError_code(),resp.getError_msg());
+        }
+    }
+
+    @PostMapping(value="deleteGoods")
+    public ResultVO deleteGoods(@RequestBody GoodsDeleteReq req) {
+        log.info("GoodsController.deleteGoods req={}", req);
+        GoodsDeleteResp resp = goodsService.deleteGoods(req);
+        if (StringUtils.isEmpty(resp)) {
+            return ResultVO.error();
+        }
+        if (ResultCodeEnum.SUCCESS.getCode().equals(resp.getError_code())) {
+            return ResultVO.success();
+        } else {
+            return ResultVO.error(resp.getError_code(),resp.getError_msg());
+        }
+    }
+
+    @GetMapping(value="queryGoodsByIdsAndName")
+    public ResultVO queryGoodsByIdsAndName(@RequestParam(value = "pageNo", required = false) Integer pageNo, @RequestParam
+            (value = "pageSize", required = false) Integer pageSize, @RequestParam(value = "name", required = false) String name,
+            @RequestParam(value = "ids", required = false) String ids) {
+        log.info("GoodsController.queryGoodsByIdsAndName pageNo={},pageSize={},name={},ids={}", pageNo, pageSize, name, ids);
+        GoodsPageByIdsReq req = new GoodsPageByIdsReq();
+        if (!StringUtils.isEmpty(pageNo) && !StringUtils.isEmpty(pageSize)) {
+            req.setPageNo(pageNo);
+            req.setPageSize(pageSize);
+        }
+        req.setName(name);
+        req.setIds(ids);
+        GoodsPageListResp resp = goodsService.queryGoodsByIdsAndName(req);
+        if (StringUtils.isEmpty(resp)) {
+            return ResultVO.error();
+        }
+        if (ResultCodeEnum.SUCCESS.getCode().equals(resp.getError_code())) {
+            return ResultVO.success(ResponseComUtil.page(req.getPageNo(),resp.getGoodsPage()));
+        } else if (ResultCodeEnum.ROP_INVOKE_EXCEPTION.getCode().equals(resp.getError_code())) {
+            return ResultVO.error(resp.getError_code(), resp.getError_msg());
+        }
+        else {
+            return ResultVO.successMessage("查询数据为空");
+        }
+    }
+
+    @PostMapping(value="updateMarketEnable")
+    public ResultVO updateMarketEnable(@RequestBody UpdateMarketEnableReq req) {
+        log.info("GoodsController.updateMarketEnable req={}", req);
+        UpdateMarketEnableResp resp = goodsService.updateMarketEnable(req);
+        if (StringUtils.isEmpty(resp)) {
+            return ResultVO.error();
+        }
+        if (ResultCodeEnum.SUCCESS.getCode().equals(resp.getError_code())) {
+            return ResultVO.success();
+        } else {
+            return ResultVO.error(resp.getError_code(), resp.getError_msg());
+        }
+    }
+}

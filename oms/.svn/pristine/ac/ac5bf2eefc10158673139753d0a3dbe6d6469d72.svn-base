@@ -1,0 +1,62 @@
+package com.iwhalecloud.retail.oms.web.controller.cloud;
+
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.alibaba.dubbo.config.annotation.Reference;
+import com.iwhalecloud.retail.oms.OmsCommonConsts;
+import com.iwhalecloud.retail.oms.dto.ShelfTemplatesDTO;
+import com.iwhalecloud.retail.oms.service.ShelfTemplatesService;
+import com.iwhalecloud.retail.oms.web.controller.BaseController;
+import com.iwhalecloud.retail.oms.dto.ResultVO;
+
+/**
+ * @Auther: lin.wh
+ * @Date: 2018/10/16 14:28
+ * @Description: 云货架模版（增删改查）
+ */
+
+@RestController
+@RequestMapping("/api/shelfTemplates")
+@Slf4j
+public class ShelfTemplatesController extends BaseController {
+	@Reference
+    private ShelfTemplatesService shelfTemplatesService;
+
+    @RequestMapping(value = "/createShelfTemplates", method = RequestMethod.POST)
+    public ResultVO createShelfTemplates(@RequestBody ShelfTemplatesDTO dto) {
+        ResultVO resultVO = new ResultVO();
+        try {
+            shelfTemplatesService.createShelfTemplates(dto);
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+            resultVO.setResultData("新增成功");
+            resultVO.setResultMsg("success");
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultData(e.getMessage());
+        }
+        return resultVO;
+    }
+
+    @RequestMapping(value = "/updateShelfTemplatesStatus", method = RequestMethod.PUT)
+    public ResultVO updateShelfTemplatesStatus(@RequestBody ShelfTemplatesDTO dto) {
+        ResultVO resultVO = new ResultVO();
+        try {
+            shelfTemplatesService.updateShelfTemplatesStatus(dto);
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+            resultVO.setResultData("编辑成功");
+            resultVO.setResultMsg("success");
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultData(e.getMessage());
+        }
+        return resultVO;
+    }
+}
+

@@ -1,0 +1,19 @@
+package com.iwhalecloud.retail.oms.service;
+
+import com.iwhalecloud.retail.oms.dto.ResultVO;
+import zte.params.region.req.RegionsListReq;
+import zte.params.region.resp.RegionsListResp;
+
+/**
+ * @Author pjq
+ * @Date 2018/10/11
+ **/
+public interface RegionService {
+    /**
+     *查询省、市、区列表
+     * @param req
+     * @return
+     */
+    ResultVO<RegionsListResp> listRegions(RegionsListReq req);
+
+}

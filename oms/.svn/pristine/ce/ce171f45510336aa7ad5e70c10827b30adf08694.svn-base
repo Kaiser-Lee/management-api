@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>oms-parent</artifactId>
+		<groupId>com.iwhalecloud.retail</groupId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>oms-boot</artifactId>
+	<name>oms-boot</name>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.iwhalecloud.retail</groupId>
+            <artifactId>oms-service</artifactId>
+            <version>${oms.version}</version>
+		</dependency>
+
+		<dependency>
+            <groupId>com.iwhalecloud.retail</groupId>
+            <artifactId>oms-web</artifactId>
+            <version>${oms.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+    </dependencies>
+	<packaging>war</packaging>
+	<build>
+		<finalName>oms</finalName>
+		
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+</project>

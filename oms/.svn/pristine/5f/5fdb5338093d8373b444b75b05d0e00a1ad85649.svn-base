@@ -1,0 +1,12 @@
+package com.iwhalecloud.retail.oms.web.controller.partner;
+
+import com.iwhalecloud.retail.oms.web.controller.BaseController;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.*;
+
+@Slf4j
+@RestController
+@RequestMapping("/api/partner")
+public class PartnerController extends BaseController {
+
+}

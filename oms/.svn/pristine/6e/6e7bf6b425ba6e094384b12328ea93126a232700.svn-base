@@ -1,0 +1,74 @@
+package com.iwhalecloud.retail.oms.manager;
+
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.iwhalecloud.retail.oms.dto.CloudShelfDTO;
+import com.iwhalecloud.retail.oms.dto.CloudShelfDetailDTO;
+import com.iwhalecloud.retail.oms.dto.OperatingPositionBindDTO;
+import com.iwhalecloud.retail.oms.dto.resquest.cloud.CloudShelfRequestDTO;
+import com.iwhalecloud.retail.oms.dto.resquest.CloudShelfPageReq;
+import com.iwhalecloud.retail.oms.entity.CloudShelf;
+import com.iwhalecloud.retail.oms.mapper.CloudShelfMapper;
+import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
+import java.util.Date;
+import java.util.List;
+
+/**
+ * @Auther: lin.wh
+ * @Date: 2018/10/21 20:15
+ * @Description:
+ */
+
+@Component
+public class CloudShelfManager {
+    @Resource
+    private CloudShelfMapper cloudShelfMapper;
+
+    public Page<CloudShelfDTO> queryCloudShelfList(CloudShelfPageReq pageReq) {
+        Page<CloudShelfDTO> page = new Page<CloudShelfDTO>(pageReq.getPageNo(), pageReq.getPageSize());
+        return cloudShelfMapper.queryCloudShelfList(page, pageReq);
+    }
+
+    public CloudShelfDTO queryCloudShelfListDetails(String num) {
+        CloudShelfDTO cloudShelfDTO = cloudShelfMapper.queryCloudShelfListDetails(num);
+        List<CloudShelfDetailDTO> list = cloudShelfMapper.queryCloudShelfListDetails1(num);
+        CloudShelfDetailDTO cloudShelfDetailDTO = new CloudShelfDetailDTO();
+        for (int i = 0; i < list.size(); i++) {
+            cloudShelfDetailDTO = list.get(i);
+            String operatingPositionId = cloudShelfDetailDTO.getOperatingPositionId();
+            OperatingPositionBindDTO operatingPositionBindDTO = cloudShelfMapper.queryCloudShelfListDetails2(operatingPositionId);
+            cloudShelfDetailDTO.setOperatingPositionBindDTO(operatingPositionBindDTO);
+        }
+        cloudShelfDTO.setCloudShelfDetailDTOS(list);
+        return cloudShelfDTO;
+    }
+
+    public int createCloudShelf(CloudShelfDTO dto) {
+        dto.setGmtCreate(new Date());
+        dto.setGmtModified(new Date());
+        CloudShelf cloudShelf = new CloudShelf();
+        BeanUtils.copyProperties(dto, cloudShelf);
+        int t = cloudShelfMapper.insert(cloudShelf);
+        dto.setId(cloudShelf.getId());
+        return t;
+    }
+
+    public int editCloudShelf(CloudShelfDTO dto) {
+        dto.setGmtModified(new Date());
+        int t = cloudShelfMapper.editCloudShelf(dto);
+        return t;
+    }
+
+    public int deleteCloudShelf(CloudShelfDTO dto) {
+        int t = cloudShelfMapper.deleteCloudShelf(dto);
+        return t;
+    }
+
+    public int modifyCloudShelfByParam(CloudShelfRequestDTO cloudShelfRequestDTO) {
+        return cloudShelfMapper.modifyCloudShelfByParam(cloudShelfRequestDTO);
+    }
+
+}
+

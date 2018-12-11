@@ -1,0 +1,50 @@
+package com.iwhalecloud.retail.oms.service.impl;
+
+import com.iwhalecloud.retail.oms.OmsCommonConsts;
+import com.iwhalecloud.retail.oms.consts.OmsConst;
+import com.iwhalecloud.retail.oms.dto.CloudDeviceLogDTO;
+import com.iwhalecloud.retail.oms.dto.ResultVO;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.alibaba.dubbo.config.annotation.Service;
+import com.iwhalecloud.retail.oms.manager.CloudDeviceLogManager;
+import com.iwhalecloud.retail.oms.service.CloudDeviceLogService;
+import org.springframework.transaction.annotation.Transactional;
+
+
+@Service
+public class CloudDeviceLogServiceImpl implements CloudDeviceLogService {
+
+    @Autowired
+    private CloudDeviceLogManager cloudDeviceLogManager;
+
+
+    @Override
+    @Transactional
+    public ResultVO addCloudDeviceLog(CloudDeviceLogDTO cloudDeviceLogDTO) throws  Exception{
+        ResultVO resultVO = new ResultVO();
+        cloudDeviceLogDTO.setIsDeleted(OmsConst.IsDeleted.NOT_DELETED.getCode());
+        //根据时间查询，设备编码查询该设备是否在线
+        CloudDeviceLogDTO existCloudDeviceLog = cloudDeviceLogManager.queryCloudDeviceLog(cloudDeviceLogDTO);
+        java.util.Date gmtCreate = cloudDeviceLogDTO.getGmtCreate();
+        java.util.Date gmtModified = cloudDeviceLogDTO.getGmtModified();
+        Long diff = gmtModified.getTime() - gmtCreate.getTime();
+        long days = diff / (1000 * 60 * 60 * 24);
+        long hours = (diff-days*(1000 * 60 * 60 * 24))/(1000* 60 * 60);
+        long minutes = (diff-days*(1000 * 60 * 60 * 24)-hours*(1000* 60 * 60))/(1000* 60);
+        long seconds = minutes*60;
+        if(existCloudDeviceLog!=null){
+            existCloudDeviceLog.setGmtModified(gmtModified);
+            existCloudDeviceLog.setWorkTime(seconds);
+            cloudDeviceLogManager.updateCloudDeviceLog(existCloudDeviceLog);
+            resultVO.setResultData("更新成功");
+        }else{
+            cloudDeviceLogDTO.setWorkTime(seconds);
+            cloudDeviceLogManager.addCloudDeviceLog(cloudDeviceLogDTO);
+            resultVO.setResultData("插入成功");
+        }
+        resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+        resultVO.setResultMsg("success");
+        return resultVO;
+    }
+
+}

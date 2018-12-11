@@ -1,0 +1,142 @@
+package com.iwhalecloud.retail.oms.web.controller.cloud;
+
+import java.util.HashMap;
+import java.util.List;
+
+import io.swagger.annotations.*;
+
+import org.springframework.web.bind.annotation.*;
+
+import com.alibaba.dubbo.config.annotation.Reference;
+import com.iwhalecloud.retail.oms.OmsCommonConsts;
+import com.iwhalecloud.retail.oms.dto.CloudShelfDTO;
+import com.iwhalecloud.retail.oms.service.CloudShelfService;
+import com.iwhalecloud.retail.oms.web.controller.BaseController;
+import com.iwhalecloud.retail.oms.dto.ResultVO;
+
+/**
+ * @Auther: lin.wh
+ * @Date: 2018/10/12 14:56
+ * @Description: 云货架（增删改查）
+ */
+
+@RestController
+@RequestMapping("/api/cloudShelf")
+public class CloudShelfController extends BaseController {
+    @Reference
+    private CloudShelfService cloudShelfService;
+
+    @GetMapping(value = "queryCloudShelfList")
+    public ResultVO<List<CloudShelfDTO>> queryCloudShelfList(@RequestParam(value = "id", required = false) Integer id,
+                                                             @RequestParam(value = "pageIndex", required = false) Integer pageIndex,
+                                                             @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+        ResultVO resultVO = new ResultVO();
+        HashMap<String, Object> map = new HashMap<String, Object>();
+        map.put("id", id);
+        map.put("pageIndex", (pageIndex - 1) * pageSize);
+        map.put("pageSize", pageSize);
+        try {
+            List<CloudShelfDTO> cloudShelfDTO = cloudShelfService.queryCloudShelfList(map);
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+            resultVO.setResultData(cloudShelfDTO);
+            resultVO.setResultMsg("success");
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultData(e.getMessage());
+        }
+        return resultVO;
+    }
+
+    @ApiOperation(value = "查询CloudShelfDTO详情", notes = "根据id，查询CloudShelfDTO对象")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "id", paramType = "path", required = true, dataType = "int")
+    })
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "请求参数没填好"),
+            @ApiResponse(code = 404, message = "请求路径没有或页面跳转路径不对")
+    })
+    @RequestMapping(value = "/queryCloudShelfListDetails/{id}", method = RequestMethod.GET)
+    public ResultVO<CloudShelfDTO> queryCloudShelfListDetails(@PathVariable int id) {
+        ResultVO resultVO = new ResultVO();
+        try {
+            CloudShelfDTO cloudShelfDTO = cloudShelfService.queryCloudShelfListDetails(id);
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+            resultVO.setResultData(cloudShelfDTO);
+            resultVO.setResultMsg("success");
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultData(e.getMessage());
+        }
+        return resultVO;
+    }
+
+    @ApiOperation(value = "新增CloudShelfDTO", notes = "传入CloudShelfDTO对象，进行保存操作")
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "请求参数没填好"),
+            @ApiResponse(code = 404, message = "请求路径没有或页面跳转路径不对")
+    })
+    @RequestMapping(value = "/createCloudShelf", method = RequestMethod.POST)
+    public ResultVO<CloudShelfDTO> createCloudShelf(@RequestBody @ApiParam(value = "CloudShelfDTO", required = true) CloudShelfDTO request) {
+        ResultVO resultVO = new ResultVO();
+        try {
+            cloudShelfService.createCloudShelf(request);
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+            resultVO.setResultData("新增成功");
+            resultVO.setResultMsg("success");
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultData(e.getMessage());
+        }
+        return resultVO;
+    }
+
+    @ApiOperation(value = "修改CloudShelfDTO", notes = "接口支持根据id修改云货架信息")
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "请求参数没填好"),
+            @ApiResponse(code = 404, message = "请求路径没有或页面跳转路径不对")
+    })
+    @RequestMapping(value = "/updateCloudShelfStatus", method = RequestMethod.PUT)
+    public ResultVO updateCloudShelfStatus(@RequestBody CloudShelfDTO dto) {
+        ResultVO resultVO = new ResultVO();
+        try {
+            cloudShelfService.updateCloudShelfStatus(dto);
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+            resultVO.setResultData("修改成功");
+            resultVO.setResultMsg("success");
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultData(e.getMessage());
+        }
+        return resultVO;
+    }
+
+    @ApiOperation(value = "删除CloudShelfDTO", notes = "根据id，进行删除操作")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "id", paramType = "path", required = true, dataType = "int")
+    })
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "请求参数没填好"),
+            @ApiResponse(code = 404, message = "请求路径没有或页面跳转路径不对")
+    })
+    @RequestMapping(value = "/deleteCloudShelf/{id}", method = RequestMethod.DELETE)
+    public ResultVO deleteCloudShelf(@PathVariable int id) {
+        ResultVO resultVO = new ResultVO();
+        try {
+            CloudShelfDTO dto = new CloudShelfDTO();
+            dto.setId(id);
+            cloudShelfService.deleteCloudShelf(dto);
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+            resultVO.setResultData("删除成功");
+            resultVO.setResultMsg("success");
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultData(e.getMessage());
+        }
+        return resultVO;
+    }
+}

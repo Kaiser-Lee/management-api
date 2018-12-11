@@ -1,0 +1,193 @@
+package com.iwhalecloud.retail.oms.web.controller.partner;
+
+import com.alibaba.dubbo.config.annotation.Reference;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.iwhalecloud.retail.oms.OmsCommonConsts;
+import com.iwhalecloud.retail.oms.dto.resquest.StaffBindingAdminUserReq;
+import com.iwhalecloud.retail.oms.service.SystemService;
+import com.iwhalecloud.retail.partner.dto.PartnerStaffDTO;
+import com.iwhalecloud.retail.partner.dto.ResultVO;
+import com.iwhalecloud.retail.partner.dto.req.PartnerStaffAddReq;
+import com.iwhalecloud.retail.partner.dto.req.PartnerStaffDeleteReq;
+import com.iwhalecloud.retail.partner.dto.req.PartnerStaffPageReq;
+import com.iwhalecloud.retail.partner.dto.req.PartnerStaffUpdateReq;
+import com.iwhalecloud.retail.partner.entity.PartnerStaff;
+import com.iwhalecloud.retail.partner.service.PartnerStaffService;
+import com.ztesoft.net.eop.resource.model.AdminUser;
+import io.swagger.annotations.*;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.web.bind.annotation.*;
+import params.adminuser.req.AdminAddReq;
+import params.adminuser.resp.AdminAddResp;
+
+@Slf4j
+@RestController
+@RequestMapping("/api/partnerStaff")
+public class PartnerStaffController {
+
+    @Reference
+    private PartnerStaffService partnerStaffService;
+    @Reference
+    private SystemService systemService;
+
+
+    @ApiOperation(value = "新增分销商店员", notes = "传入PartnerStaffAddReq对象，进行添加操作")
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "请求参数没填好"),
+            @ApiResponse(code = 404, message = "请求路径没有或页面跳转路径不对")
+    })
+    @PostMapping("/add")
+    public ResultVO<Integer> addPartnerStaff(@RequestBody @ApiParam(value = "PartnerStaffAddReq", required = true) PartnerStaffAddReq req) {
+
+        if (StringUtils.isEmpty(req.getPartnerId())) {
+            return ResultVO.error("分销商ID不能为空！");
+        }
+        if (StringUtils.isEmpty(req.getStaffCode())) {
+            return ResultVO.error("员工编码不能为空！");
+        }
+        if (StringUtils.isEmpty(req.getStaffName())) {
+            return ResultVO.error("员工名称不能为空！");
+        }
+        try {
+            int result = partnerStaffService.addPartnerStaff(req);
+            if (result == 0)
+                return ResultVO.error("添加员工信息失败");
+            return ResultVO.success(result);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResultVO.error(e.getMessage());
+        }
+    }
+
+
+    @ApiOperation(value = "店员绑定系统工号", notes = "传入PartnerStaffAddReq对象，进行添加操作")
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "请求参数没填好"),
+            @ApiResponse(code = 404, message = "请求路径没有或页面跳转路径不对")
+    })
+    @PostMapping("/bindingAdminUser")
+    public ResultVO bindingAdminUser(@RequestBody @ApiParam(value = "PartnerStaffAddReq", required = true) StaffBindingAdminUserReq req) {
+
+        if (StringUtils.isEmpty(req.getStaffId())) {
+            return ResultVO.error("员工ID不能为空！");
+        }
+        AdminAddReq adminAddReq = new AdminAddReq();
+        AdminUser adminUser = new AdminUser();
+        adminUser.setState(1); //
+        adminUser.setParuserid(req.getParentUserId());
+        adminUser.setPassword(req.getPassWord());
+        adminUser.setUsername(req.getUserName());
+        adminUser.setRealname(req.getRealName());
+        adminUser.setFounder(11); // 分销商类型 founder 先写死11
+        adminUser.setRelcode(req.getStaffId());
+        adminAddReq.setAdminUser(adminUser);
+        adminAddReq.setUserSessionId(req.getUserSessionId());
+        try {
+            AdminAddResp resp = systemService.addAdmin(adminAddReq);
+            // 失败统一返回
+            if (!resp.getError_code().equals(OmsCommonConsts.RESULE_CODE_SUCCESS)) {
+                return ResultVO.error("员工绑定系统工号失败!");
+            }
+            return ResultVO.success(resp.getError_msg(), resp);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResultVO.error(e.getMessage());
+        }
+    }
+
+
+    @ApiOperation(value = "编辑分销商店员", notes = "传入PartnerStaffUpdateReq对象，进行编辑操作")
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "请求参数没填好"),
+            @ApiResponse(code = 404, message = "请求路径没有或页面跳转路径不对")
+    })
+    @PostMapping("/edit")
+    public ResultVO<Integer> editPartnerStaff(@RequestBody @ApiParam(value = "PartnerStaffUpdateReq", required = true) PartnerStaffUpdateReq req) {
+
+        //TODO 要限定哪些字段不能改
+        if (StringUtils.isEmpty(req.getStaffId())) {
+            return ResultVO.error("员工ID不能为空！");
+        }
+        try {
+            int result = partnerStaffService.editPartnerStaff(req);
+            if (result == 0)
+                return ResultVO.error("编辑员工信息失败");
+            return ResultVO.success(result);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResultVO.error(e.getMessage());
+        }
+    }
+
+    @ApiOperation(value = "批量删除分销商店员", notes = "传入PartnerStaffDeleteReq对象的staffIds，进行批量删除操作")
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "请求参数没填好"),
+            @ApiResponse(code = 404, message = "请求路径没有或页面跳转路径不对")
+    })
+    @PostMapping("/delete")
+    public ResultVO<Integer> deletePartnerStaffs(@RequestBody @ApiParam(value = "PartnerStaffDeleteReq", required = true) PartnerStaffDeleteReq req) {
+
+        if (req.getStaffIds() == null
+                || req.getStaffIds().length == 0) {
+            return ResultVO.error("员工ID不能为空！");
+        }
+        try {
+            int result = partnerStaffService.deletePartnerStaff(req.getStaffIds());
+            if (result == 0)
+                return ResultVO.error("删除员工信息失败");
+            return ResultVO.success(result);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResultVO.error(e.getMessage());
+        }
+    }
+
+    @ApiOperation(value = "查询店员列表", notes = "可以根据分销商ID、员工姓名、员工编号条件进行筛选查询")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "partnerId", value = "partnerId", paramType = "path", required = false, dataType = "String"),
+            @ApiImplicitParam(name = "staffName", value = "staffName", paramType = "path", required = false, dataType = "String"),
+            @ApiImplicitParam(name = "staffCode", value = "staffCode", paramType = "path", required = false, dataType = "String"),
+            @ApiImplicitParam(name = "pageSize", value = "pageSize", paramType = "path", required = true, dataType = "Integer"),
+            @ApiImplicitParam(name = "pageNo", value = "pageNo", paramType = "path", required = true, dataType = "Integer"),
+    })
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "请求参数没填好"),
+            @ApiResponse(code = 404, message = "请求路径没有或页面跳转路径不对")
+    })
+    @GetMapping("/list")
+    public ResultVO<Page<PartnerStaff>> getPartnerStaffList(
+            @RequestParam(value = "partnerId", required = false) String partnerId,
+            @RequestParam(value = "staffName", required = false) String staffName,
+            @RequestParam(value = "staffCode", required = false) String staffCode,
+            @RequestParam(value = "pageSize", required = true) Integer pageSize,
+            @RequestParam(value = "pageNo", required = true) Integer pageNo
+    ) {
+        try {
+            Page<PartnerStaff> page = partnerStaffService.getPartnerStaffList(partnerId, staffName, staffCode, pageSize, pageNo);
+            return ResultVO.success(page);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResultVO.error(e.getMessage());
+        }
+    }
+
+
+    @ApiOperation(value = "查询店员列表", notes = "可以根据分销商ID、员工姓名、店名条件进行筛选查询")
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "请求参数没填好"),
+            @ApiResponse(code = 404, message = "请求路径没有或页面跳转路径不对")
+    })
+    @PostMapping("/qryList")
+    public ResultVO<Page<PartnerStaffDTO>> qryPartnerStaffList(
+            @RequestBody @ApiParam(value = "PartnerStaffPageReq", required = true) PartnerStaffPageReq req) {
+        try {
+            Page<PartnerStaffDTO> page = partnerStaffService.getPartnerStaffList(req);
+            return ResultVO.success(page);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResultVO.error(e.getMessage());
+
+        }
+    }
+}

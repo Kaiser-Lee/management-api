@@ -1,0 +1,52 @@
+package com.iwhalecloud.retail.oms.service;
+
+import com.iwhalecloud.retail.oms.VO.CartVO;
+import com.iwhalecloud.retail.oms.dto.ResultVO;
+import params.cart.req.CartAddReq;
+import params.cart.req.CartListReq;
+import params.cart.req.CartReverseSelectionReq;
+import params.cart.resp.CartAddResp;
+import zte.params.cart.req.CartDeleteReq;
+import zte.params.cart.resp.CartDeleteResp;
+import zte.params.order.req.CartUpdateReq;
+import zte.params.order.resp.CartUpdateResp;
+/**
+ * @author pjq
+ * @date 2018/10/8
+ */
+public interface CartService {
+    /**
+     *查询购物车
+     * @param req
+     * @return
+     */
+    ResultVO listCart(CartListReq req);
+
+    /**
+     *添加购物车
+     * @param req
+     * @return
+     */
+    CartAddResp addCart(CartAddReq req);
+
+    /**
+     * 修改购物车数量
+     * @param req
+     * @return
+     */
+    ResultVO<Boolean> updateCartNum(CartUpdateReq req);
+
+    /**
+     *删除购物车
+     * @param req
+     * @return
+     */
+    ResultVO<Boolean> deleteCart(CartDeleteReq req);
+
+    /**
+     *反选购物车列表
+     * @param req
+     * @return
+     */
+    ResultVO<Boolean> cartReverseSelection(CartReverseSelectionReq req);
+}

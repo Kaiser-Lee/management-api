@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="goods-client" />
+        <module name="goods-datasource" />
+        <module name="goods-service" />
+        <module name="goods-service-boot" />
+        <module name="oms-client" />
+        <module name="oms-datasource" />
+        <module name="oms-service" />
+        <module name="oms-service-boot" />
+        <module name="oms-web" />
+        <module name="oms-web-boot" />
+        <module name="order-client" />
+        <module name="order-datasource" />
+        <module name="order-service" />
+        <module name="order-service-boot" />
+        <module name="partner-client" />
+        <module name="partner-datasource" />
+        <module name="partner-service" />
+        <module name="partner-service-boot" />
+        <module name="system-client" />
+        <module name="system-datasource" />
+        <module name="system-service" />
+        <module name="system-service-boot" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="goods-client" target="1.8" />
+      <module name="goods-datasource" target="1.8" />
+      <module name="goods-parent" target="1.8" />
+      <module name="goods-service" target="1.8" />
+      <module name="goods-service-boot" target="1.8" />
+      <module name="oms-boot" target="1.8" />
+      <module name="oms-client" target="1.8" />
+      <module name="oms-datasource" target="1.8" />
+      <module name="oms-parent" target="1.8" />
+      <module name="oms-service" target="1.8" />
+      <module name="oms-service-boot" target="1.8" />
+      <module name="oms-web" target="1.8" />
+      <module name="oms-web-boot" target="1.8" />
+      <module name="order-client" target="1.8" />
+      <module name="order-datasource" target="1.8" />
+      <module name="order-parent" target="1.8" />
+      <module name="order-service" target="1.8" />
+      <module name="order-service-boot" target="1.8" />
+      <module name="partner-client" target="1.8" />
+      <module name="partner-client (1)" target="1.8" />
+      <module name="partner-datasource" target="1.8" />
+      <module name="partner-datasource (1)" target="1.8" />
+      <module name="partner-parent" target="1.8" />
+      <module name="partner-parent (1)" target="1.8" />
+      <module name="partner-service" target="1.8" />
+      <module name="partner-service (1)" target="1.8" />
+      <module name="partner-service-boot" target="1.8" />
+      <module name="partner-service-boot (1)" target="1.8" />
+      <module name="partner-web" target="1.8" />
+      <module name="system-client" target="1.8" />
+      <module name="system-datasource" target="1.8" />
+      <module name="system-parent" target="1.8" />
+      <module name="system-service" target="1.8" />
+      <module name="system-service-boot" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+</project>

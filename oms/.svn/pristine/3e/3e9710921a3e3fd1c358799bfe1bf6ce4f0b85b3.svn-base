@@ -1,0 +1,44 @@
+package com.iwhalecloud.retail.oms.web.controller.cloud;
+
+import com.alibaba.dubbo.config.annotation.Reference;
+import com.iwhalecloud.retail.oms.OmsCommonConsts;
+import com.iwhalecloud.retail.oms.dto.DefaultOperatingDTO;
+import com.iwhalecloud.retail.oms.dto.ResultVO;
+import com.iwhalecloud.retail.oms.entity.DefaultOperating;
+import org.springframework.web.bind.annotation.*;
+
+import lombok.extern.slf4j.Slf4j;
+import com.iwhalecloud.retail.oms.service.DefaultOperationService;
+
+@Slf4j
+@RestController
+@CrossOrigin
+@RequestMapping("/api/defaultOperation")
+public class DefaultOperatingController {
+	
+    @Reference
+    private DefaultOperationService defaultOperationService;
+
+
+    @RequestMapping(value = "/createDefaultOperation", method = RequestMethod.POST)
+    public ResultVO createDefaultOperation(@RequestBody DefaultOperatingDTO defaultOperatingDTO)throws Exception{
+        ResultVO resultVO = new ResultVO();
+        defaultOperationService.createDefaultOperation(defaultOperatingDTO);
+        resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+        resultVO.setResultData("新增成功");
+        resultVO.setResultMsg("success");
+        return  resultVO;
+    }
+
+
+    @RequestMapping(value = "/editDefaultOperation", method = RequestMethod.POST)
+    public ResultVO editDefaultOperation(@RequestBody DefaultOperatingDTO defaultOperatingDTO)throws Exception{
+        ResultVO resultVO = new ResultVO();
+        defaultOperationService.editDefaultOperation(defaultOperatingDTO);
+        resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+        resultVO.setResultData("更新成功");
+        resultVO.setResultMsg("success");
+        return  resultVO;
+    }
+
+}

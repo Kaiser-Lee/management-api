@@ -1,0 +1,24 @@
+package com.iwhalecloud.retail.oms.web.controller.partner;
+
+import com.alibaba.dubbo.config.annotation.Reference;
+import com.iwhalecloud.retail.partner.service.SupplyRelService;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.CrossOrigin;
+
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@RestController
+@CrossOrigin
+@RequestMapping("/api/supplyRel")
+public class SupplyRelController {
+	
+    @Reference
+    private SupplyRelService supplyRelService;
+
+    
+    
+    
+    
+}

@@ -1,0 +1,13 @@
+package com.iwhalecloud.retail.oms.mapper;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.iwhalecloud.retail.oms.dto.ShelfTemplatesDTO;
+import org.apache.ibatis.annotations.Mapper;
+
+@Mapper
+public interface ShelfTemplatesMapper extends BaseMapper<ShelfTemplatesDTO> {
+
+    int createShelfTemplates(ShelfTemplatesDTO dto);
+
+    int editShelfTemplates(ShelfTemplatesDTO dto);
+}

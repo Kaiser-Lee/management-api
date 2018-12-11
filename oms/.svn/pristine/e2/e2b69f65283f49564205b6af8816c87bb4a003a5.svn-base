@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 指定工作空间，要与接口名相同，源代码没有去看，猜测应该是通过"这里的namespace.下边方法的id"来定位方法的 -->
+<mapper namespace="com.iwhalecloud.retail.oms.mapper.CloudDeviceMapper">
+
+    <select id="queryCloudDeviceList" parameterType="Map"
+            resultType="com.iwhalecloud.retail.oms.dto.CloudDeviceDTO">
+        SELECT * FROM cloud_device t
+        <where>
+            <if test="adscriptionCity!=null">
+                and t.adscription_city=#{adscriptionCity}
+            </if>
+            <if test="adscriptionShop!=null">
+                and t.adscription_shop=#{adscriptionShop}
+            </if>
+            <if test="num!=null">
+                and t.num=#{num}
+            </if>
+            <if test="deviceName!=null">
+                and t.device_name like #{deviceName}
+            </if>
+            <if test="status!=null">
+                and t.status=#{status}
+            </if>
+            <if test="onlineType!=null">
+                and t.online_type=#{onlineType}
+            </if>
+            <if test="deviceType!=null">
+                and t.device_type=#{deviceType}
+            </if>
+            and is_deleted = 0
+        </where>
+    </select>
+
+    <select id="queryCloudDeviceListDetails" parameterType="String"
+            resultType="com.iwhalecloud.retail.oms.dto.CloudDeviceDTO">
+		SELECT * FROM cloud_device t WHERE t.num=#{num}
+	</select>
+
+    <insert id="createCloudDevice" parameterType="com.iwhalecloud.retail.oms.dto.CloudDeviceDTO">
+		insert into cloud_device (gmt_create,gmt_modified,creator,modifier,is_deleted,number,cloud_shelf_number,status,device_name,device_type,online_type,totally_work_time,adscription_shop,adscription_city,can_delete,adscription_city_area,device_desc) values (#{gmtCreate},#{gmtModified},#{creator},#{modifier},#{isDeleted},#{number},#{cloudShelfNumber},#{status},#{deviceName},#{deviceType},#{onlineType},#{totallyWorkTime},#{adscriptionShop},#{adscriptionCity},#{canDelete},#{adscriptionCityArea},#{deviceDesc})
+	</insert>
+
+    <update id="editCloudDevice" parameterType="com.iwhalecloud.retail.oms.dto.CloudDeviceDTO">
+        UPDATE cloud_device
+        <set>
+            <if test="deviceType != null">
+                device_type=#{deviceType},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="adscriptionCity != null">
+                adscription_city=#{adscriptionCity},
+            </if>
+            <if test="adscriptionCityArea != null">
+                adscription_city_area=#{adscriptionCityArea},
+            </if>
+            <if test="adscriptionShop != null">
+                adscription_shop=#{adscriptionShop},
+            </if>
+            <if test="deviceDesc != null">
+                device_desc=#{deviceDesc},
+            </if>
+        </set>
+        WHERE num=#{num}
+    </update>
+
+    <update id="deleteCloudDevice" parameterType="com.iwhalecloud.retail.oms.dto.CloudDeviceDTO">
+		update cloud_device set is_deleted = 1 WHERE num=#{num}
+	</update>
+
+</mapper>

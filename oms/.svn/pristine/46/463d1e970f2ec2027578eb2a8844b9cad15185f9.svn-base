@@ -1,0 +1,48 @@
+package com.iwhalecloud.retail.oms.manager;
+
+import com.iwhalecloud.retail.oms.entity.ContentTag;
+import com.iwhalecloud.retail.oms.dto.ContentTagDTO;
+import com.iwhalecloud.retail.oms.entity.ContentTag;
+import org.springframework.stereotype.Component;
+import javax.annotation.Resource;
+import com.iwhalecloud.retail.oms.mapper.ContentTagMapper;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+
+@Component
+public class ContentTagManager{
+    @Resource
+    private ContentTagMapper contentTagMapper;
+
+    public ContentTag insertContentTag(ContentTag contentTag){
+        contentTagMapper.insert(contentTag);
+        return contentTag;
+    }
+
+    public int deleteContentTag(ContentTag contentTag){
+        Map<String,Object> contentTagMap = new HashMap<String,Object>();
+        contentTagMap.put(contentTag.getRelaId().toString(),contentTag);
+        return contentTagMapper.deleteByMap(contentTagMap);
+    }
+
+    /**
+     * 查询内容标签详情
+     * @param contentTagDTO
+     * @return
+     */
+    public List<ContentTag> queryContentTag(ContentTagDTO contentTagDTO){
+        return  contentTagMapper.queryContentTag(contentTagDTO);
+    }
+
+    /**
+     * 通过内容ID查询内容标签详情
+     * @param contentId
+     * @return
+     */
+    public List<ContentTag> queryContentTagByContentId(Long contentId){
+        return contentTagMapper.queryContentTagByContentId(contentId);
+    }
+}

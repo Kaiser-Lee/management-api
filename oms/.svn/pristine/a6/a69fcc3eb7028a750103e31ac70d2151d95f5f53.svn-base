@@ -1,0 +1,112 @@
+package com.iwhalecloud.retail.oms.service.impl;
+
+import com.iwhalecloud.retail.oms.OmsCommonConsts;
+import com.iwhalecloud.retail.oms.common.ResultCodeEnum;
+import com.iwhalecloud.retail.oms.dto.ResultVO;
+import com.iwhalecloud.retail.oms.rop.ZteRopClient;
+import com.iwhalecloud.retail.oms.service.MemberAddressService;
+import com.ztesoft.net.app.base.core.model.MemberAddress;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.alibaba.dubbo.config.annotation.Service;
+import zte.params.addr.req.MemberAddressAddReq;
+import zte.params.addr.req.MemberAddressDeleteReq;
+import zte.params.addr.req.MemberAddressEditReq;
+import zte.params.addr.req.MemberAddressListReq;
+import zte.params.addr.resp.MemberAddressAddResp;
+import zte.params.addr.resp.MemberAddressDeleteResp;
+import zte.params.addr.resp.MemberAddressEditResp;
+import zte.params.addr.resp.MemberAddressListResp;
+
+import java.util.List;
+/**
+ * @author pjq
+ * @date 2018/10/8
+ */
+@Slf4j
+@Service
+public class MemberAddressServiceImpl implements MemberAddressService {
+
+    @Autowired
+    private ZteRopClient client;
+
+    @Override
+    public ResultVO<List<MemberAddress>> listMemberAddress(MemberAddressListReq req) {
+        log.info("MemberAddressServiceImpl listMemberAddress req={} ",req);
+        MemberAddressListResp resp = null;
+        try {
+            resp = client.execute(req,MemberAddressListResp.class);
+            if(null == resp){
+                return ResultVO.error("resp is null");
+            }
+            if(ResultCodeEnum.ERROR.getCode().equals(resp.getError_code())){
+                return ResultVO.error(resp.getError_msg());
+            }
+        }catch (Exception e){
+            log.error("MemberAddressServiceImpl listMemberAddress Exception={}  ",e);
+            return ResultVO.error();
+        }
+        log.info("MemberAddressServiceImpl listMemberAddress resp={} ",resp);
+        return ResultVO.success(resp.getAddressList());
+    }
+
+    @Override
+    public ResultVO<MemberAddress> addMemeberAddress(MemberAddressAddReq req) {
+        log.info("MemberAddressServiceImpl listMemberAddress req={} ",req);
+        MemberAddressAddResp  resp = null;
+        try {
+            resp = client.execute(req,MemberAddressAddResp .class);
+            if(null == resp){
+                return ResultVO.error("resp is null");
+            }
+            if(ResultCodeEnum.ERROR.getCode().equals(resp.getError_code())){
+                return ResultVO.error(resp.getError_msg());
+            }
+        }catch (Exception e){
+            log.error("MemberAddressServiceImpl addMemeberAddress Exception={} ",e);
+            return ResultVO.error();
+        }
+        log.info("MemberAddressServiceImpl addMemeberAddress resp={} ",resp);
+        return ResultVO.success(resp.getMemberAddress());
+    }
+
+    @Override
+    public ResultVO editMemberAddress(MemberAddressEditReq req) {
+        log.info("MemberAddressServiceImpl editMemberAddress req={} ",req);
+        MemberAddressEditResp resp = null;
+        try {
+            resp = client.execute(req,MemberAddressEditResp.class);
+            if(null == resp){
+                return ResultVO.error("resp is null");
+            }
+            if(ResultCodeEnum.ERROR.getCode().equals(resp.getError_code())){
+                return ResultVO.error(resp.getError_msg());
+            }
+        }catch (Exception e){
+            log.error("MemberAddressServiceImpl editMemberAddress Exception={} ",e);
+            return ResultVO.error();
+        }
+        log.info("MemberAddressServiceImpl editMemberAddress resp={} ",resp);
+        return ResultVO.success();
+    }
+
+    @Override
+    public ResultVO deleteMemberAddress(MemberAddressDeleteReq req) {
+        log.info("MemberAddressServiceImpl deleteMemberAddress req={} ",req);
+        MemberAddressDeleteResp resp = null;
+        try {
+            resp = client.execute(req,MemberAddressDeleteResp.class);
+            if(null == resp){
+                return ResultVO.error("resp is null");
+            }
+            if(ResultCodeEnum.ERROR.getCode().equals(resp.getError_code())){
+                return ResultVO.error(resp.getError_msg());
+            }
+        }catch (Exception e){
+            log.error("MemberAddressServiceImpl deleteMemberAddress Exception={} ",e);
+            return ResultVO.error();
+        }
+        log.info("MemberAddressServiceImpl deleteMemberAddress resp={} ",resp);
+        return ResultVO.success();
+    }
+}

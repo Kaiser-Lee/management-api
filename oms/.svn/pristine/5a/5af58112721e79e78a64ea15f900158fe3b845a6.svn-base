@@ -1,0 +1,56 @@
+package com.iwhalecloud.retail.oms.dto.resquest;
+
+import com.iwhalecloud.retail.oms.dto.ContentBaseDTO;
+import com.iwhalecloud.retail.oms.dto.ContentTagDTO;
+import com.iwhalecloud.retail.oms.dto.ContentTextDTO;
+import com.iwhalecloud.retail.oms.entity.*;
+
+import java.io.Serializable;
+import java.util.List;
+import java.util.Map;
+
+public class ContentEditReq implements Serializable {
+    //内容基础信息
+    private ContentBaseDTO contentBaseDTO;
+
+    //内容标签
+    private List<ContentTagDTO> contentTagDTOList;
+
+    //软文
+    private ContentTextDTO contentTextDTO;
+
+    //素材信息
+    private List<Map<String,Object>> itemInfo;
+
+    public ContentBaseDTO getContentBaseDTO() {
+        return contentBaseDTO;
+    }
+
+    public void setContentBaseDTO(ContentBaseDTO contentBaseDTO) {
+        this.contentBaseDTO = contentBaseDTO;
+    }
+
+    public List<ContentTagDTO> getContentTagDTOList() {
+        return contentTagDTOList;
+    }
+
+    public void setContentTagDTOList(List<ContentTagDTO> contentTagDTOList) {
+        this.contentTagDTOList = contentTagDTOList;
+    }
+
+    public ContentTextDTO getContentTextDTO() {
+        return contentTextDTO;
+    }
+
+    public void setContentTextDTO(ContentTextDTO contentTextDTO) {
+        this.contentTextDTO = contentTextDTO;
+    }
+
+    public List<Map<String, Object>> getItemInfo() {
+        return itemInfo;
+    }
+
+    public void setItemInfo(List<Map<String, Object>> itemInfo) {
+        this.itemInfo = itemInfo;
+    }
+}

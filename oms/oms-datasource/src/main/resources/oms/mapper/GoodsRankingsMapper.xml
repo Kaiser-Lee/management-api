@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iwhalecloud.retail.oms.mapper.GoodsRankingsMapper">
+
+    <sql id="allFields">
+        t.ID
+        ,t.PRODUCT_ID
+        ,t.GOODS_ID
+        ,t.ORDER_ID
+        ,t.NUM
+        ,t.SESSION_ID
+        ,t.GOODS_NAME
+        ,t.MEMBER_ID
+    </sql>
+
+    <insert id="saveGoodsRankings" parameterType="com.iwhalecloud.retail.oms.entity.GoodsRankingsDO">
+		insert into R_GOODS_RANKINGS (PRODUCT_ID,GOODS_ID,ORDER_ID,NUM,SESSION_ID,GOODS_NAME,MEMBER_ID,CREATE_TIME,LAST_MODIFY)
+		 values (#{productId},#{goodsId},#{orderId},#{num},#{sessionId},#{goodsName},#{memberId},#{specId},sysdate,sysdate)
+	</insert>
+
+    <select id="listGoodsRankings" resultType="com.iwhalecloud.retail.oms.dto.ListGoodsRankingsDTO">
+        SELECT num,name
+        FROM (SELECT t1.*, ROWNUM AS rowno FROM (
+		    select sum(num) num,goods_name name
+		    from R_GOODS_RANKINGS
+		    where 1=1
+            <if test="goodsId != null and goodsId !=''">
+                and goods_id = #{goodsId}
+            </if>
+            <if test="goodsName != null and goodsName !=''">
+                and goods_name like #{goodsName}
+            </if>
+            <if test="objType != null and objType !=''">
+                and obj_type = #{objType}
+            </if>
+		    group by goods_name
+            order by num
+		    ) t1
+           WHERE ROWNUM <![CDATA[ <= ]]> #{pageSize} * #{pageIndex}) t2
+         WHERE t2.rowno <![CDATA[ > ]]> (#{pageIndex}-1)* #{pageIndex}
+	</select>
+
+</mapper>

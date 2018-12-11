@@ -1,0 +1,176 @@
+package com.iwhalecloud.retail.oms.service.impl;
+
+import com.iwhalecloud.retail.oms.common.ResultCodeEnum;
+import com.iwhalecloud.retail.oms.rop.ZteRopClient;
+import com.iwhalecloud.retail.oms.service.GoodsService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.alibaba.dubbo.config.annotation.Service;
+import zte.params.comments.req.CommentsPageListReq;
+import zte.params.comments.resp.CommentsPageListResp;
+import zte.params.goods.req.*;
+import zte.params.goods.resp.*;
+import zte.params.goodstype.req.GoodsTypeListReq;
+import zte.params.goodstype.resp.GoodsTypeListResp;
+
+/**
+ * @author mzl
+ * @date 2018/10/8
+ */
+@Slf4j
+@Service
+public class GoodsServiceImpl implements GoodsService {
+
+    @Autowired
+    private ZteRopClient client;
+
+    @Override
+    public GoodsPageListResp queryGoodsForPage(GoodsPageListReq req) {
+        log.info("GoodsServiceImpl.queryGoodsForPage req={}", req);
+        GoodsPageListResp resp;
+        try {
+            resp = client.execute(req, GoodsPageListResp.class);
+        } catch(Exception ex) {
+            log.error("GoodsServiceImpl.queryGoodsForPage Rop Invoke Exception, ex={}", ex);
+            resp = new GoodsPageListResp();
+            resp.setError_code(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getCode());
+            resp.setError_msg(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getDesc());
+        }
+        return resp;
+    }
+
+    @Override
+    public GoodsIntroResp queryGoodsDetail(GoodsIntroReq req) {
+        log.info("GoodsServiceImpl.queryGoodsDetail req={}", req);
+        GoodsIntroResp resp;
+        try {
+            resp = client.execute(req, GoodsIntroResp.class);
+        } catch (Exception ex) {
+            log.error("GoodsServiceImpl.queryGoodsDetail Rop Invoke Exception, ex={}", ex);
+            resp = new GoodsIntroResp();
+            resp.setError_code(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getCode());
+            resp.setError_msg(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getDesc());
+        }
+        return resp;
+    }
+
+    @Override
+    public CommentsPageListResp listGoodsComments(CommentsPageListReq req) {
+        log.info("GoodsServiceImpl.listGoodsComments req={}", req);
+        CommentsPageListResp resp;
+        try {
+            resp = client.execute(req, CommentsPageListResp.class);
+        } catch (Exception ex) {
+            log.error("GoodsServiceImpl.listGoodsComments Rop Invoke Exception, ex={}", ex);
+            resp = new CommentsPageListResp();
+            resp.setError_code(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getCode());
+            resp.setError_msg(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getDesc());
+        }
+        return resp;
+    }
+
+    @Override
+    public GoodsSpecListResp listGoodsSpec(GoodsSpecListReq req) {
+        log.info("GoodsServiceImpl.listGoodsSpec req={}", req);
+        GoodsSpecListResp resp;
+        try {
+            resp = client.execute(req, GoodsSpecListResp.class);
+        } catch (Exception ex) {
+            log.error("GoodsServiceImpl.listGoodsSpec Rop Invoke Exception, ex={}", ex);
+            resp = new GoodsSpecListResp();
+            resp.setError_code(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getCode());
+            resp.setError_msg(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getDesc());
+        }
+        return resp;
+    }
+
+    @Override
+    public GoodsTypeListResp getTypeList(GoodsTypeListReq req) {
+        log.info("GoodsServiceImpl.getTypeList req={}", req);
+        GoodsTypeListResp resp;
+        try {
+            resp = client.execute(req, GoodsTypeListResp.class);
+        } catch (Exception ex) {
+            log.error("GoodsServiceImpl.getTypeList Rop Invoke Exception, ex={}", ex);
+            resp = new GoodsTypeListResp();
+            resp.setError_code(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getCode());
+            resp.setError_msg(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getDesc());
+        }
+        return resp;
+    }
+
+    @Override
+    public GoodsAddResp addGoods(GoodsAddReq req) {
+        log.info("GoodsServiceImpl.addGoods req={}", req);
+        GoodsAddResp resp;
+        try {
+            resp = client.execute(req, GoodsAddResp.class);
+        } catch (Exception ex) {
+            log.error("GoodsServiceImpl.addGoods Rop Invoke Exception, ex={}", ex);
+            resp = new GoodsAddResp();
+            resp.setError_code(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getCode());
+            resp.setError_msg(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getDesc());
+        }
+        return resp;
+    }
+
+    @Override
+    public GoodsEditResp editGoods(GoodsEditReq req) {
+        log.info("GoodsServiceImpl.editGoods req={}", req);
+        GoodsEditResp resp;
+        try {
+            resp = client.execute(req, GoodsEditResp.class);
+        } catch (Exception ex) {
+            log.error("GoodsServiceImpl.editGoods Rop Invoke Exception, ex={}", ex);
+            resp = new GoodsEditResp();
+            resp.setError_code(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getCode());
+            resp.setError_msg(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getDesc());
+        }
+        return resp;
+    }
+
+    @Override
+    public GoodsDeleteResp deleteGoods(GoodsDeleteReq req) {
+        log.info("GoodsServiceImpl.deleteGoods req={}", req);
+        GoodsDeleteResp resp;
+        try {
+            resp = client.execute(req, GoodsDeleteResp.class);
+        } catch (Exception ex) {
+            log.error("GoodsServiceImpl.deleteGoods Rop Invoke Exception, ex={}", ex);
+            resp = new GoodsDeleteResp();
+            resp.setError_code(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getCode());
+            resp.setError_msg(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getDesc());
+        }
+        return resp;
+    }
+
+    @Override
+    public GoodsPageListResp queryGoodsByIdsAndName(GoodsPageByIdsReq req) {
+        log.info("GoodsServiceImpl.queryGoodsByIdsAndName req={}", req);
+        GoodsPageListResp resp;
+        try {
+            resp = client.execute(req, GoodsPageListResp.class);
+        } catch (Exception ex) {
+            log.error("GoodsServiceImpl.queryGoodsByIdsAndName Rop Invoke Exception, ex={}", ex);
+            resp = new GoodsPageListResp();
+            resp.setError_code(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getCode());
+            resp.setError_msg(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getDesc());
+        }
+        return resp;
+    }
+
+    @Override
+    public UpdateMarketEnableResp updateMarketEnable(UpdateMarketEnableReq req) {
+        log.info("GoodsServiceImpl.updateMarketEnable req={}", req);
+        UpdateMarketEnableResp resp;
+        try {
+            resp = client.execute(req, UpdateMarketEnableResp.class);
+        } catch (Exception ex) {
+            log.error("GoodsServiceImpl.updateMarketEnable Rop Invoke Exception, ex={}", ex);
+            resp = new UpdateMarketEnableResp();
+            resp.setError_code(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getCode());
+            resp.setError_msg(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getDesc());
+        }
+        return resp;
+    }
+}

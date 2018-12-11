@@ -1,0 +1,31 @@
+package com.iwhalecloud.retail.oms.manager;
+
+import com.iwhalecloud.retail.oms.dto.ShelfTemplatesDTO;
+import com.iwhalecloud.retail.oms.mapper.ShelfTemplatesMapper;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
+
+/**
+ * @Auther: lin.wh
+ * @Date: 2018/10/21 23:37
+ * @Description:
+ */
+
+@Component
+public class ShelfTemplatesManager {
+
+    @Resource
+    private ShelfTemplatesMapper shelfTemplatesMapper;
+
+    public int createShelfTemplates(ShelfTemplatesDTO dto) {
+        int t = shelfTemplatesMapper.insert(dto);
+        return t;
+    }
+
+    public int updateShelfTemplatesStatus(ShelfTemplatesDTO dto) {
+        int t = shelfTemplatesMapper.editShelfTemplates(dto);
+        return t;
+    }
+}
+

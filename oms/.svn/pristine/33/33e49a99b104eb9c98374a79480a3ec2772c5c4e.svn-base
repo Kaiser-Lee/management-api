@@ -1,0 +1,174 @@
+package com.iwhalecloud.retail.oms.web.controller.partner;
+
+import com.iwhalecloud.retail.partner.dto.req.PartnerShopListReq;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.alibaba.dubbo.config.annotation.Reference;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.iwhalecloud.retail.oms.OmsCommonConsts;
+import com.iwhalecloud.retail.oms.common.ResultCodeEnum;
+import com.iwhalecloud.retail.oms.dto.CloudShelfDTO;
+import com.iwhalecloud.retail.oms.dto.ResultVO;
+import com.iwhalecloud.retail.oms.web.controller.BaseController;
+import com.iwhalecloud.retail.partner.dto.PartnerShopDTO;
+import com.iwhalecloud.retail.partner.dto.req.PartnerShopPageReq;
+import com.iwhalecloud.retail.partner.dto.req.PartnerShopStateUpdateReq;
+import com.iwhalecloud.retail.partner.dto.req.PartnerShopUpdateReq;
+import com.iwhalecloud.retail.partner.service.PartnerShopService;
+
+import java.util.List;
+
+@RestController
+@CrossOrigin
+@RequestMapping("/api/partnerShop")
+public class PartnerShopController extends BaseController<Object> {
+	
+    @Reference
+    private PartnerShopService partnerShopService;
+
+    
+    @ApiOperation(value = "新增店铺", notes = "传入PartnerShopDTO对象，进行保存操作")
+    @ApiResponses({
+            @ApiResponse(code=400,message="请求参数没填好"),
+            @ApiResponse(code=404,message="请求路径没有或页面跳转路径不对")
+    })
+    @RequestMapping(value = "/add", method = RequestMethod.POST)
+    public ResultVO<Integer> addPartnerShop(@RequestBody @ApiParam( value = "PartnerShopDTO", required = true )PartnerShopDTO request) {
+    	
+    	if (StringUtils.isEmpty(request.getName())) {
+    		return ResultVO.error("厅店名称不能为空！");
+    	}
+    	if (StringUtils.isEmpty(request.getNetType())) {
+    		return ResultVO.error("厅店类型不能为空！");
+    	}
+        ResultVO<Integer> resultVO = new ResultVO<Integer>();
+        int resp = partnerShopService.addPartnerShop(request);
+        resultVO.setResultCode(ResultCodeEnum.SUCCESS.getCode());
+        resultVO.setResultData(resp);
+        resultVO.setResultMsg("成功");
+        return resultVO;
+    }
+
+    @ApiOperation(value = "查询店铺信息", notes = "根据店铺ID查询店铺信息")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "partnerShopId", value = "partnerShopId", paramType = "path", required = true, dataType = "String")
+    })
+    @ApiResponses({
+            @ApiResponse(code=400,message="请求参数没填好"),
+            @ApiResponse(code=404,message="请求路径没有或页面跳转路径不对")
+    })
+    @RequestMapping(value = "/get/{partnerShopId}", method = RequestMethod.GET)
+    public ResultVO<PartnerShopDTO> getPartnerShop(@PathVariable String partnerShopId) {
+//        public ResultVO<PartnerShopDTO> getPartnerShop(@PathVariable String partnerId) {
+        ResultVO<PartnerShopDTO> resultVO = new ResultVO<PartnerShopDTO>();
+    	PartnerShopDTO request = new PartnerShopDTO();
+//        request.setPartnerId(partnerId);
+        request.setPartnerShopId(partnerShopId);
+        PartnerShopDTO dto = partnerShopService.getPartnerShop(request);
+        resultVO.setResultCode(ResultCodeEnum.SUCCESS.getCode());
+        
+        resultVO.setResultData(dto);
+        resultVO.setResultMsg("成功");
+        return resultVO;
+    }
+
+    @ApiOperation(value = "修改店铺信息", notes = "根据partnerId修改店铺信息")
+    @ApiResponses({
+            @ApiResponse(code=400,message="请求参数没填好"),
+            @ApiResponse(code=404,message="请求路径没有或页面跳转路径不对")
+    })
+    @RequestMapping(value = "/update", method = RequestMethod.PUT)
+    public ResultVO<Integer> updatePartnerShopDTO(@RequestBody PartnerShopUpdateReq req) {
+    	if (StringUtils.isEmpty(req.getName())) {
+    		return ResultVO.error("厅店名称不能为空！");
+    	}
+    	if (StringUtils.isEmpty(req.getNetType())) {
+    		return ResultVO.error("厅店类型不能为空！");
+    	}
+//    	if (StringUtils.isEmpty(req.getPartnerId())) {
+//    		return ResultVO.error("厅店ID不能为空！");
+//    	}
+        if (StringUtils.isEmpty(req.getPartnerShopId())) {
+            return ResultVO.error("厅店ID不能为空！");
+        }
+    	
+        ResultVO<Integer> resultVO = new ResultVO<Integer>();
+        int resp = partnerShopService.updatePartnerShop(req);
+        resultVO.setResultCode(ResultCodeEnum.SUCCESS.getCode());
+        resultVO.setResultData(resp);
+        resultVO.setResultMsg("成功");
+        return resultVO;
+    }
+    
+    @ApiOperation(value = "修改店铺状态", notes = "根据分销商ID修改店铺状态")
+    @ApiResponses({
+            @ApiResponse(code=400,message="请求参数没填好"),
+            @ApiResponse(code=404,message="请求路径没有或页面跳转路径不对")
+    })
+    @RequestMapping(value = "/updateState", method = RequestMethod.PUT)
+    public ResultVO<Integer> updatePartnerShopStateO(@RequestBody PartnerShopStateUpdateReq req) {
+        if (StringUtils.isEmpty(req.getPartnerShopId())) {
+            return ResultVO.error("厅店ID不能为空！");
+        }
+        ResultVO<Integer> resultVO = new ResultVO<Integer>();
+        int resp = partnerShopService.updatePartnerShopState(req);
+        resultVO.setResultCode(ResultCodeEnum.SUCCESS.getCode());
+        resultVO.setResultData(resp);
+        resultVO.setResultMsg("成功");
+        return resultVO;
+    }
+
+    @ApiOperation(value = "查询店铺列表", notes = "根据参数查询店铺列表")
+    @ApiResponses({
+            @ApiResponse(code=400,message="请求参数没填好"),
+            @ApiResponse(code=404,message="请求路径没有或页面跳转路径不对")
+    })
+    @RequestMapping(value = "/listShop", method = RequestMethod.POST)
+    public ResultVO<List<PartnerShopDTO>> listShop(@RequestBody PartnerShopListReq req) {
+        ResultVO<List<PartnerShopDTO>> resultVO = new ResultVO();
+        try {
+            List<PartnerShopDTO> list = partnerShopService.listShop(req);
+            resultVO.setResultCode(ResultCodeEnum.SUCCESS.getCode());
+            resultVO.setResultData(list);
+            resultVO.setResultMsg("成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO.setResultCode(ResultCodeEnum.ERROR.getCode());
+            resultVO.setResultMsg(e.getMessage());
+        }
+        return resultVO;
+    }
+    
+    @ApiOperation(value = "查询厅店", notes = "查询厅店")
+    @ApiResponses({
+            @ApiResponse(code=400,message="请求参数没填好"),
+            @ApiResponse(code=404,message="请求路径没有或页面跳转路径不对")
+    })
+    @RequestMapping(value = "/query", method = RequestMethod.POST)
+    public ResultVO<Page<PartnerShopDTO>> queryPartnerShop(@RequestBody PartnerShopPageReq req) {
+    	
+    	ResultVO<Page<PartnerShopDTO>> resultVO = new ResultVO<Page<PartnerShopDTO>>();
+    	Page<PartnerShopDTO> partnerShops = partnerShopService.queryPartnerShop(req);
+        resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+        resultVO.setResultMsg("成功");
+        resultVO.setResultData(partnerShops);
+        
+        return resultVO;
+    }
+    
+    
+}

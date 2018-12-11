@@ -1,0 +1,28 @@
+package com.iwhalecloud.retail.oms.service;
+
+import com.iwhalecloud.retail.oms.dto.ShelfTemplatesDTO;
+
+
+/**
+ * @Auther: lin.wh
+ * @Date: 2018/10/16
+ * @Description: 云货架模版
+ */
+public interface ShelfTemplatesService {
+
+    /**
+     * 添加
+     *
+     * @param dto
+     * @return
+     */
+    int createShelfTemplates(ShelfTemplatesDTO dto);
+
+    /**
+     * 修改
+     *
+     * @param dto
+     * @return
+     */
+    int updateShelfTemplatesStatus(ShelfTemplatesDTO dto);
+}

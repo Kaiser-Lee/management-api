@@ -1,0 +1,49 @@
+package com.iwhalecloud.retail.oms.service.impl;
+
+import com.alibaba.dubbo.config.annotation.Service;
+import com.iwhalecloud.retail.oms.manager.EventOperationDeskManager;
+import com.iwhalecloud.retail.oms.service.EventOperationDeskService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+@Slf4j
+@Service
+public class EventOperationDeskServiceImpl implements EventOperationDeskService {
+
+    @Autowired
+    private EventOperationDeskManager eventOperationDeskManager;
+
+    @Override
+    public int getTodayEventCountByPartnerId(String partnerId, String eventCode) {
+        return eventOperationDeskManager.getTodayEventCountByPartnerId(partnerId, eventCode);
+    }
+
+    @Override
+    public int getTodayEventCountByArea(String adscriptionCity, String eventCode){
+        return eventOperationDeskManager.getTodayEventCountByArea(adscriptionCity,eventCode);
+    }
+
+    @Override
+    public List<Map<String,Object>> getShopVisitVolumeRankByArea(String adscriptionCity, Date beginTime, Date endTime){
+        return eventOperationDeskManager.getShopVisitVolumeRankByArea(adscriptionCity,beginTime, endTime);
+    }
+
+    @Override
+    public  List<Map<String,Object>> getShopWorkTimeRankByArea(String adscriptionCity,Date beginTime,Date endTime) {
+        return eventOperationDeskManager.getShopWorkTimeRankByArea(adscriptionCity,beginTime, endTime);
+    }
+
+    @Override
+    public List<Map<String, Object>> getTimeIntervalVisitByArea(String adscriptionCity, Date beginTime, Date endTime) {
+        return eventOperationDeskManager.getTimeIntervalVisitByArea(adscriptionCity,beginTime, endTime);
+    }
+
+    @Override
+    public List<Map<String, Object>> getOnOffLineTimeAboutDevice(String adscriptionCity, Date beginTime, Date endTime) throws Exception{
+        return eventOperationDeskManager.getOnOffLineTimeAboutDevice(adscriptionCity,beginTime, endTime);
+    }
+}

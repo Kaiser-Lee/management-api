@@ -1,0 +1,54 @@
+project:
+  name: 本机环境
+
+server:
+  port: 8081
+
+spring:
+  dubbo:
+    application:
+      name: order-provider
+    registry:
+      #address: zookeeper://10.45.47.90:2121
+      address: zookeeper://localhost:2181
+    protocol:
+      name: dubbo
+      port: 20880
+    scan: com.iwhalecloud.retail
+  redis:
+    database: 0
+    host: 127.0.0.1
+    port: 6379
+    clusterNodes: 10.45.47.129:7021,10.45.47.129:7022,10.45.47.129:7023,10.45.47.129:7024,10.45.47.129:7025,10.45.47.129:7026
+    expireSeconds: 120
+    commandTimeout: 10000  #redis操作的超时时间
+    pool:
+      max-active: 600
+      max-idle: 300
+      max-wait: 1000
+      min-idle: 5
+
+jmx:
+  enabled: false
+
+rop:
+  #platUrl: http://10.45.47.90:7003/router
+  #zfUrl: http://10.45.47.90:7003/router
+  platUrl: http://127.0.0.1:8080/router
+  zfUrl: http://127.0.0.1:8080/router
+
+
+spring.datasource:
+#  driver-class-name: com.mysql.jdbc.Driver
+#  url: jdbc:mysql://10.45.47.88:3306/retail
+#  username: retail
+#  password: retail123
+
+  driver-class-name: oracle.jdbc.driver.OracleDriver
+  url: jdbc:oracle:thin:@10.45.47.87:1521:orcl
+  username: OMS
+  password: OMS
+
+# 分布式文件系统FDFS配置
+fdfs:
+  showUrl: https://gy.ztesoft.com/

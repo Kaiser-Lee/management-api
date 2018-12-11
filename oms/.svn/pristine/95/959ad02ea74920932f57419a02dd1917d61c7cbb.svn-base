@@ -1,0 +1,37 @@
+package com.iwhalecloud.retail.oms.service.impl;
+
+import com.iwhalecloud.retail.oms.common.ResultCodeEnum;
+import com.iwhalecloud.retail.oms.rop.ZteRopClient;
+import com.iwhalecloud.retail.oms.service.GoodsTagsService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.alibaba.dubbo.config.annotation.Service;
+import zte.params.tags.req.TagListReq;
+import zte.params.tags.resp.TagListResp;
+
+/**
+ * @author mzl
+ * @date 2018/10/26
+ */
+@Slf4j
+@Service
+public class GoodsTagsServiceImpl implements GoodsTagsService {
+
+    @Autowired
+    private ZteRopClient client;
+
+    @Override
+    public TagListResp listTag() {
+        TagListReq req = new TagListReq();
+        TagListResp resp;
+        try {
+            resp = client.execute(req, TagListResp.class);
+        } catch(Exception ex) {
+            log.error("GoodsTagsServiceImpl.listTag Rop Invoke Exception, ex={}", ex);
+            resp = new TagListResp();
+            resp.setError_code(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getCode());
+            resp.setError_msg(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getDesc());
+        }
+        return resp;
+    }
+}

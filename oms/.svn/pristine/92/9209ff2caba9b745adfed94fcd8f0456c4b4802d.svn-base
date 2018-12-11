@@ -1,0 +1,93 @@
+package com.iwhalecloud.retail.oms.web.controller.cms;
+
+import java.util.List;
+
+import javax.annotation.Resource;
+
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.web.bind.annotation.*;
+
+import com.alibaba.dubbo.config.annotation.Reference;
+import com.iwhalecloud.retail.oms.OmsCommonConsts;
+import com.iwhalecloud.retail.oms.dto.CataLogDTO;
+import com.iwhalecloud.retail.oms.dto.ResultVO;
+import com.iwhalecloud.retail.oms.dto.SelectTagListDTO;
+import com.iwhalecloud.retail.oms.service.ContentMenuService;
+
+/**
+ * @Auther: lin.wh
+ * @Date: 2018/10/25 11:26
+ * @Description:
+ */
+
+@RestController
+@RequestMapping("/api/contentMenu")
+public class ContentMenuController {
+	@Reference
+    private ContentMenuService contentMenuService;
+
+    @RequestMapping(value = "/createContentMenu", method = RequestMethod.POST)
+    public ResultVO createContentMenu(@RequestBody CataLogDTO dto) {
+        ResultVO resultVO = new ResultVO();
+        try {
+            contentMenuService.createContentMenu(dto);
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+            resultVO.setResultData("新增成功");
+            resultVO.setResultMsg("success");
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultData(e.getMessage());
+        }
+        return resultVO;
+    }
+
+    @RequestMapping(value = "deleteContentMenu", method = RequestMethod.DELETE)
+    public ResultVO deleteContentMenu(@RequestBody CataLogDTO dto) {
+        ResultVO resultVO = new ResultVO();
+        try {
+            contentMenuService.deleteContentMenu(dto);
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+            resultVO.setResultData("删除成功");
+            resultVO.setResultMsg("success");
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultData(e.getMessage());
+        }
+        return resultVO;
+    }
+
+    @RequestMapping(value = "/editContentMenu", method = RequestMethod.PUT)
+    public ResultVO editContentMenu(@RequestBody CataLogDTO dto) {
+        ResultVO resultVO = new ResultVO();
+        try {
+            contentMenuService.editContentMenu(dto);
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+            resultVO.setResultData("修改成功");
+            resultVO.setResultMsg("success");
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultData(e.getMessage());
+        }
+        return resultVO;
+    }
+    @RequestMapping(value = "/queryContentMenuList/{catalogId}", method = RequestMethod.GET)
+    public ResultVO<List<SelectTagListDTO>> queryContentMenuList(@PathVariable int catalogId) {
+        ResultVO resultVO = new ResultVO();
+        try {
+            List<CataLogDTO> cataLogDTO = contentMenuService.queryContentMenuList(catalogId);
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+            resultVO.setResultData(cataLogDTO);
+            resultVO.setResultMsg("success");
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultData(e.getMessage());
+        }
+        return resultVO;
+    }
+}
+

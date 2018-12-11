@@ -1,0 +1,144 @@
+package com.iwhalecloud.retail.oms.service.impl;
+
+import com.alibaba.dubbo.config.annotation.Service;
+import com.iwhalecloud.retail.oms.OmsCommonConsts;
+import com.iwhalecloud.retail.oms.consts.OmsConst;
+import com.iwhalecloud.retail.oms.dto.*;
+import com.iwhalecloud.retail.oms.dto.resquest.cloud.CloudShelfDetailModifyReq;
+import com.iwhalecloud.retail.oms.dto.resquest.cloud.CloudShelfDetailReq;
+import com.iwhalecloud.retail.oms.dto.resquest.cloud.CloudShelfDetailResetReq;
+import com.iwhalecloud.retail.oms.dto.resquest.cloud.OperatingPositionBindReq;
+import com.iwhalecloud.retail.oms.entity.CloudShelfDetail;
+import com.iwhalecloud.retail.oms.entity.ContentBase;
+import com.iwhalecloud.retail.oms.entity.OperatingPositionBind;
+import com.iwhalecloud.retail.oms.manager.*;
+import com.iwhalecloud.retail.oms.exception.BaseException;
+import com.iwhalecloud.retail.oms.manager.CloudShelfDetailManager;
+import com.iwhalecloud.retail.oms.manager.ContentBaseManager;
+import com.iwhalecloud.retail.oms.manager.DefaultContentManager;
+import com.iwhalecloud.retail.oms.manager.DefaultOperatingManager;
+import com.iwhalecloud.retail.oms.manager.OperatingPositionBindManager;
+import com.iwhalecloud.retail.oms.service.CloudShelfDetailService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+@Slf4j
+@Service
+public class CloudShelfDetailServiceImpl implements CloudShelfDetailService {
+
+    @Autowired
+    private CloudShelfDetailManager cloudShelfDetailManager;
+
+    @Autowired
+    private DefaultOperatingManager defaultOperatingManager;
+
+    @Autowired
+    private DefaultContentManager defaultContentManager;
+
+    @Autowired
+    private ContentBaseManager contentBaseManager;
+
+    @Autowired
+    private OperatingPositionBindManager operationPositionManager;
+
+    @Autowired
+    private ShelfDetailManager ShelfDetailManager;
+
+    @Override
+    @Transactional
+    public List<CloudShelfDetailDTO> resetCloudShelfDetail(CloudShelfDetailResetReq req, String userId) throws Exception {
+        List<CloudShelfDetailDTO> cloudShelfDetailDTOS = new ArrayList<>();
+        List<CloudShelfDetail> cloudShelfDetails = cloudShelfDetailManager.qryListByIds(req.getCloudShelfDetailIds());
+        for (CloudShelfDetail cloudShelfDetail : cloudShelfDetails)
+        {
+            //重置云货架栏目相关信息
+            DefaultOperatingDTO defaultOperation = defaultOperatingManager.qryDefaultOperation(cloudShelfDetail.getShelfCategoryId());
+            if(defaultOperation == null)
+            {
+                throw new BaseException("未能找到货架栏目【"+cloudShelfDetail.getId()+"】所属的类目信息", "-1");
+            }
+            cloudShelfDetail.setOperatingPositionAdscription(defaultOperation.getOperatingPositionAdscription());
+            cloudShelfDetail.setOperatingPositionExpiryTime(defaultOperation.getOperatingPositionExpiryTime());
+            cloudShelfDetail.setOperatingPositionName(defaultOperation.getOperatingPositionName());
+            cloudShelfDetail.setOperatingPositionPlayMode(defaultOperation.getOperatingPositionPlayMode());
+            cloudShelfDetail.setOperatingPositionProperty(defaultOperation.getOperatingPositionProperty());
+            cloudShelfDetail.setOperatingPositionType(defaultOperation.getOperatingPositionType());
+            cloudShelfDetail.setModifier(userId);
+            cloudShelfDetail.setGmtModified(new Date());
+            cloudShelfDetailManager.update(cloudShelfDetail);
+            CloudShelfDetailDTO cloudShelfDetailDTO = new CloudShelfDetailDTO();
+            BeanUtils.copyProperties(cloudShelfDetail, cloudShelfDetailDTO);
+
+            //新增内容
+            DefaultContentDTO defaultContentDTO = defaultContentManager.selectById(defaultOperation.getDefaultContentId());
+            ContentBase contentBase = new ContentBase();
+            contentBase.setTitle(defaultContentDTO.getContentTittle());
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            contentBase.setEffDate(new Date());
+            contentBase.setExpDate(sdf.parse("2199-12-12"));
+            contentBase.setUpdDate(new Date());
+            contentBaseManager.insertContentBase(contentBase);
+            ContentBaseDTO contentBaseDTO = new ContentBaseDTO();
+            BeanUtils.copyProperties(contentBase, contentBaseDTO);
+
+            //重置云货架栏目关联内容相关信息
+            operationPositionManager.delete(cloudShelfDetail.getOperatingPositionId());
+            OperatingPositionBind operatingPositionBind = new OperatingPositionBind();
+            operatingPositionBind.setOperatingPositionId(cloudShelfDetail.getOperatingPositionId());
+            operatingPositionBind.setContentNumber(contentBase.getContentId().toString());
+            operatingPositionBind.setCreator(userId);
+            operatingPositionBind.setModifier(userId);
+            operatingPositionBind.setIsDeleted(OmsConst.IsDeleted.NOT_DELETED.getCode());
+            operationPositionManager.insert(operatingPositionBind);
+            OperatingPositionBindDTO operatingPositionBindDTO = new OperatingPositionBindDTO();
+            BeanUtils.copyProperties(operatingPositionBind, operatingPositionBindDTO);
+
+            operatingPositionBindDTO.setContentBase(contentBaseDTO);
+            cloudShelfDetailDTO.setOperatingPositionBindDTO(operatingPositionBindDTO);
+            cloudShelfDetailDTOS.add(cloudShelfDetailDTO);
+        }
+        return cloudShelfDetailDTOS;
+    }
+
+    /**
+     * 接口逻辑：
+     * 更新云货架详情信息，更新云货架关联内容模型
+     * @param cloudShelfDetailModifyReq
+     * @return
+     */
+    @Override
+    @Transactional
+    public ResultVO modifyCloudShelfDetailByParam(CloudShelfDetailModifyReq cloudShelfDetailModifyReq) {
+        ResultVO resultVO = new ResultVO();
+        log.info("CloudShelfDetailServiceImpl modifyCloudShelfDetailByParam cloudShelfDetailModifyReq={} ",cloudShelfDetailModifyReq);
+        try {
+            List<CloudShelfDetailReq>  cloudShelfDetailReqs = cloudShelfDetailModifyReq.getDetails();
+            List<OperatingPositionBindReq>  allOperatingPositionBindReqs = new ArrayList<OperatingPositionBindReq>();
+            if(cloudShelfDetailReqs.size()>0){
+                for (int i = 0; i < cloudShelfDetailReqs.size(); i++) {
+                    List<OperatingPositionBindReq>  operatingPositionBindReqs = cloudShelfDetailReqs.get(i).getOperatingPositionBind();
+                    allOperatingPositionBindReqs.addAll(operatingPositionBindReqs);
+                }
+                if(allOperatingPositionBindReqs.size()>0){
+                    operationPositionManager.batchUpdateOperatingPositionBind(allOperatingPositionBindReqs);
+                }
+                resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+                resultVO.setResultData("更新成功");
+                resultVO.setResultMsg("success");
+            }
+        }catch (Exception e) {
+            log.info("CloudShelfDetailServiceImpl modifyCloudShelfDetailByParam Exception={} ",e);
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultData(e.getMessage());
+        }
+        return resultVO;
+    }
+
+}

@@ -1,0 +1,800 @@
+package com.iwhalecloud.retail.oms.web.controller.rop;
+
+import com.alibaba.dubbo.config.annotation.Reference;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.Claim;
+import com.google.common.collect.Maps;
+import com.iwhalecloud.retail.oms.consts.OmsConst;
+import com.iwhalecloud.retail.oms.dto.resquest.AdminUserEditRequestDTO;
+import com.iwhalecloud.retail.oms.web.annotation.PassToken;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import params.adminuser.req.*;
+import params.member.req.MemberListQryPageReq;
+import params.member.resp.MemberQryResp;
+import utils.MD5Util;
+import zte.params.member.resp.MemberLoginResp;
+
+import com.alibaba.dubbo.config.annotation.Reference;
+import com.iwhalecloud.retail.oms.OmsCommonConsts;
+import com.iwhalecloud.retail.oms.common.ResultCodeEnum;
+import com.iwhalecloud.retail.oms.consts.OmsConst;
+import com.iwhalecloud.retail.oms.dto.ResultVO;
+import com.iwhalecloud.retail.oms.dto.resquest.AdminUserAddRequestDTO;
+import com.iwhalecloud.retail.oms.dto.resquest.AdminUserEditRequestDTO;
+import com.iwhalecloud.retail.oms.dto.resquest.order.RoleAddRequestDTO;
+import com.iwhalecloud.retail.oms.service.SystemService;
+import com.iwhalecloud.retail.oms.service.TokenService;
+import com.iwhalecloud.retail.oms.web.annotation.PassToken;
+import com.iwhalecloud.retail.oms.web.annotation.UserLoginToken;
+import com.iwhalecloud.retail.oms.web.controller.BaseController;
+import com.iwhalecloud.retail.oms.web.interceptor.UserContext;
+import com.ztesoft.form.util.StringUtil;
+import com.ztesoft.net.app.base.core.model.Role;
+import com.ztesoft.net.eop.resource.model.AdminUser;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import params.adminuser.resp.AdminAddResp;
+import params.adminuser.resp.AdminEditUserResp;
+import params.adminuser.resp.AdminSetStatusResp;
+import params.adminuser.resp.AdminUserDelResp;
+import params.adminuser.resp.AdminUserRolePageResp;
+import params.adminuser.resp.AuthListResp;
+import params.adminuser.resp.AuthResp;
+import params.adminuser.resp.RoleAddResp;
+import params.adminuser.resp.RoleDelResp;
+import params.adminuser.resp.RoleListResp;
+import params.adminuser.resp.RolePageResp;
+import params.adminuser.resp.UserPermissionResp;
+import params.adminuser.resp.UserWdLoginResp;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.Map;
+
+@Slf4j
+@RestController
+@RequestMapping("/api/rop/system")
+public class SystemROPController extends BaseController {
+
+    @Value("${jwt.secret}")
+    private String SECRET;
+    @Reference
+    private SystemService systemService;
+    @Reference
+    private TokenService tokenService;
+
+    /**
+     * 管理员登陆（电商的微店登陆）
+     * @param req
+     * @return
+     */
+    @ApiOperation(value = "系统员工登陆", notes = "传入UserWdLoginReq对象，进行系统用户登陆操作")
+    @ApiResponses({
+            @ApiResponse(code=400,message="请求参数没填好"),
+            @ApiResponse(code=404,message="请求路径没有或页面跳转路径不对")
+    })
+    @RequestMapping(value = "/userWdLogin", method = RequestMethod.POST)
+    public ResultVO<UserWdLoginResp> userWdLogin(@RequestBody @ApiParam(value = "UserWdLoginReq", required = true) UserWdLoginReq req) {
+
+        if (StringUtil.isEmpty(req.getUsername())) {
+            return resultVO(OmsCommonConsts.RESULE_CODE_FAIL, "username不能为空", null);
+        }
+        if (StringUtil.isEmpty(req.getPassword())) {
+            return resultVO(OmsCommonConsts.RESULE_CODE_FAIL, "password不能为空", null);
+        }
+        UserWdLoginResp resp = systemService.userWdLogin(req);
+
+        // 失败统一返回
+//        if (!resp.getError_code().equals(OmsCommonConsts.RESULE_CODE_SUCCESS)) {
+//            return ResultVO.error("登陆失败,账号或密码不正确!");
+//        }
+        if (!resp.getError_code().equals(OmsCommonConsts.RESULE_CODE_SUCCESS)) {
+            return ResultVO.error(resp.getError_msg());
+        }
+
+        ResultVO resultVO = new ResultVO();
+        resultVO.setResultCode(resp.getError_code());
+        resultVO.setResultMsg(resp.getError_msg());
+        resultVO.setResultData(resp);
+        Map objMap = new HashMap();
+        UserContext.setAdminUser(resp.getAdminUser());
+        objMap.put("adminUser", resp.getAdminUser());
+        objMap.put("userMenu", resp.getUserMenu());
+        objMap.put("userSessionId", resp.getUserSessionId());
+        try {
+            objMap.put("token", tokenService.getUserToken(resp.getAdminUser().getUserid(), resp.getUserSessionId()));
+        } catch (Exception e) {
+            objMap.put("token", "");
+        }
+
+        resultVO.setResultData(objMap);
+        return resultVO;
+    }
+
+
+    /**
+     * 获取系统用户信息（外层都返回成功，是否登陆在resultData字段里面返回）
+     * 不用token拦截啦，这里本身要做token校验啦（方便统一返回）
+     * @param request
+     * @return
+     */
+    @ApiOperation(value = "根据token获取系统用户信息", notes = "把token放进请求头部，键值对 token: token字符串 ")
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "请求参数没填好"),
+            @ApiResponse(code = 404, message = "请求路径没有或页面跳转路径不对")
+    })
+    @RequestMapping(value="/getUser",method = RequestMethod.GET)
+    @PassToken
+    public ResultVO getUser(HttpServletRequest request) {
+        ResultVO checkUserLoginResult = checkUserLogin(request);
+        Map objMap = Maps.newConcurrentMap();
+        if (!checkUserLoginResult.isSuccess()) {
+            // 验证码失败返回
+//			return checkUserLoginResult;
+            objMap.put("adminUser", ""); // 注意不能用null代替""，不然会报空指针的
+            objMap.put("loginStatusCode", OmsConst.loginStatusEnum.NOT_LOGIN.getCode());
+            objMap.put("loginStatusMsg", OmsConst.loginStatusEnum.NOT_LOGIN.getValue());
+            return ResultVO.success(objMap);
+        }
+        AdminUser adminUser = (AdminUser)request.getSession().getAttribute(OmsConst.SESSION_USER);
+        if (adminUser == null) {
+            String userId = (String) checkUserLoginResult.getResultData();
+            adminUser = systemService.getAdminById(userId);
+
+            request.getSession().setAttribute(OmsConst.SESSION_USER, adminUser);
+        }
+        objMap.put("adminUser", adminUser);
+        objMap.put("loginStatusCode", OmsConst.loginStatusEnum.HAVE_LOGIN.getCode());
+        objMap.put("loginStatusMsg", OmsConst.loginStatusEnum.HAVE_LOGIN.getValue());
+        return ResultVO.success(objMap);
+    }
+
+    /**
+     * 判断用户是否登陆  登陆：返回 用户ID： userId
+     * @param request
+     * @return
+     */
+    private ResultVO checkUserLogin(HttpServletRequest request) {
+        // 从 http 请求头中取出  token
+        String token = request.getHeader("token");
+        // 如果http请求头没有token则尝试从session中获取
+        if (StringUtil.isEmpty(token)) {
+            token = (String)request.getSession().getAttribute("TOKEN");
+        }
+        // 判空
+        if (StringUtil.isEmpty(token)) {
+            return ResultVO.errorEnum(ResultCodeEnum.NOT_LOGIN);
+        }
+        if (token == null || token.equals("")) {
+            return ResultVO.errorEnum(ResultCodeEnum.NOT_LOGIN);
+        }
+        // 执行认证
+        String id;
+        try {
+            Map<String, Claim> claims = JWT.decode(token).getClaims();
+            id = claims.get("id").asString();
+            if (id == null) {
+                return ResultVO.errorEnum(ResultCodeEnum.NOT_LOGIN);
+            }
+            String sessionId = claims.get("sessionId").asString();
+            int exp = claims.get("exp").asInt();
+            int iat = claims.get("iat").asInt();
+            String selfToken = claims.get("selfToken").asString();
+            if(!selfToken.equals(MD5Util.compute("id="+id+"&sessionId="+sessionId+"&secret="+SECRET+"&exp="+String.valueOf(exp)+"&iat="+String.valueOf(iat)))){
+                return ResultVO.errorEnum(ResultCodeEnum.NOT_LOGIN);
+            }
+        } catch (Exception ex) {
+            log.error("MemberController.getMemberToken Exception ex={}",ex);
+            return ResultVO.errorEnum(ResultCodeEnum.NOT_LOGIN);
+        }
+        // 验证token
+        JWTVerifier jwtVerifier = JWT.require(Algorithm.HMAC256(SECRET)).build();
+        try {
+            jwtVerifier.verify(token);
+        } catch (JWTVerificationException e) {
+            return ResultVO.errorEnum(ResultCodeEnum.NOT_LOGIN);
+        }
+        return ResultVO.success(id);
+    }
+
+
+    /**
+     * 查询会员列表
+     *
+     * @param request
+     * @param req     查询条件
+     * @return
+     */
+    @ApiOperation(value = "查询会员分页列表", notes = "传入MemberListQryPageReq对象，进行查询操作")
+    @ApiResponses({
+            @ApiResponse(code=400,message="请求参数没填好"),
+            @ApiResponse(code=404,message="请求路径没有或页面跳转路径不对")
+    })
+    @RequestMapping(value = "/qryMemberList", method = RequestMethod.POST)
+    @UserLoginToken
+    public ResultVO memberList(HttpServletRequest request, @RequestBody MemberListQryPageReq req) {
+
+        MemberQryResp resp = systemService.qryMemberListPage(req);
+
+        ResultVO resultVO = new ResultVO();
+        resultVO.setResultCode(resp.getError_code());
+        resultVO.setResultMsg(resp.getError_msg());
+        resultVO.setResultData(resp.getMemberPage());
+
+        return resultVO;
+    }
+
+    /**
+     * 获取用户列表（带角色）
+     *
+     * @param userName 用户名
+     * @return
+     */
+    @ApiOperation(value = "获取用户列表（带角色）", notes = "可以根据用户账号、姓名、ID 条件进行筛选查询")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "userSessionId", value = "userSessionId", paramType = "path", required = false, dataType = "String"),
+            @ApiImplicitParam(name = "userName", value = "userName", paramType = "path", required = false, dataType = "String"),
+            @ApiImplicitParam(name = "realName", value = "realName", paramType = "path", required = false, dataType = "String"),
+            @ApiImplicitParam(name = "userId", value = "userId", paramType = "path", required = false, dataType = "String"),
+            @ApiImplicitParam(name = "pageSize", value = "pageSize", paramType = "path", required = true, dataType = "Integer"),
+            @ApiImplicitParam(name = "pageNo", value = "pageNo", paramType = "path", required = true, dataType = "Integer"),
+    })
+    @ApiResponses({
+            @ApiResponse(code=400,message="请求参数没填好"),
+            @ApiResponse(code=404,message="请求路径没有或页面跳转路径不对")
+    })
+    @RequestMapping(value = "/getAdminListWithRole", method = RequestMethod.GET)
+    public ResultVO<MemberLoginResp> getAdminListWithRole(
+            @RequestParam(value = "userSessionId", required = true) String userSessionId,
+            @RequestParam(value = "userName", required = false) String userName,
+            @RequestParam(value = "realName", required = false) String realName,
+            @RequestParam(value = "userId", required = false) String userId,
+            @RequestParam(value = "pageSize", required = true) Integer pageSize,
+            @RequestParam(value = "pageNo", required = true) Integer pageNo
+    ) {
+
+        AdminUserRolePageReq req = new AdminUserRolePageReq();
+        req.setUserSessionId(userSessionId);
+        req.setUsername(userName);
+        req.setUserid(userId);
+        req.setRealname(realName);
+        req.setPageNo(pageNo.toString());
+        req.setPageSize(pageSize.toString());
+
+        AdminUserRolePageResp resp = systemService.getAdminListWithRole(req);
+
+        // 失败统一返回
+        if (!resp.getError_code().equals(OmsCommonConsts.RESULE_CODE_SUCCESS)) {
+            return ResultVO.error("获取用户列表失败!");
+        }
+
+        ResultVO resultVO = new ResultVO();
+        resultVO.setResultCode(ResultCodeEnum.SUCCESS.getCode());
+        resultVO.setResultMsg(ResultCodeEnum.SUCCESS.getDesc());
+//        resultVO.setResultData(resp);
+        resultVO.setResultData(resp.getWebPage());
+//        Map objMap = new HashMap();
+//        objMap.put("adminList", resp.getWebPage());
+//        resultVO.setResultData(objMap);
+        return resultVO;
+    }
+
+    /**
+     * 添加用户(先根据userName字段去查询有没有这个字段值的账号，没有才能注册）
+     *
+     * @param adminUserAddRequestDTO
+     * @return
+     */
+    @ApiOperation(value = "添加系统员工", notes = "传入AdminUserAddRequestDTO对象，进行添加操作")
+    @ApiResponses({
+            @ApiResponse(code=400,message="请求参数没填好"),
+            @ApiResponse(code=404,message="请求路径没有或页面跳转路径不对")
+    })
+    @RequestMapping(value = "/addAdminUser", method = RequestMethod.POST)
+    public ResultVO<AdminAddResp> addAdminUser(@RequestBody AdminUserAddRequestDTO adminUserAddRequestDTO) {
+
+        if (StringUtil.isEmpty(adminUserAddRequestDTO.getUserName())) {
+            return resultVO(OmsCommonConsts.RESULE_CODE_FAIL, "账号不能为空", null);
+        }
+        if (StringUtil.isEmpty(adminUserAddRequestDTO.getPassWord())) {
+            return resultVO(OmsCommonConsts.RESULE_CODE_FAIL, "密码不能为空", null);
+        }
+        if (StringUtil.isEmpty(adminUserAddRequestDTO.getUserSessionId())) {
+            return resultVO(OmsCommonConsts.RESULE_CODE_FAIL, "sessionId不能为空", null);
+        }
+
+        // 检查是否存在同名账号
+        AdminUser oldAdminUser = systemService.getAdminByUserName(adminUserAddRequestDTO.getUserName());
+        if(oldAdminUser != null){
+            return resultVO(OmsCommonConsts.RESULE_CODE_FAIL, "该账号已经存在，请换一个账号名", null);
+        }
+
+        AdminAddReq req = new AdminAddReq();
+        AdminUser adminUser = new AdminUser();
+        adminUser.setState(1);// 默认可用  0：不可用  1：可用
+        adminUser.setFounder(OmsConst.CURR_FOUNDER1); // TODO 先写死  后面待确认
+        adminUser.setUsername(adminUserAddRequestDTO.getUserName());
+        adminUser.setRealname(adminUserAddRequestDTO.getRealName());
+        adminUser.setPassword(adminUserAddRequestDTO.getPassWord());
+        adminUser.setParuserid(adminUserAddRequestDTO.getParentUserId());
+        adminUser.setRoleids(adminUserAddRequestDTO.getRoleIds());
+        req.setAdminUser(adminUser);
+        req.setUserSessionId(adminUserAddRequestDTO.getUserSessionId());
+        AdminAddResp resp = systemService.addAdmin(req);
+
+        // 失败统一返回
+        if (!resp.getError_code().equals(OmsCommonConsts.RESULE_CODE_SUCCESS)) {
+            return ResultVO.error("登陆失败,账号或密码不正确!");
+        }
+
+        ResultVO resultVO = new ResultVO();
+        resultVO.setResultCode(resp.getError_code());
+        resultVO.setResultMsg(resp.getError_msg());
+        resultVO.setResultData(resp);
+        return resultVO;
+    }
+
+    /**
+     * 设置用户状态
+     * @param req
+     * @return
+     */
+    @ApiOperation(value = "设置用户状态", notes = "传入AdminSetStatusReq对象，进行添加操作")
+    @ApiResponses({
+            @ApiResponse(code=400,message="请求参数没填好"),
+            @ApiResponse(code=404,message="请求路径没有或页面跳转路径不对")
+    })
+    @RequestMapping(value = "/setAdminStatus", method = RequestMethod.POST)
+    public ResultVO<AdminAddResp> setAdminStatus(@RequestBody AdminSetStatusReq req) {
+
+        if (StringUtil.isEmpty(req.getUserId())) {
+            return resultVO(OmsCommonConsts.RESULE_CODE_FAIL, "用户ID不能为空", null);
+        }
+        if (req.getStatus() == null) {
+            return resultVO(OmsCommonConsts.RESULE_CODE_FAIL, "状态不能为空", null);
+        }
+        if (req.getStatus() != 0 && req.getStatus() != 1) {
+            return resultVO(OmsCommonConsts.RESULE_CODE_FAIL, "状态值参数错误", null);
+        }
+
+        AdminSetStatusResp resp = systemService.setAdminStatus(req);
+
+        // 失败统一返回
+        if (!resp.getError_code().equals(OmsCommonConsts.RESULE_CODE_SUCCESS)) {
+            return ResultVO.error("修改用户状态失败");
+        }
+
+        ResultVO resultVO = new ResultVO();
+        resultVO.setResultCode(resp.getError_code());
+        resultVO.setResultMsg(resp.getError_msg());
+        resultVO.setResultData(resp);
+        return resultVO;
+    }
+
+
+    /**
+     * 获取所有的角色列表
+     *
+     * @param userSessionId
+     * @param roleName
+     * @return
+     */
+    @ApiOperation(value = "获取所有角色列表（不分页）", notes = "可根据角色名字条件筛选")
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "请求参数没填好"),
+            @ApiResponse(code = 404, message = "请求路径没有或页面跳转路径不对")
+    })
+    @RequestMapping(value = "/getAllRoles", method = RequestMethod.GET)
+    public ResultVO<RolePageResp> getAllRoles(
+            @RequestParam(value = "userSessionId", required = true) String userSessionId,
+            @RequestParam(value = "roleName", required = false) String roleName
+//            @RequestParam(value = "roleCode", required = false) String roleCode,
+//            @RequestParam(value = "authType", required = false) String authType,
+//            @RequestParam(value = "pageSize", required = true) Integer pageSize,
+//            @RequestParam(value = "pageNo", required = true) Integer pageNo
+    ) {
+        RoleListReq roleListReq = new RoleListReq();
+        roleListReq.setRolename(roleName);
+        roleListReq.setUserSessionId(userSessionId);
+//        RolePageReq rolePageReq = new RolePageReq();
+//        rolePageReq.setUserSessionId(userSessionId);
+//        rolePageReq.setRole_name(roleName);
+//        rolePageReq.setRole_code(roleCode);
+//        rolePageReq.setAuth_type(authType);
+//        rolePageReq.setPageNo(pageNo);
+//        rolePageReq.setPageSize(pageSize);
+
+        RoleListResp resp = systemService.getAllRoleList(roleListReq);
+
+        // 失败统一返回
+        if (!resp.getError_code().equals(OmsCommonConsts.RESULE_CODE_SUCCESS)) {
+            return ResultVO.error("获取角色列表失败!");
+        }
+
+        ResultVO resultVO = new ResultVO();
+        resultVO.setResultCode(ResultCodeEnum.SUCCESS.getCode());
+        resultVO.setResultMsg(ResultCodeEnum.SUCCESS.getDesc());
+        resultVO.setResultData(resp.getRoleList());
+        return resultVO;
+    }
+
+    /**
+     * 获取所有的权限列表
+     * @param userSessionId
+     * @param authName  权限名称
+     * @param authId  权限ID
+     * @param authType 权限类型
+     * @param pageSize
+     * @param pageNo
+     * @return
+     */
+    @ApiOperation(value = "获取权限列表", notes = "可根据条件筛选")
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "请求参数没填好"),
+            @ApiResponse(code = 404, message = "请求路径没有或页面跳转路径不对")
+    })
+    @RequestMapping(value = "/getAllAuths", method = RequestMethod.GET)
+    public ResultVO<MemberLoginResp> getAllAuths(
+            @RequestParam(value = "userSessionId", required = true) String userSessionId,
+            @RequestParam(value = "authName", required = false) String authName,
+            @RequestParam(value = "authId", required = false) String authId,
+            @RequestParam(value = "authType", required = false) String authType,
+            @RequestParam(value = "pageSize", required = true) Integer pageSize,
+            @RequestParam(value = "pageNo", required = true) Integer pageNo
+    ) {
+        AuthPageReq req = new AuthPageReq();
+        req.setUserSessionId(userSessionId);
+        req.setName(authName);
+        req.setAct_id(authId);
+        req.setType(authType);
+        req.setPage(pageNo);
+        req.setPageSize(pageSize);
+
+        AuthListResp resp = systemService.getAllAuths(req);
+
+        // 失败统一返回
+//        if(resp.getWebPage() == null){
+//            return ResultVO.error("获取角色列表失败!");
+//        }
+        // 失败统一返回
+        if (!resp.getError_code().equals(OmsCommonConsts.RESULE_CODE_SUCCESS)) {
+            return ResultVO.error("获取权限列表失败!");
+        }
+
+        ResultVO resultVO = new ResultVO();
+        resultVO.setResultCode(ResultCodeEnum.SUCCESS.getCode());
+        resultVO.setResultMsg(ResultCodeEnum.SUCCESS.getDesc());
+        resultVO.setResultData(resp.getWebPage());
+        return resultVO;
+    }
+
+    /**
+     * 编辑用户(只可以编辑角色）
+     * @para requestDTO
+     * @return
+     */
+    @ApiOperation(value = "编辑系统用户信息", notes = "传入AdminUserEditRequestDTO对象，进行编辑操作")
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "请求参数没填好"),
+            @ApiResponse(code = 404, message = "请求路径没有或页面跳转路径不对")
+    })
+    @RequestMapping(value = "/editAdminUser", method = RequestMethod.POST)
+    public ResultVO<AdminAddResp> editAdminUser(@RequestBody AdminUserEditRequestDTO requestDTO) {
+
+        if (StringUtil.isEmpty(requestDTO.getUserId())) {
+            return resultVO(OmsCommonConsts.RESULE_CODE_FAIL, "用户ID不能为空", null);
+        }
+        if (requestDTO.getRoleIds() == null) {
+            return resultVO(OmsCommonConsts.RESULE_CODE_FAIL, "角色参数缺失", null);
+        }
+
+        UserPermissionReq req = new UserPermissionReq();
+        req.setRoleids(requestDTO.getRoleIds());
+        req.setUserid(requestDTO.getUserId());
+        UserPermissionResp resp = systemService.editAdminRoles(req);
+
+        // 失败统一返回
+        if (!resp.getError_code().equals(OmsCommonConsts.RESULE_CODE_SUCCESS)) {
+            return ResultVO.error("编辑用户角色失败!");
+        }
+
+        ResultVO resultVO = new ResultVO();
+        resultVO.setResultCode(resp.getError_code());
+        resultVO.setResultMsg(resp.getError_msg());
+        return resultVO;
+
+//        if (StringUtil.isEmpty(requestDTO.getUserId())) {
+//            return resultVO(OmsCommonConsts.RESULE_CODE_FAIL, "用户ID不能为空", null);
+//        }
+//        if (requestDTO.getRoleIds() == null) {
+//            return resultVO(OmsCommonConsts.RESULE_CODE_FAIL, "角色ID数组不能为空", null);
+//        }
+//        if (StringUtil.isEmpty(requestDTO.getUserSessionId())) {
+//            return resultVO(OmsCommonConsts.RESULE_CODE_FAIL, "sessionId不能为空", null);
+//        }
+//
+//        // 先获取 原数据
+//        AdminUser adminUser = systemService.getAdminById(requestDTO.getUserId());
+//        if (adminUser == null) {
+//            adminUser = new AdminUser();
+//        }
+//
+//        AdminUserEditReq req = new AdminUserEditReq();
+//        // 设置要修改的值
+//        adminUser.setUserid(requestDTO.getUserId());
+//        if (!StringUtil.isEmpty(requestDTO.getUserName())) {
+//            adminUser.setUsername(requestDTO.getUserName());
+//        }
+//        // 关联角色
+//        adminUser.setRoleids(requestDTO.getRoleIds());
+//        req.setAdminUser(adminUser);
+//        req.setUserSessionId(requestDTO.getUserSessionId());
+//        AdminEditUserResp resp = systemService.editAdmin(req);
+//
+//        // 失败统一返回
+//        if (!resp.getError_code().equals(OmsCommonConsts.RESULE_CODE_SUCCESS)) {
+//            return ResultVO.error("编辑用户失败!");
+//        }
+//
+//        ResultVO resultVO = new ResultVO();
+//        resultVO.setResultCode(resp.getError_code());
+//        resultVO.setResultMsg(resp.getError_msg());
+////        Map objMap = new HashMap();
+////        objMap.put("adminUserId", resp.getBody());
+////        resultVO.setResultData(objMap);
+////        resultVO.setResultData(resp.getBody());
+//        return resultVO;
+    }
+
+    /**
+     * 获取用户角色
+     *
+     * @param userId
+     * @return
+     */
+    @ApiOperation(value = "获取系统用户角色信息", notes = "传入userId，进行获取操作")
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "请求参数没填好"),
+            @ApiResponse(code = 404, message = "请求路径没有或页面跳转路径不对")
+    })
+    @RequestMapping(value = "/getAdminUserRoles", method = RequestMethod.GET)
+    public ResultVO<AdminAddResp> getAdminUserRoles(
+            @RequestParam(value = "userId", required = true) String userId
+    ) {
+
+        if (StringUtil.isEmpty(userId)) {
+            return resultVO(OmsCommonConsts.RESULE_CODE_FAIL, "用户ID不能为空", null);
+        }
+
+        RoleReq req = new RoleReq();
+        req.setRoleid(userId);
+        RoleListResp resp = systemService.getAdminRoles(req);
+
+        // 失败统一返回
+        if (!resp.getError_code().equals(OmsCommonConsts.RESULE_CODE_SUCCESS)) {
+            return ResultVO.error("获取用户角色列表失败!");
+        }
+
+        ResultVO resultVO = new ResultVO();
+        resultVO.setResultCode(resp.getError_code());
+        resultVO.setResultMsg(resp.getError_msg());
+//        Map objMap = new HashMap();
+//        objMap.put("adminUserId", resp.get());
+//        resultVO.setResultData(objMap);
+        resultVO.setResultData(resp);
+        return resultVO;
+    }
+
+    /**
+     * 获取角色权限
+     *
+     * @param roleId
+     * @return
+     */
+    @ApiOperation(value = "获取角色对应权限信息", notes = "传入roleId，进行获取操作")
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "请求参数没填好"),
+            @ApiResponse(code = 404, message = "请求路径没有或页面跳转路径不对")
+    })
+    @RequestMapping(value = "/getAuthsByRoleId", method = RequestMethod.GET)
+    public ResultVO<AdminAddResp> getAuthsByRoleId(
+            @RequestParam(value = "roleId", required = true) String roleId
+    ) {
+
+        if (StringUtil.isEmpty(roleId)) {
+            return resultVO(OmsCommonConsts.RESULE_CODE_FAIL, "角色ID不能为空", null);
+        }
+
+        AuthReq req = new AuthReq();
+        req.setRoleid(roleId);
+        AuthResp resp = systemService.getAuthsByRoleId(req);
+
+        // 失败统一返回
+        if (!resp.getError_code().equals(OmsCommonConsts.RESULE_CODE_SUCCESS)) {
+            return ResultVO.error("获取角色权限列表失败!");
+        }
+
+        ResultVO resultVO = new ResultVO();
+        resultVO.setResultCode(resp.getError_code());
+        resultVO.setResultMsg(resp.getError_msg());
+//        Map objMap = new HashMap();
+//        objMap.put("adminUserId", resp.get());
+//        resultVO.setResultData(objMap);
+        resultVO.setResultData(resp);
+        return resultVO;
+    }
+
+
+    /**
+     * 添加角色
+     *
+     * @param roleAddRequestDTO
+     * @return
+     */
+    @ApiOperation(value = "添加角色", notes = "传入RoleAddRequestDTO对象，进行添加操作")
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "请求参数没填好"),
+            @ApiResponse(code = 404, message = "请求路径没有或页面跳转路径不对")
+    })
+    @RequestMapping(value = "/addRole", method = RequestMethod.POST)
+    public ResultVO<AdminAddResp> addRole(@RequestBody RoleAddRequestDTO roleAddRequestDTO) {
+
+        if (StringUtil.isEmpty(roleAddRequestDTO.getRoleName())) {
+            return failResultVO("参数缺失，角色名称不能为空");
+        }
+        if (roleAddRequestDTO.getActIds() == null) {
+            return failResultVO("参数缺失，权限id数组不能为空");
+        }
+
+        RoleAddReq req = new RoleAddReq();
+        Role role = new Role();
+        role.setRolename(roleAddRequestDTO.getRoleName());
+        role.setRolememo(roleAddRequestDTO.getRoleDesc());
+        role.setCreateuserid(roleAddRequestDTO.getUserId());
+        req.setRole(role);
+        req.setActs(roleAddRequestDTO.getActIds());
+//        req.setUserSessionId(adminUserAddRequestDTO.getUserSessionId());
+        RoleAddResp resp = systemService.addRole(req);
+
+        // 失败统一返回
+        if (!resp.getError_code().equals(OmsCommonConsts.RESULE_CODE_SUCCESS)) {
+            return failResultVO("添加角色失败!");
+        }
+
+        ResultVO resultVO = new ResultVO();
+        resultVO.setResultCode(resp.getError_code());
+        resultVO.setResultMsg(resp.getError_msg());
+        resultVO.setResultData(resp);
+        return resultVO;
+    }
+
+
+    /**
+     * 编辑角色
+     *
+     * @param roleAddRequestDTO
+     * @return
+     */
+    @ApiOperation(value = "编辑角色", notes = "传入RoleAddRequestDTO对象，进行编辑操作")
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "请求参数没填好"),
+            @ApiResponse(code = 404, message = "请求路径没有或页面跳转路径不对")
+    })
+    @RequestMapping(value = "/editRole", method = RequestMethod.POST)
+    public ResultVO<RoleAddResp> editRole(@RequestBody RoleAddRequestDTO roleAddRequestDTO) {
+
+        if (StringUtil.isEmpty(roleAddRequestDTO.getRoleName())) {
+            return resultVO(OmsCommonConsts.RESULE_CODE_FAIL, "角色名称不能为空", null);
+        }
+        if (roleAddRequestDTO.getRole() == null) {
+            return resultVO(OmsCommonConsts.RESULE_CODE_FAIL, "角色不能为空", null);
+        }
+        if (StringUtil.isEmpty(roleAddRequestDTO.getRole().getRoleid())) {
+            return resultVO(OmsCommonConsts.RESULE_CODE_FAIL, "角色id不能为空", null);
+        }
+        if (roleAddRequestDTO.getActIds() == null) {
+            return resultVO(OmsCommonConsts.RESULE_CODE_FAIL, "权限ID数组actIds参数缺失", null);
+        }
+
+        RoleEditReq req = new RoleEditReq();
+        Role role = roleAddRequestDTO.getRole();
+        role.setRolename(roleAddRequestDTO.getRoleName());
+        if (roleAddRequestDTO.getRoleDesc() != null) {
+            role.setRolememo(roleAddRequestDTO.getRoleDesc());
+        }
+        req.setRole(role);
+        if (roleAddRequestDTO.getActIds() != null) {
+            req.setActs(roleAddRequestDTO.getActIds());
+        }
+        RoleAddResp resp = systemService.editRole(req);
+
+        // 失败统一返回
+        if (!resp.getError_code().equals(OmsCommonConsts.RESULE_CODE_SUCCESS)) {
+            return ResultVO.error("编辑角色失败!");
+        }
+
+        ResultVO resultVO = new ResultVO();
+        resultVO.setResultCode(resp.getError_code());
+        resultVO.setResultMsg(resp.getError_msg());
+        resultVO.setResultData(resp);
+        return resultVO;
+    }
+
+
+    /**
+     * 删除角色
+     *
+     * @param roleAddRequestDTO
+     * @return
+     */
+    @ApiOperation(value = "删除角色", notes = "传入RoleAddRequestDTO对象的roleId，进行删除操作")
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "请求参数没填好"),
+            @ApiResponse(code = 404, message = "请求路径没有或页面跳转路径不对")
+    })
+    @RequestMapping(value = "/deleteRole", method = RequestMethod.POST)
+    public ResultVO<RoleDelResp> deleteRole(@RequestBody RoleAddRequestDTO roleAddRequestDTO) {
+
+        if (StringUtil.isEmpty(roleAddRequestDTO.getRoleId())) {
+            return resultVO(OmsCommonConsts.RESULE_CODE_FAIL, "角色id不能为空", null);
+        }
+
+        RoleDelReq req = new RoleDelReq();
+        req.setRoleid(roleAddRequestDTO.getRoleId());
+        RoleDelResp resp = systemService.deleteRole(req);
+
+        // 失败统一返回
+        if (!resp.getError_code().equals(OmsCommonConsts.RESULE_CODE_SUCCESS)) {
+            return ResultVO.error("删除角色失败!");
+        }
+
+        ResultVO resultVO = new ResultVO();
+        resultVO.setResultCode(resp.getError_code());
+        resultVO.setResultMsg(resp.getError_msg());
+        resultVO.setResultData(resp);
+        return resultVO;
+    }
+
+    /**
+     * 删除用户
+     *
+     * @param requestDTO
+     * @return
+     */
+    @RequestMapping(value = "/deleteAdmin", method = RequestMethod.POST)
+    public ResultVO<AdminUserDelResp> deleteAdmin(@RequestBody AdminUserEditRequestDTO requestDTO) {
+
+        if (StringUtil.isEmpty(requestDTO.getUserId())) {
+            return resultVO(OmsCommonConsts.RESULE_CODE_FAIL, "用户id不能为空", null);
+        }
+
+        AdminUserDelReq req = new AdminUserDelReq();
+        req.setUser_id(requestDTO.getUserId());
+        AdminUserDelResp resp = systemService.deleteAdmin(req);
+
+        // 失败统一返回
+        if (!resp.getError_code().equals(OmsCommonConsts.RESULE_CODE_SUCCESS)) {
+            return ResultVO.error("删除用户失败!");
+        }
+
+        ResultVO resultVO = new ResultVO();
+        resultVO.setResultCode(resp.getError_code());
+        resultVO.setResultMsg(resp.getError_msg());
+        resultVO.setResultData(resp);
+        return resultVO;
+    }
+
+}

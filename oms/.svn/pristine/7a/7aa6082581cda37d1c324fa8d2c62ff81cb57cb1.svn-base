@@ -1,0 +1,107 @@
+package com.iwhalecloud.retail.oms.dto.resquest;
+
+import com.iwhalecloud.retail.oms.entity.*;
+
+import java.io.Serializable;
+
+public class ContentAddReq implements Serializable {
+
+    //内容基础信息
+    private ContentBase contentBase;
+
+    //内容标签
+    private ContentTag contentTag;
+
+    //内容素材
+    private ContentMaterial contentMaterial;
+
+    //软文
+    private ContentText contentText;
+
+    //单图片
+    private ContentPic contentPic;
+
+    //轮播图
+    private ContentOrderpic contentOrderpic;
+
+    //推广图集
+    private ContentPicset contentPicset;
+
+    //纯视频
+    private ContentVideosDefaultContent contentVideosDefaultContent;
+
+    //视频二级内容
+    private ContentVediolv2 contentVediolv2;
+
+    public ContentBase getContentBase() {
+        return contentBase;
+    }
+
+    public void setContentBase(ContentBase contentBase) {
+        this.contentBase = contentBase;
+    }
+
+    public ContentTag getContentTag() {
+        return contentTag;
+    }
+
+    public void setContentTag(ContentTag contentTag) {
+        this.contentTag = contentTag;
+    }
+
+    public ContentMaterial getContentMaterial() {
+        return contentMaterial;
+    }
+
+    public void setContentMaterial(ContentMaterial contentMaterial) {
+        this.contentMaterial = contentMaterial;
+    }
+
+    public ContentText getContentText() {
+        return contentText;
+    }
+
+    public void setContentText(ContentText contentText) {
+        this.contentText = contentText;
+    }
+
+    public ContentPic getContentPic() {
+        return contentPic;
+    }
+
+    public void setContentPic(ContentPic contentPic) {
+        this.contentPic = contentPic;
+    }
+
+    public ContentOrderpic getContentOrderpic() {
+        return contentOrderpic;
+    }
+
+    public void setContentOrderpic(ContentOrderpic contentOrderpic) {
+        this.contentOrderpic = contentOrderpic;
+    }
+
+    public ContentPicset getContentPicset() {
+        return contentPicset;
+    }
+
+    public void setContentPicset(ContentPicset contentPicset) {
+        this.contentPicset = contentPicset;
+    }
+
+    public ContentVideosDefaultContent getContentVideosDefaultContent() {
+        return contentVideosDefaultContent;
+    }
+
+    public void setContentVideosDefaultContent(ContentVideosDefaultContent contentVideosDefaultContent) {
+        this.contentVideosDefaultContent = contentVideosDefaultContent;
+    }
+
+    public ContentVediolv2 getContentVediolv2() {
+        return contentVediolv2;
+    }
+
+    public void setContentVediolv2(ContentVediolv2 contentVediolv2) {
+        this.contentVediolv2 = contentVediolv2;
+    }
+}

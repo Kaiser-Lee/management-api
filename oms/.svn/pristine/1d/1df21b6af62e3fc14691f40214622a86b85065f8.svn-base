@@ -1,0 +1,32 @@
+package com.iwhalecloud.retail.oms.web.utils;
+
+import com.iwhalecloud.retail.oms.dto.ResultVO;
+import com.iwhalecloud.retail.oms.dto.response.CommonResultResp;
+import com.ztesoft.net.framework.database.Page;
+import org.springframework.util.StringUtils;
+
+public class ResponseComUtil {
+
+    public static ResponseComBody page(Integer pageNo,Page page) {
+        ResponseComBody responseComBody = new ResponseComBody();
+        if(page==null){
+            return responseComBody;
+        }
+        responseComBody.setPageSize(page.getPageSize());
+        if (!StringUtils.isEmpty(pageNo)) {
+            responseComBody.setCurrentPageNo(new Long(pageNo));
+        }
+        responseComBody.setStart(page.getStart());
+        responseComBody.setData(page.getResult());
+        responseComBody.setTotalPageCount(page.getTotalPageCount());
+        responseComBody.setTotalCount(page.getTotalCount());
+        return responseComBody;
+    }
+
+    public static void RespToResultVO(CommonResultResp resp, ResultVO result){
+        result.setResultCode(resp.getResultCode());
+        result.setResultMsg(resp.getResultMsg());
+        result.setResultData(resp.getResultData());
+    }
+
+}

@@ -1,0 +1,42 @@
+package com.iwhalecloud.retail.oms.manager;
+
+import com.iwhalecloud.retail.oms.dto.ContentMaterialDTO;
+import com.iwhalecloud.retail.oms.dto.response.ContentMaterialListRespDTO;
+import com.iwhalecloud.retail.oms.entity.ContentMaterial;
+
+import com.iwhalecloud.retail.oms.entity.ContentMaterial;
+import com.iwhalecloud.retail.oms.entity.ContentVediolv2;
+import org.springframework.stereotype.Component;
+import javax.annotation.Resource;
+import com.iwhalecloud.retail.oms.mapper.ContentMaterialMapper;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+
+@Component
+public class ContentMaterialManager{
+    @Resource
+    private ContentMaterialMapper contentMaterialMapper;
+
+    public List<ContentMaterial> queryContentMaterialList(Long contentId) {
+        return contentMaterialMapper.queryContentMaterialList(contentId);
+    }
+
+    public ContentMaterial insertContentMaterial(ContentMaterial contentMaterial){
+        contentMaterialMapper.insert(contentMaterial);
+        return contentMaterial;
+    }
+
+    public ContentMaterial updateContentMaterial(ContentMaterial contentMaterial){
+        contentMaterialMapper.updateById(contentMaterial);
+        return contentMaterial;
+    }
+
+    public int deleteContentMaterial(ContentMaterial contentMaterial){
+        Map<String,Object> contentMaterialMap = new HashMap<String,Object>();
+        contentMaterialMap.put(contentMaterial.getMatid().toString(),contentMaterial);
+        return contentMaterialMapper.deleteByMap(contentMaterialMap);
+    }
+}

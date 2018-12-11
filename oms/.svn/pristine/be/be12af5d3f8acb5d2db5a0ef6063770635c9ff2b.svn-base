@@ -1,0 +1,177 @@
+package com.iwhalecloud.retail.oms.web.controller.cms;
+
+import java.util.List;
+
+
+import com.iwhalecloud.retail.oms.web.controller.BaseController;
+import com.ztesoft.form.util.StringUtil;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.util.CollectionUtils;
+import org.springframework.web.bind.annotation.*;
+
+import com.alibaba.dubbo.config.annotation.Reference;
+import com.iwhalecloud.retail.oms.OmsCommonConsts;
+import com.iwhalecloud.retail.oms.dto.CataLogDTO;
+import com.iwhalecloud.retail.oms.dto.ResultVO;
+import com.iwhalecloud.retail.oms.service.ContentMenuService;
+
+/**
+ * @Auther: lin.wh
+ * @Date: 2018/10/25 11:26
+ * @Description:
+ */
+
+@Slf4j
+@RestController
+@CrossOrigin
+@RequestMapping("/api/contentMenu")
+public class ContentMenuController extends BaseController {
+    @Reference
+    private ContentMenuService contentMenuService;
+
+    @ApiOperation(value = "新增目录", notes = "传入TagDTO对象，进行新增操作")
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "请求参数没填好"),
+            @ApiResponse(code = 404, message = "请求路径没有或页面跳转路径不对")
+    })
+    @RequestMapping(value = "/createContentMenu", method = RequestMethod.POST)
+    public ResultVO createContentMenu(@RequestBody CataLogDTO dto) {
+        ResultVO resultVO = new ResultVO();
+        try {
+            contentMenuService.createContentMenu(dto);
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+            resultVO.setResultData("新增成功");
+            resultVO.setResultMsg("success");
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultMsg(e.getMessage());
+        }
+        return resultVO;
+    }
+
+    @ApiOperation(value = "删除目录", notes = "传入TagDTO对象，进行删除操作")
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "请求参数没填好"),
+            @ApiResponse(code = 404, message = "请求路径没有或页面跳转路径不对")
+    })
+    @RequestMapping(value = "deleteContentMenu", method = RequestMethod.DELETE)
+    public ResultVO deleteContentMenu(@RequestBody CataLogDTO dto) {
+        ResultVO resultVO = new ResultVO();
+        try {
+            CataLogDTO cataLogDTO = contentMenuService.queryContentMenuDetail(dto);
+            int canDel = cataLogDTO.getCanDel();
+            if (canDel == 0) {
+                resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+                resultVO.setResultData("无法删除该目录");
+                return resultVO;
+            }
+            List<CataLogDTO> cataLogDTO1 = contentMenuService.queryContentMenuList(dto);
+            if (cataLogDTO1.size() > 0) {
+                resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+                resultVO.setResultData("无法删除该目录");
+                return resultVO;
+            }
+            contentMenuService.deleteContentMenu(dto);
+            contentMenuService.updateContentBase(dto);
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+            resultVO.setResultData("删除成功");
+            resultVO.setResultMsg("success");
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultMsg(e.getMessage());
+        }
+        return resultVO;
+    }
+
+    @ApiOperation(value = "修改目录", notes = "传入TagDTO对象，进行修改操作")
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "请求参数没填好"),
+            @ApiResponse(code = 404, message = "请求路径没有或页面跳转路径不对")
+    })
+    @RequestMapping(value = "/editContentMenu", method = RequestMethod.PUT)
+    public ResultVO editContentMenu(@RequestBody CataLogDTO dto) {
+        ResultVO resultVO = new ResultVO();
+        try {
+            contentMenuService.editContentMenu(dto);
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+            resultVO.setResultData("修改成功");
+            resultVO.setResultMsg("success");
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultMsg(e.getMessage());
+        }
+        return resultVO;
+    }
+
+    @ApiOperation(value = "查询目录", notes = "传入TagDTO，进行查询操作")
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "请求参数没填好"),
+            @ApiResponse(code = 404, message = "请求路径没有或页面跳转路径不对")
+    })
+    @RequestMapping(value = "/queryContentMenuList", method = RequestMethod.POST)
+    public ResultVO<List<CataLogDTO>> queryContentMenuList(@RequestBody CataLogDTO dto) {
+        ResultVO resultVO = new ResultVO();
+        try {
+            String name = dto.getName();
+            if (!StringUtil.isEmpty(name)) {
+                dto.setName("%" + name + "%");
+            }
+            List<CataLogDTO> cataLogDTO = contentMenuService.queryContentMenuList(dto);
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+            resultVO.setResultData(cataLogDTO);
+            resultVO.setResultMsg("success");
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultMsg(e.getMessage());
+        }
+        return resultVO;
+    }
+
+    @ApiOperation(value = "移动目录", notes = "传入cataId、parentCataId，进行更新目录结构操作")
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "请求参数没填好"),
+            @ApiResponse(code = 404, message = "请求路径没有或页面跳转路径不对")
+    })
+    @RequestMapping(value = "/moveContentMenu", method = RequestMethod.PUT)
+    public ResultVO moveContentMenu(@RequestBody CataLogDTO dto) {
+        ResultVO resultVO = new ResultVO();
+        try {
+            CataLogDTO cataLogDTO1 = contentMenuService.queryContentMenuDetail(dto);
+            String name = cataLogDTO1.getName();
+            Long cataId = dto.getCataid();
+            Long parentCataId = dto.getParentCataId();
+            dto.setCataid(parentCataId);
+            List<CataLogDTO> cataLogDTO = contentMenuService.queryContentMenuList(dto);
+            if (!CollectionUtils.isEmpty(cataLogDTO)) {
+                for (int i = 0; i < cataLogDTO.size(); i++) {
+                    if (cataLogDTO.get(i).getName().equals(name)) {
+                        resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+                        resultVO.setResultData("同层级目录已有名称相同的目录");
+                        resultVO.setResultMsg("fail");
+                        return resultVO;
+                    }
+                    dto.setCatalogLevel(cataLogDTO.get(1).getCatalogLevel());
+                }
+                dto.setCataid(cataId);
+            }
+            contentMenuService.moveContentMenu(dto);
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+            resultVO.setResultData("移动目录成功");
+            resultVO.setResultMsg("success");
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultMsg(e.getMessage());
+        }
+        return resultVO;
+    }
+}
+

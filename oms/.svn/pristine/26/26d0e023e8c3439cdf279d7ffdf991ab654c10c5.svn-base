@@ -1,0 +1,319 @@
+package com.iwhalecloud.retail.oms.service.impl.order;
+
+import com.alibaba.dubbo.config.annotation.Service;
+import com.alibaba.fastjson.JSON;
+import com.iwhalecloud.retail.oms.OmsCommonConsts;
+import com.iwhalecloud.retail.oms.consts.OrderManagerConsts;
+import com.iwhalecloud.retail.oms.dto.response.CommonResultResp;
+import com.iwhalecloud.retail.oms.dto.resquest.order.*;
+import com.iwhalecloud.retail.oms.handler.OrderMangerHandler;
+import com.iwhalecloud.retail.oms.handler.OrderStatusHandler;
+import com.iwhalecloud.retail.oms.rop.ZteRopClient;
+import com.iwhalecloud.retail.oms.service.order.OrderManagerService;
+import com.ztesoft.net.app.base.core.model.Member;
+import com.ztesoft.net.consts.OrderStatus;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
+import params.cart.req.CartAddReq;
+import params.cart.req.CartReverseSelectionReq;
+import params.cart.resp.CartAddResp;
+import params.cart.resp.CartReverseSelectionResp;
+import zte.net.fjord.params.req.FjOrderAddReq;
+import zte.params.order.req.OrderApplyAddReq;
+import zte.params.order.req.OrderApplyAuditReq;
+import zte.params.order.req.OrderApplyConfirmReq;
+import zte.params.order.req.OrderApplyPageListReq;
+import zte.params.order.resp.*;
+
+import static com.iwhalecloud.retail.oms.consts.OrderManagerConsts.ORDER_SERVICE_TYPE_HH;
+
+@Slf4j
+@Service
+public class OrderManagerServiceImpl implements OrderManagerService {
+
+    @Autowired
+    private ZteRopClient zteRopClient;
+
+    @Autowired
+    private OrderMangerHandler orderMangerHandler;
+
+    @Override
+    public CommonResultResp builderOrder(BuilderOrderRequestDTO request) {
+        log.info("gs_10010_builderOrder request{}", JSON.toJSONString(request));
+//        orderMangerHandler.login(request.getMemberId(),request.getUserSessionId());
+
+        CommonResultResp resultVO = new CommonResultResp();
+        Member member = orderMangerHandler.selectMember(request.getMemberId());
+        if(member==null){
+            resultVO.setResultMsg("获取会员信息失败,memberId="+request.getMemberId());
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            return resultVO;
+        }
+
+        switch (request.getSourceType()) {
+            case OrderManagerConsts.ORDER_SOURCE_TYPE_LJGM:
+
+                if(!StringUtils.isEmpty(request.getMemberId())){
+                    CartReverseSelectionReq selectionReq =new CartReverseSelectionReq();
+                    selectionReq.setMember_id(request.getMemberId());
+                    CartReverseSelectionResp selectionResp=zteRopClient.execute(selectionReq,CartReverseSelectionResp.class);
+                    log.info("gs_10010_builderOrder selectionReq{},selectionResp{}",
+                            JSON.toJSONString(selectionReq),JSON.toJSONString(selectionResp));
+                }
+
+                //加入购物车
+                CartAddReq cartAddReq = new CartAddReq();
+                cartAddReq.setProduct_id(request.getProductId());
+                cartAddReq.setNum(String.valueOf(request.getGoodsNum()));
+                cartAddReq.setMember_id(request.getMemberId());
+                cartAddReq.setMember_lv_id(member.getLv_id(member.getLv_ids()));
+                cartAddReq.setUserSessionId(request.getUserSessionId());
+                CartAddResp cartAddResp = zteRopClient.execute(cartAddReq, CartAddResp.class);
+                log.info("gs_10010_builderOrder cartAddReq{},cartAddResp{}", JSON.toJSONString(cartAddReq), JSON.toJSONString(cartAddResp));
+                if (!"0".equals(cartAddResp.getError_code())) {
+                    resultVO.setResultMsg(cartAddResp.getError_msg());
+                    resultVO.setResultCode(cartAddResp.getError_code());
+                    return resultVO;
+                }
+                break;
+            case OrderManagerConsts.ORDER_SOURCE_TYPE_GWC:
+                break;
+            default:
+                resultVO.setResultMsg("sourceType不匹配");
+                resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+                return resultVO;
+        }
+
+
+        final FjOrderAddReq req = new FjOrderAddReq();
+
+        req.setOrder_from(request.getTypeCode() + "");
+        req.setUserSessionId(request.getUserSessionId());
+        //订单信息
+
+        req.setOrder_info_dt(orderMangerHandler.builderOrderInfo(request));
+        req.setDelivery_info_dt(orderMangerHandler.builderDeliveryInfo(request));
+
+//        Map<String,String> payment_info_dt = new HashMap<String,String>();
+//		// 拼装支付信息
+//		payment_info_dt.put("type", "1");  		  //FJOrderConstant.PAY_FLOW_TYPE_SZ
+//		payment_info_dt.put("pay_type", request.getPayType());  //FJOrderConstant.PAY_TYPE_ZXZF   ZXZF：在线支付  HDFK：货到付款
+
+        OrderAddCreateResp resp = zteRopClient.execute(req, OrderAddCreateResp.class);
+        log.info("gs_10010_builderOrder req{},resp{}", JSON.toJSONString(req), JSON.toJSONString(resp));
+        if (resp.getError_code().equals("0") && !CollectionUtils.isEmpty(resp.getOrderCollectList())) {
+            resultVO.setResultCode(resp.getOrderCollectList().get(0).getError_code());
+            resultVO.setResultMsg(resp.getOrderCollectList().get(0).getError_msg());
+            resultVO.setResultData(resp.getOrderCollectList());
+        } else {
+            resultVO.setResultCode(resp.getError_code());
+            resultVO.setResultMsg(resp.getError_msg());
+            resultVO.setResultData(resp.getOrderCollectList());
+        }
+
+        return resultVO;
+
+    }
+
+
+    @Autowired
+    private OrderStatusHandler orderStatusHandler;
+
+    @Override
+    public CommonResultResp updateOrderStatus(UpdateOrderStatusRequestDTO request) {
+        //登录信息
+//        orderMangerHandler.login(request.getMemberId(),request.getUserSessionId());
+
+        CommonResultResp resultVO = new CommonResultResp();
+        log.info("gs_10010_updateOrderStatus request{}", JSON.toJSONString(request));
+
+        switch (request.getFlowType()) {
+            case OrderManagerConsts.ORDER_HANDLER_FH: //发货
+
+                resultVO = orderStatusHandler.sendGoods(request);
+                return resultVO;
+
+            case OrderManagerConsts.ORDER_HANDLER_ZF: //支付
+                resultVO = orderStatusHandler.pay(request);
+                return resultVO;
+
+            case OrderManagerConsts.ORDER_HANDLER_SH:  //收货
+                resultVO = orderStatusHandler.getGoods(request);
+                return resultVO;
+
+            case OrderManagerConsts.ORDER_HANDLER_QX: //取消订单
+                resultVO = orderStatusHandler.cancelOrder(request);
+                return resultVO;
+
+            case OrderManagerConsts.ORDER_HANDLER_PJ: //评价
+                resultVO = orderStatusHandler.updateStatus(request.getOrderId(), OrderManagerConsts.ORDER_STATUS_6);
+                return resultVO;
+            case OrderManagerConsts.ORDER_HANDLER_SC: //删除
+                resultVO = orderStatusHandler.updateStatus(request.getOrderId(), OrderManagerConsts.ORDER_STATUS_99_);
+                return resultVO;
+            default:
+                resultVO.setResultMsg("flowType 类型不匹配，请检查");
+                resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+                return resultVO;
+        }
+    }
+
+    @Override
+    public CommonResultResp addOrderApply(ApplyOrderRequestDTO request) {
+        CommonResultResp resultVO = new CommonResultResp();
+        OrderApplyAddReq req = new OrderApplyAddReq();
+        req.setUserSessionId(request.getUserSessionId());
+        String orderStatus = "";
+        switch (request.getServiceType()) {
+            case OrderManagerConsts.ORDER_SERVICE_TYPE_TH: //退货
+                req.setService_type(OrderManagerConsts.ORDER_SERVICE_TYPE_TH);
+                orderStatus = OrderManagerConsts.ORDER_STATUS_20;
+                break;
+
+            case ORDER_SERVICE_TYPE_HH: //换货
+                req.setService_type(ORDER_SERVICE_TYPE_HH);
+                orderStatus = OrderManagerConsts.ORDER_STATUS_22;
+                break;
+
+            case OrderManagerConsts.ORDER_SERVICE_TYPE_TK: //退款
+                req.setService_type(OrderManagerConsts.ORDER_SERVICE_TYPE_TK);
+                orderStatus = OrderManagerConsts.ORDER_STATUS_25;
+                break;
+
+            default:
+                resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+                resultVO.setResultMsg("serviceType 类型不匹配");
+                return resultVO;
+        }
+
+        req.setOrder_id(request.getOrderId());//原订单ID
+//			req.setPayment_id("2");
+        req.setShipping_id(request.getShippingId());
+        req.setAction(request.getAction());//
+
+        if (CollectionUtils.isEmpty(request.getOis())) {
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultMsg("商品信息 ois不能为空");
+            return resultVO;
+        }
+
+        req.setApplyItems(orderMangerHandler.builderOrderDetail(request));
+        req.setOrderApply(orderMangerHandler.builderAddOrderApply(request));
+
+        OrderApplyAddResp resp = zteRopClient.execute(req, OrderApplyAddResp.class);
+        log.info("gs_10010_addOrderApply req{},resp{}", JSON.toJSONString(req), JSON.toJSONString(resp));
+        if (resp.getError_code().equals("0")) {
+            orderStatusHandler.updateStatus(request.getOrderId(), orderStatus);
+        }
+        resultVO.setResultCode(resp.getError_code());
+        resultVO.setResultMsg(resp.getError_msg());
+        resultVO.setResultData(resp.getItem());
+        return resultVO;
+    }
+
+    @Override
+    public OrderApplyPageListResp selectApplyOrder(SelectApplyOrderRequestDTO request) {
+
+        OrderApplyPageListReq req = new OrderApplyPageListReq();
+        req.setService_type(request.getServiceType());
+        req.setOrder_id(request.getOrderId());
+        req.setApply_id(request.getApplyId());
+        req.setMember_id(request.getMemberId());
+        req.setStart_time(request.getStartTime());
+        req.setEnd_time(request.getEndTime());
+        req.setPageNo(request.getPageNo());
+        req.setPageSize(request.getPageSize());
+        OrderApplyPageListResp resp = zteRopClient.execute(req, OrderApplyPageListResp.class);
+
+        return resp;
+    }
+
+    @Override
+    public CommonResultResp updateTHApplyOrder(UpdateApplyOrderRequestDTO request) {
+//        orderMangerHandler.login(request.getMemberId(),request.getUserSessionId());
+        CommonResultResp resultVO=new CommonResultResp();
+        String orderStatus = "";
+        switch (request.getAction()) {
+            case OrderManagerConsts.ORDER_TH_ACTION_STATUS_SH: //审核
+                OrderApplyAuditReq req = new OrderApplyAuditReq();
+                req.setUserSessionId(request.getUserSessionId());
+                req.setApply_id(request.getApplyId());//申请单ID
+                req.setService_type(OrderManagerConsts.ORDER_SERVICE_TYPE_TH);
+                if (request.getAuditingStatus().equals(OrderManagerConsts.ORDER_AUDITING_STATUS_YES)) {
+                    orderStatus = OrderManagerConsts.ORDER_STATUS_21;  //退货审核通过
+                } else {
+
+                }
+                req.setApply_status(request.getAuditingStatus());
+                OrderApplyAuditResp resp = zteRopClient.execute(req, OrderApplyAuditResp.class);
+                log.info("gs_10010_updateApplyOrder_sh req{},resp{}", JSON.toJSONString(req), JSON.toJSONString(resp));
+                resultVO.setResultCode(resp.getError_code());
+                resultVO.setResultMsg(resp.getError_msg());
+                resultVO.setResultData(resp.getItem());
+                break;
+            case OrderManagerConsts.ORDER_TH_ACTION_STATUS_TH:  //发起
+                OrderApplyConfirmReq confirmReq = new OrderApplyConfirmReq();
+                confirmReq.setUserSessionId(request.getUserSessionId());
+                confirmReq.setService_type(OrderStatus.ORDER_TYPE_4);//换货
+                confirmReq.setOrder_apply_id(request.getApplyId());
+                confirmReq.setAction(request.getAuditingStatus());
+                OrderApplyConfirmResp orderApplyConfirmResp = zteRopClient.execute(confirmReq, OrderApplyConfirmResp.class);
+                log.info("gs_10010_updateApplyOrder_th req{},resp{}", JSON.toJSONString(confirmReq),
+                        JSON.toJSONString(orderApplyConfirmResp));
+                resultVO.setResultCode(orderApplyConfirmResp.getError_code());
+                resultVO.setResultMsg(orderApplyConfirmResp.getError_msg());
+                resultVO.setResultData(orderApplyConfirmResp.getItem());
+                break;
+            default:
+                resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+                resultVO.setResultMsg("操作类型 action 不匹配");
+                return resultVO;
+        }
+        if (resultVO.getResultCode().equals("0")) {
+            orderStatusHandler.updateStatus(request.getOrderId(), orderStatus);
+        }
+        return resultVO;
+    }
+
+    @Override
+    public CommonResultResp updateHHApplyOrder(UpdateApplyOrderRequestDTO request) {
+//        orderMangerHandler.login(request.getMemberId(), request.getUserSessionId());
+        CommonResultResp resultVO=new CommonResultResp();
+        switch (request.getAction()) {
+            case OrderManagerConsts.ORDER_HH_ACTION_STATUS_SH: //审核
+                OrderApplyAuditReq req = new OrderApplyAuditReq();
+                req.setUserSessionId(request.getUserSessionId());
+                req.setApply_id(request.getApplyId());//申请单ID
+                req.setService_type(ORDER_SERVICE_TYPE_HH);  //换货
+                req.setApply_status(request.getAuditingStatus());//通过
+                OrderApplyAuditResp resp = zteRopClient.execute(req, OrderApplyAuditResp.class);
+                log.info("gs_10010_updateApplyOrder_sh req{},resp{}", JSON.toJSONString(req), JSON.toJSONString(resp));
+                resultVO.setResultCode(resp.getError_code());
+                resultVO.setResultMsg(resp.getError_msg());
+                resultVO.setResultData(resp.getItem());
+                break;
+            case OrderManagerConsts.ORDER_HH_ACTION_STATUS_HH:  //发起退货
+                OrderApplyConfirmReq confirmReq = new OrderApplyConfirmReq();
+                confirmReq.setUserSessionId(request.getUserSessionId());
+                confirmReq.setService_type(ORDER_SERVICE_TYPE_HH);//退货
+                confirmReq.setOrder_apply_id(request.getApplyId());
+                confirmReq.setAction(request.getAuditingStatus());
+                OrderApplyConfirmResp orderApplyConfirmResp = zteRopClient.execute(confirmReq, OrderApplyConfirmResp.class);
+                log.info("gs_10010_updateApplyOrder_th req{},resp{}", JSON.toJSONString(confirmReq),
+                        JSON.toJSONString(orderApplyConfirmResp));
+                resultVO.setResultCode(orderApplyConfirmResp.getError_code());
+                resultVO.setResultMsg(orderApplyConfirmResp.getError_msg());
+                resultVO.setResultData(orderApplyConfirmResp.getItem());
+                break;
+            default:
+                resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+                resultVO.setResultMsg("操作类型 action 不匹配");
+                return resultVO;
+        }
+        return resultVO;
+    }
+
+
+}

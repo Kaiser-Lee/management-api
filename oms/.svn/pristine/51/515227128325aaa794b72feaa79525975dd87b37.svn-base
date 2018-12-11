@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+	   http://code.alibabatech.com/schema/dubbo
+	   http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+
+
+    <!-- 消费方应用名 -->
+    <dubbo:application name="oms-consumer"/>
+
+    <!-- 注册中心服务地址 -->
+    <dubbo:registry id="zookeeper" protocol="zookeeper" address="10.45.47.90:2121"/>
+
+    <!-- 引用TestService服务-->
+    <dubbo:reference id="testService" interface="com.iwhalecloud.retail.oms.service.TestService" check="false" version="1.0" registry="zookeeper" protocol="dubbo" timeout="15000"/>
+
+   <!--订单管理-->
+    <dubbo:reference id="orderManagerService" interface="com.iwhalecloud.retail.oms.service.OrderManagerService" check="false" version="1.0" registry="zookeeper" protocol="dubbo" timeout="15000"/>
+
+    <!-- 引用GoodsService服务-->
+    <dubbo:reference id="goodsService" interface="com.iwhalecloud.retail.oms.service.GoodsService" check="false" version="1.0" registry="zookeeper" protocol="dubbo" timeout="15000"/>
+
+    <!-- 引用GoodsCatsService服务-->
+    <dubbo:reference id="goodsCatsService" interface="com.iwhalecloud.retail.oms.service.GoodsCatsService" check="false" version="1.0" registry="zookeeper" protocol="dubbo" timeout="15000"/>
+
+    <!-- 引用memberService服务-->
+    <dubbo:reference id="memberService" interface="com.iwhalecloud.retail.oms.service.MemberService" check="false" version="1.0" registry="zookeeper" protocol="dubbo" timeout="15000"/>
+
+    <!-- 引用systemService服务-->
+    <dubbo:reference id="systemService" interface="com.iwhalecloud.retail.oms.service.SystemService" check="false" version="1.0" registry="zookeeper" protocol="dubbo" timeout="15000"/>
+
+    <!-- 引用cartService服务-->
+    <dubbo:reference id="cartService" interface="com.iwhalecloud.retail.oms.service.CartService" check="false" version="1.0" registry="zookeeper" protocol="dubbo" timeout="15000"/>
+
+    <!-- 引用memberAddressService服务-->
+    <dubbo:reference id="memberAddressService" interface="com.iwhalecloud.retail.oms.service.MemberAddressService" check="false" version="1.0" registry="zookeeper" protocol="dubbo" timeout="15000"/>
+
+    <!-- 引用commentsService服务-->
+    <dubbo:reference id="commentsService" interface="com.iwhalecloud.retail.oms.service.CommentsService" check="false" version="1.0" registry="zookeeper" protocol="dubbo" timeout="15000"/>
+
+    <!-- 引用cloudShelfService服务-->
+    <dubbo:reference id="cloudDeviceService" interface="com.iwhalecloud.retail.oms.service.CloudDeviceService" check="false" version="1.0" registry="zookeeper" protocol="dubbo" timeout="15000"/>
+
+    <!-- 引用cloudShelfService服务-->
+    <dubbo:reference id="cloudShelfService" interface="com.iwhalecloud.retail.oms.service.CloudShelfService" check="false" version="1.0" registry="zookeeper" protocol="dubbo" timeout="15000"/>
+
+    <!-- 引用shelfTemplatesService服务-->
+    <dubbo:reference id="shelfTemplatesService" interface="com.iwhalecloud.retail.oms.service.ShelfTemplatesService" check="false" version="1.0" registry="zookeeper" protocol="dubbo" timeout="15000"/>
+
+    <!-- 引用shelfTemplatesService服务-->
+    <dubbo:reference id="operationPositionService" interface="com.iwhalecloud.retail.oms.service.OperationPositionService" check="false" version="1.0" registry="zookeeper" protocol="dubbo" timeout="15000"/>
+
+    <!-- 引用JWS服务-->
+    <dubbo:reference id="tokenService" interface="com.iwhalecloud.retail.oms.service.TokenService" check="false" version="1.0" registry="zookeeper" protocol="dubbo" timeout="15000"/>
+
+    <!-- 引用JWS服务-->
+    <dubbo:reference id="userService" interface="com.iwhalecloud.retail.oms.service.UserService" check="false" version="1.0" registry="zookeeper" protocol="dubbo" timeout="15000"/>
+
+    <!-- 引用JWS服务-->
+    <dubbo:reference id="regionService" interface="com.iwhalecloud.retail.oms.service.RegionService" check="false" version="1.0" registry="zookeeper" protocol="dubbo" timeout="15000"/>
+
+    <!-- 引用ContentMenuService服务-->
+    <dubbo:reference id="contentMenuService" interface="com.iwhalecloud.retail.oms.service.ContentMenuService" check="false" version="1.0" registry="zookeeper" protocol="dubbo" timeout="15000"/>
+
+    <!-- 引用FileManagerService服务-->
+    <dubbo:reference id="fileManagerService" interface="com.iwhalecloud.retail.oms.service.FileManagerService" check="false" version="1.0" registry="zookeeper" protocol="dubbo" timeout="15000"/>
+
+    <!-- 引用GoodsBrandService服务-->
+    <dubbo:reference id="goodsBrandService" interface="com.iwhalecloud.retail.oms.service.GoodsBrandService" check="false" version="1.0" registry="zookeeper" protocol="dubbo" timeout="15000"/>
+
+    <!-- 引用GoodsEvaluateTotalService服务-->
+    <dubbo:reference id="goodsEvaluateTotalService" interface="com.iwhalecloud.retail.oms.service.GoodsEvaluateTotalService" check="false" version="1.0" registry="zookeeper" protocol="dubbo" timeout="15000"/>
+
+    <!-- 引用PartnerShopService服务-->
+    <dubbo:reference id="partnerShopService" interface="com.iwhalecloud.retail.oms.service.PartnerShopService" check="false" version="1.0" registry="zookeeper" protocol="dubbo" timeout="15000"/>
+
+    <!-- 引用RfidGoodsRelService服务-->
+    <dubbo:reference id="rfidGoodsRelService" interface="com.iwhalecloud.retail.oms.service.RfidGoodsRelService" check="false" version="1.0" registry="zookeeper" protocol="dubbo" timeout="15000"/>
+
+    <!-- 引用ShelfDetailService服务-->
+    <dubbo:reference id="shelfDetailService" interface="com.iwhalecloud.retail.oms.service.ShelfDetailService" check="false" version="1.0" registry="zookeeper" protocol="dubbo" timeout="15000"/>
+
+    <!-- 引用ShopService服务-->
+    <dubbo:reference id="shopService" interface="com.iwhalecloud.retail.oms.service.ShopService" check="false" version="1.0" registry="zookeeper" protocol="dubbo" timeout="15000"/>
+
+    <!-- 引用SpecService服务-->
+    <dubbo:reference id="specService" interface="com.iwhalecloud.retail.oms.service.SpecService" check="false" version="1.0" registry="zookeeper" protocol="dubbo" timeout="15000"/>
+
+    <!-- 引用TagService服务-->
+    <dubbo:reference id="tagService" interface="com.iwhalecloud.retail.oms.service.TagService" check="false" version="1.0" registry="zookeeper" protocol="dubbo" timeout="15000"/>
+    <dubbo:reference id="contentBaseService" interface="com.iwhalecloud.retail.oms.service.ContentBaseService" check="false" version="1.0" registry="zookeeper" protocol="dubbo" timeout="15000"/>
+    <dubbo:reference id="contentChkhisService" interface="com.iwhalecloud.retail.oms.service.ContentChkhisService" check="false" version="1.0" registry="zookeeper" protocol="dubbo" timeout="15000"/>
+    <dubbo:reference id="contentMaterialService" interface="com.iwhalecloud.retail.oms.service.ContentMaterialService" check="false" version="1.0" registry="zookeeper" protocol="dubbo" timeout="15000"/>
+    <dubbo:reference id="contentOrderpicService" interface="com.iwhalecloud.retail.oms.service.ContentOrderpicService" check="false" version="1.0" registry="zookeeper" protocol="dubbo" timeout="15000"/>
+    <dubbo:reference id="contentPicService" interface="com.iwhalecloud.retail.oms.service.ContentPicService" check="false" version="1.0" registry="zookeeper" protocol="dubbo" timeout="15000"/>
+    <dubbo:reference id="contentPicsetService" interface="com.iwhalecloud.retail.oms.service.ContentPicsetService" check="false" version="1.0" registry="zookeeper" protocol="dubbo" timeout="15000"/>
+    <dubbo:reference id="contentPublishService" interface="com.iwhalecloud.retail.oms.service.ContentPublishService" check="false" version="1.0" registry="zookeeper" protocol="dubbo" timeout="15000"/>
+    <dubbo:reference id="contentTagService" interface="com.iwhalecloud.retail.oms.service.ContentTagService" check="false" version="1.0" registry="zookeeper" protocol="dubbo" timeout="15000"/>
+    <dubbo:reference id="contentTextService" interface="com.iwhalecloud.retail.oms.service.ContentTextService" check="false" version="1.0" registry="zookeeper" protocol="dubbo" timeout="15000"/>
+    <dubbo:reference id="contentVediolv2Service" interface="com.iwhalecloud.retail.oms.service.ContentVediolv2Service" check="false" version="1.0" registry="zookeeper" protocol="dubbo" timeout="15000"/>
+    <dubbo:reference id="contentVideosDefaultContentService" interface="com.iwhalecloud.retail.oms.service.ContentVideosDefaultContentService" check="false" version="1.0" registry="zookeeper" protocol="dubbo" timeout="15000"/>
+</beans>

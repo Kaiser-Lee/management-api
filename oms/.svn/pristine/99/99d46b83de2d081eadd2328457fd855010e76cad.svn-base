@@ -1,0 +1,28 @@
+package com.iwhalecloud.retail.oms.manager;
+
+import com.iwhalecloud.retail.oms.dto.DefaultOperatingDTO;
+import com.iwhalecloud.retail.oms.mapper.DefaultOperatingMapper;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
+
+
+@Component
+public class DefaultOperatingManager {
+    @Resource
+    private DefaultOperatingMapper defaultOperatingMapper;
+
+    /**
+     * 查询.
+     *
+     * @param defaultCategoryId
+     * @return
+     * @author Ji.kai
+     * @date 2018/10/25 15:27
+     */
+    public DefaultOperatingDTO qryDefaultOperation(String defaultCategoryId)
+    {
+        return defaultOperatingMapper.qryDefaultOperation(defaultCategoryId);
+    }
+    
+}

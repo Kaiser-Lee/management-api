@@ -1,0 +1,19 @@
+package com.iwhalecloud.retail.oms.service.impl;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import com.alibaba.dubbo.config.annotation.Service;
+import com.iwhalecloud.retail.oms.manager.ContentVedioctrManager;
+import com.iwhalecloud.retail.oms.service.ContentVedioctrService;
+
+
+@Service
+public class ContentVedioctrServiceImpl implements ContentVedioctrService {
+
+    @Autowired
+    private ContentVedioctrManager contentVedioctrManager;
+
+    
+    
+    
+    
+}

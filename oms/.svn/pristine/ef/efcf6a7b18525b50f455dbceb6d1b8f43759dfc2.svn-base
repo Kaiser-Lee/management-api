@@ -1,0 +1,29 @@
+package com.iwhalecloud.retail.oms.service;
+
+import com.iwhalecloud.retail.oms.dto.EventDTO;
+import com.iwhalecloud.retail.oms.dto.EventInteractionTimeDTO;
+import com.iwhalecloud.retail.oms.dto.RankDTO;
+import com.iwhalecloud.retail.oms.dto.resquest.CountGoodsReq;
+import com.iwhalecloud.retail.oms.dto.resquest.CountKeyWordReq;
+import com.iwhalecloud.retail.oms.dto.resquest.EventInteractionTimeReq;
+
+import java.util.List;
+
+public interface CSInteractionTimeService {
+
+    int buryingPointEvent(EventDTO dto);
+
+    int countInteractionTime(EventInteractionTimeDTO dto);
+
+    List<EventInteractionTimeDTO> queryInteractionTime(EventInteractionTimeReq dto);
+
+    List<EventDTO> queryLastInteractionTime();
+
+    List<EventDTO> queryBeforeInteractionTime();
+
+    List<EventDTO> queryEvent();
+
+    List<RankDTO> countKeyWord(CountKeyWordReq req);
+
+    List<RankDTO> countGoods(CountGoodsReq req);
+}

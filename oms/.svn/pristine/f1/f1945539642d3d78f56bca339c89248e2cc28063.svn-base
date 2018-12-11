@@ -1,0 +1,61 @@
+package com.iwhalecloud.retail.oms.manager;
+
+import com.iwhalecloud.retail.oms.dto.ContentMaterialDTO;
+import com.iwhalecloud.retail.oms.dto.response.ContentMaterialListRespDTO;
+import com.iwhalecloud.retail.oms.entity.ContentMaterial;
+
+import com.iwhalecloud.retail.oms.entity.ContentMaterial;
+import com.iwhalecloud.retail.oms.entity.ContentVediolv2;
+import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Component;
+import javax.annotation.Resource;
+import com.iwhalecloud.retail.oms.mapper.ContentMaterialMapper;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+
+@Component
+public class ContentMaterialManager{
+    @Resource
+    private ContentMaterialMapper contentMaterialMapper;
+
+    public List<ContentMaterialDTO> queryContentMaterialList(Long contentId) {
+        List<ContentMaterial> contentMaterialList = contentMaterialMapper.queryContentMaterialList(contentId);
+        List<ContentMaterialDTO> contentTagDTOList = new ArrayList<>();
+        int index = 0;
+        for(ContentMaterial contentMaterial: contentMaterialList){
+            ContentMaterialDTO contentMaterialDTO = new ContentMaterialDTO();
+            BeanUtils.copyProperties(contentMaterial,contentMaterialDTO);
+            contentTagDTOList.add(index++, contentMaterialDTO);
+        }
+        return contentTagDTOList;
+    }
+
+
+    public ContentMaterialDTO insertContentMaterial(ContentMaterialDTO contentMaterialDTO){
+        ContentMaterial contentMaterial = new ContentMaterial();
+        BeanUtils.copyProperties(contentMaterialDTO,contentMaterial);
+        contentMaterialMapper.insert(contentMaterial);
+        BeanUtils.copyProperties(contentMaterial,contentMaterialDTO);
+        return contentMaterialDTO;
+    }
+
+    public ContentMaterialDTO updateContentMaterial(ContentMaterialDTO contentMaterialDTO){
+        ContentMaterial contentMaterial = new ContentMaterial();
+        BeanUtils.copyProperties(contentMaterialDTO,contentMaterial);
+        contentMaterialMapper.updateById(contentMaterial);
+        BeanUtils.copyProperties(contentMaterial,contentMaterialDTO);
+        return contentMaterialDTO;
+    }
+
+    public int deleteContentMaterial(ContentMaterialDTO contentMaterialDTO){
+        Map<String,Object> contentMaterialMap = new HashMap<String,Object>();
+        ContentMaterial contentMaterial = new ContentMaterial();
+        BeanUtils.copyProperties(contentMaterialDTO, contentMaterial);
+        contentMaterialMap.put(contentMaterial.getMatid().toString(),contentMaterial);
+        return contentMaterialMapper.deleteByMap(contentMaterialMap);
+    }
+}

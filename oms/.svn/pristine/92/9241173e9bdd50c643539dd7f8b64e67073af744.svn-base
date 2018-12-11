@@ -1,0 +1,88 @@
+package com.iwhalecloud.retail.oms.web.controller.rop;
+
+import com.alibaba.dubbo.config.annotation.Reference;
+import com.google.common.collect.Lists;
+import com.iwhalecloud.retail.goods.common.ResultCodeEnum;
+import com.iwhalecloud.retail.goods.dto.ResultVO;
+import com.iwhalecloud.retail.goods.service.dubbo.rop.GoodsCatsService;
+import com.iwhalecloud.retail.oms.dto.resquest.CatComplexBatchAddReq;
+import com.ztesoft.net.mall.core.model.CatComplex;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.*;
+import zte.params.goodscats.req.CatComplexAddReq;
+import zte.params.goodscats.req.CatsListByIdReq;
+import zte.params.goodscats.req.ComplexGoodsGetReq;
+import zte.params.goodscats.resp.CatComplexAddResp;
+import zte.params.goodscats.resp.CatsListByIdResp;
+import zte.params.goodscats.resp.ComplexGoodsGetResp;
+
+import java.util.List;
+
+/**
+ * @author mzl
+ * @date 2018/10/11
+ */
+@RestController
+@RequestMapping("/api/rop/goodsCats")
+public class GoodsCatsROPController {
+
+	@Reference
+    private GoodsCatsService goodsCatsService;
+
+    @GetMapping(value="listCats")
+    public ResultVO listCats() {
+        CatsListByIdReq req = new CatsListByIdReq();
+        req.setCat_id("-1");
+        req.setParent_cat_id("0");
+        CatsListByIdResp resp = goodsCatsService.listCats(req);
+        if (StringUtils.isEmpty(resp)) {
+            return ResultVO.error();
+        }
+        if (ResultCodeEnum.SUCCESS.getCode().equals(resp.getError_code())) {
+            return ResultVO.success(resp.getCats());
+        } else {
+            return ResultVO.error(resp.getError_code(),resp.getError_msg());
+        }
+    }
+
+
+    @GetMapping(value="getComplexGoods")
+    public ResultVO getComplexGoods(@RequestParam(value = "catId") String catId) {
+        ComplexGoodsGetReq req = new ComplexGoodsGetReq();
+        req.setCat_id(catId);
+        ComplexGoodsGetResp resp = goodsCatsService.getComplexGoods(req);
+        if (StringUtils.isEmpty(resp)) {
+            return ResultVO.error();
+        }
+        if (ResultCodeEnum.SUCCESS.getCode().equals(resp.getError_code())) {
+            return ResultVO.success(resp.getGoods());
+        } else {
+            return ResultVO.error(resp.getError_code(),resp.getError_msg());
+        }
+    }
+
+
+    @PostMapping(value="addCatComplex")
+    public ResultVO addCatComplex(@RequestBody CatComplexBatchAddReq req) {
+        if (StringUtils.isEmpty(req) || CollectionUtils.isEmpty(req.getCatComplexList())) {
+            return ResultVO.errorEnum(ResultCodeEnum.LACK_OF_PARAM);
+        }
+        List<CatComplex> catComplexList = req.getCatComplexList();
+        List<CatComplexAddReq> catComplexAddReqs = Lists.newArrayList();
+        for (CatComplex catComplex : catComplexList) {
+            CatComplexAddReq catComplexAddReq = new CatComplexAddReq();
+            catComplexAddReq.setCatComplex(catComplex);
+            catComplexAddReqs.add(catComplexAddReq);
+        }
+        CatComplexAddResp resp = goodsCatsService.addCatComplex(catComplexAddReqs);
+        if (StringUtils.isEmpty(resp)) {
+            return ResultVO.error();
+        }
+        if (ResultCodeEnum.SUCCESS.getCode().equals(resp.getError_code())) {
+            return ResultVO.success(resp.getResp());
+        } else {
+            return ResultVO.error(resp.getError_code(),resp.getError_msg());
+        }
+    }
+}

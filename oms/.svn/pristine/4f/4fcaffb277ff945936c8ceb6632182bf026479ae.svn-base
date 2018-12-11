@@ -1,0 +1,287 @@
+package com.iwhalecloud.retail.oms.service.impl;
+
+import com.alibaba.dubbo.config.annotation.Service;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.iwhalecloud.retail.oms.OmsCommonConsts;
+import com.iwhalecloud.retail.oms.consts.OmsConst;
+import com.iwhalecloud.retail.oms.dto.CloudShelfDTO;
+import com.iwhalecloud.retail.oms.dto.CloudShelfDetailDTO;
+import com.iwhalecloud.retail.oms.dto.ContentBaseDTO;
+import com.iwhalecloud.retail.oms.dto.DefaultCategoryDTO;
+import com.iwhalecloud.retail.oms.dto.DefaultContentDTO;
+import com.iwhalecloud.retail.oms.dto.DefaultOperatingDTO;
+import com.iwhalecloud.retail.oms.dto.OperatingPositionBindDTO;
+import com.iwhalecloud.retail.oms.dto.ResultVO;
+import com.iwhalecloud.retail.oms.dto.ShelfDetailDTO;
+import com.iwhalecloud.retail.oms.dto.resquest.CloudShelfPageReq;
+import com.iwhalecloud.retail.oms.dto.resquest.cloud.CloudDeviceReqDTO;
+import com.iwhalecloud.retail.oms.dto.resquest.cloud.CloudShelfAddReq;
+import com.iwhalecloud.retail.oms.dto.resquest.cloud.CloudShelfRequestDTO;
+import com.iwhalecloud.retail.oms.entity.ContentBase;
+import com.iwhalecloud.retail.oms.entity.DefaultCategory;
+import com.iwhalecloud.retail.oms.entity.OperatingPositionBind;
+import com.iwhalecloud.retail.oms.manager.CloudDeviceManager;
+import com.iwhalecloud.retail.oms.manager.CloudShelfDetailManager;
+import com.iwhalecloud.retail.oms.manager.CloudShelfManager;
+import com.iwhalecloud.retail.oms.manager.ContentBaseManager;
+import com.iwhalecloud.retail.oms.manager.DefaultCategoryManager;
+import com.iwhalecloud.retail.oms.manager.DefaultContentManager;
+import com.iwhalecloud.retail.oms.manager.DefaultOperatingManager;
+import com.iwhalecloud.retail.oms.manager.OperatingPositionBindManager;
+import com.iwhalecloud.retail.oms.manager.ShelfDetailManager;
+import com.iwhalecloud.retail.oms.service.CloudShelfService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+/**
+ * @Auther: lin.wh
+ * @Date: 2018/10/15 10:28
+ * @Description: 云货架实现类
+ */
+
+@Slf4j
+@Service
+public class CloudShelfServiceImpl implements CloudShelfService {
+
+    @Autowired
+    private CloudShelfManager cloudShelfManager;
+    @Autowired
+    private CloudDeviceManager cloudDeviceManager;
+    @Autowired
+    private DefaultCategoryManager defaultCategoryManager;
+
+    @Autowired
+    private CloudShelfDetailManager cloudShelfDetailManager;
+
+    @Autowired
+    private DefaultOperatingManager defaultOperatingManager;
+
+    @Autowired
+    private DefaultContentManager defaultContentManager;
+
+    @Autowired
+    private OperatingPositionBindManager operationPositionManager;
+
+    @Autowired
+    private ShelfDetailManager shelfDetailManager;
+
+    @Autowired
+    private ContentBaseManager contentBaseManager;
+
+
+    @Override
+    public Page<CloudShelfDTO> queryCloudShelfList(CloudShelfPageReq page) {
+        return cloudShelfManager.queryCloudShelfList(page);
+    }
+
+    @Override
+    public CloudShelfDTO queryCloudShelfListDetails(String num) {
+        return cloudShelfManager.queryCloudShelfListDetails(num);
+    }
+
+    @Override
+    @Transactional
+    public CloudShelfDTO createCloudShelf(CloudShelfAddReq req, String userId) throws ParseException {
+
+        CloudShelfDTO cloudShelfDTO = new CloudShelfDTO();
+        List<CloudShelfDetailDTO> cloudShelfDetailDTOS = new ArrayList<>();
+        cloudShelfDTO.setCloudShelfDetailDTOS(cloudShelfDetailDTOS);
+
+        //新增云货架基础类
+        cloudShelfDTO.setShelfTemplatesNumber(req.getShelfTemplatesNumber());
+        Long date = System.currentTimeMillis();
+        cloudShelfDTO.setNum(date.toString());
+        cloudShelfDTO.setName(req.getShelfName());
+        cloudShelfDTO.setIsDeleted(OmsConst.IsDeleted.NOT_DELETED.getCode());
+        cloudShelfDTO.setStatus(OmsConst.CloudShelfStatus.USED.getCode());
+        cloudShelfDTO.setCreator(userId);
+        cloudShelfDTO.setModifier(userId);
+        cloudShelfManager.createCloudShelf(cloudShelfDTO);
+
+        for (String shelfCategoryId : req.getShelfCategoryIds()) {
+            //新增云货架栏目相关信息
+            CloudShelfDetailDTO cloudShelfDetail = new CloudShelfDetailDTO();
+            DefaultOperatingDTO defaultOperation = defaultOperatingManager.qryDefaultOperation(shelfCategoryId);
+            BeanUtils.copyProperties(defaultOperation, cloudShelfDetail);
+            cloudShelfDetail.setId(null);
+            cloudShelfDetail.setCloudShelfNumber(cloudShelfDTO.getNum());
+            date = System.currentTimeMillis();
+            cloudShelfDetail.setOperatingPositionId(date.toString());
+            cloudShelfDetail.setDefaultOperatingPositionId(defaultOperation.getOperatingPositionId());
+            cloudShelfDetail.setShelfCategoryId(shelfCategoryId);
+            cloudShelfDetail.setCreator(userId);
+            cloudShelfDetail.setModifier(userId);
+            cloudShelfDetail.setIsDeleted(OmsConst.IsDeleted.NOT_DELETED.getCode());
+            cloudShelfDetailManager.insert(cloudShelfDetail);
+
+            //新增内容
+            DefaultContentDTO defaultContentDTO = defaultContentManager.selectById(defaultOperation.getDefaultContentId());
+            ContentBase contentBase = new ContentBase();
+            contentBase.setTitle(defaultContentDTO.getContentTittle());
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            contentBase.setEffDate(new Date());
+            contentBase.setExpDate(sdf.parse("2199-12-12"));
+            contentBase.setUpdDate(new Date());
+            contentBaseManager.insertContentBase(contentBase);
+            ContentBaseDTO contentBaseDTO = new ContentBaseDTO();
+            BeanUtils.copyProperties(contentBase, contentBaseDTO);
+
+            //新增云货架栏目关联内容相关信息
+            OperatingPositionBind operatingPositionBind = new OperatingPositionBind();
+            operatingPositionBind.setOperatingPositionId(cloudShelfDetail.getOperatingPositionId());
+            operatingPositionBind.setContentNumber(contentBase.getContentId().toString());
+            operatingPositionBind.setCreator(userId);
+            operatingPositionBind.setModifier(userId);
+            operatingPositionBind.setIsDeleted(OmsConst.IsDeleted.NOT_DELETED.getCode());
+            operationPositionManager.insert(operatingPositionBind);
+            OperatingPositionBindDTO operatingPositionBindDTO = new OperatingPositionBindDTO();
+            BeanUtils.copyProperties(operatingPositionBind, operatingPositionBindDTO);
+
+            operatingPositionBindDTO.setContentBase(contentBaseDTO);
+            cloudShelfDetail.setOperatingPositionBindDTO(operatingPositionBindDTO);
+            cloudShelfDetailDTOS.add(cloudShelfDetail);
+        }
+        cloudDeviceManager.updateCloudDeviceByNum(req.getDevices(), cloudShelfDTO.getNum());
+        return cloudShelfDTO;
+    }
+
+    @Override
+    public int updateCloudShelfStatus(CloudShelfDTO dto) {
+        int t = cloudShelfManager.editCloudShelf(dto);
+        return t;
+    }
+
+    @Override
+    public int deleteCloudShelf(CloudShelfDTO dto) {
+        int t = cloudShelfManager.deleteCloudShelf(dto);
+        return t;
+    }
+
+    /**
+     * 接口逻辑：
+     * (1)云货架number,货架名称,状态更新模型cloud_shlef
+     * (2)关联设备列表根据
+     * 首先通过编码查找已经关联的设备把设备表的关联编码清空，然后根据请求传入的参数 找到对应的设备填上编码
+     * 操作number
+     * (3)货架类目列表
+     * 根据云货架编码查询原本的货架类目信息，对比传入的货架类目列表，进行新增，删除，修改
+     * @param cloudShelfRequestDTO
+     * @return
+     */
+    @Override
+    @Transactional
+    public ResultVO modifyCloudShelfByParam(CloudShelfRequestDTO cloudShelfRequestDTO) {
+        ResultVO resultVO = new ResultVO();
+        log.info("CloudShelfServiceImpl modifyCloudShelfByParam cloudShelfRequestDTO={} ",cloudShelfRequestDTO);
+        try {
+            int modifyReturnNumber = cloudShelfManager.modifyCloudShelfByParam(cloudShelfRequestDTO);
+            if(modifyReturnNumber>0){
+                int updateNum = cloudDeviceManager.updateBatchCloudDevice(cloudShelfRequestDTO.getNum());
+                if(updateNum>0){
+                    List<CloudDeviceReqDTO> cloudDevice = cloudShelfRequestDTO.getCloudDevice();
+                    if(cloudDevice.size()>0){
+                        for (int i = 0; i < cloudDevice.size(); i++) {
+                            cloudDevice.get(i).setCloudShelfNumber(cloudShelfRequestDTO.getNum());
+                        }
+                    }
+                    cloudDeviceManager.updateBatchNumCloudDevice(cloudDevice);
+                }
+                HashMap<String, Object> map = new HashMap<String, Object>();
+                String num = cloudShelfRequestDTO.getNum();
+                List<ShelfDetailDTO>  existCloudShelfList = shelfDetailManager.queryShelfDetailList(num);
+                List<DefaultCategoryDTO> defaultCategorys = cloudShelfRequestDTO.getShelfCategory();
+                if(existCloudShelfList!=null&&defaultCategorys!=null){
+                    List<Long> oldDefaultCategoryIds = new ArrayList<>();
+                    List<Long> newDefaultCategoryIds = new ArrayList<>();
+                    List<Long> updateIdList = new ArrayList<>();
+                    List<Long> oldIdList = new ArrayList();
+                    List<Long> newIdList = new ArrayList();
+                    for (int i = 0; i < existCloudShelfList.size(); i++) {
+                        oldDefaultCategoryIds.add(existCloudShelfList.get(i).getId());
+                        oldIdList.add(existCloudShelfList.get(i).getId());
+                    }
+                    for (int i = 0; i < defaultCategorys.size(); i++) {
+                        newDefaultCategoryIds.add(defaultCategorys.get(i).getId());
+                        updateIdList.add(defaultCategorys.get(i).getId());
+                        newIdList.add(defaultCategorys.get(i).getId());
+                    }
+                    oldIdList.retainAll(updateIdList);
+                    if(oldIdList.size()>0){
+                       //更新原有的记录
+                        List<DefaultCategory> lists = new ArrayList<DefaultCategory>();
+                        for (int i = 0; i < oldIdList.size() ; i++) {
+                            DefaultCategory defaultCategory = new DefaultCategory();
+                            defaultCategory.setId(oldIdList.get(i));
+                            for (int j = 0; j < defaultCategorys.size(); j++) {
+                                if(String.valueOf(defaultCategorys.get(j).getId()).equals(String.valueOf(oldIdList.get(i)))){
+                                    defaultCategory.setCategoryName(defaultCategorys.get(j).getCategoryName());
+                                    break;
+                                }
+                            }
+                            if(defaultCategory.getCategoryName()!=null){
+                                lists.add(defaultCategory);
+                            }
+                        }
+                        if(lists.size()>0){
+                            defaultCategoryManager.updateBatchDefaultCatagory(lists);
+                        }
+                    }
+                    oldDefaultCategoryIds.removeAll(newDefaultCategoryIds);
+                    if(oldDefaultCategoryIds.size()>0){
+                        //移除的原来记录中已经删除的旧ID
+                        List<DefaultCategory> removeDefaultCategory = new ArrayList<DefaultCategory>();
+                        for (int i = 0; i < oldDefaultCategoryIds.size(); i++) {
+                            DefaultCategory defaultCategory = new DefaultCategory();
+                            defaultCategory.setId(oldDefaultCategoryIds.get(i));
+                            defaultCategory.setIsDeleted(OmsConst.IsDeleted.HAVE_DELETED.getCode());
+                            removeDefaultCategory.add(defaultCategory);
+                        }
+                        defaultCategoryManager.updateBatchDefaultCatagory(removeDefaultCategory);
+                    }
+                    newIdList.removeAll(oldIdList);
+                    if(newIdList.size()>0){
+                        //新增的原来记录中没有的ID
+                        List<DefaultCategory> addDefaultCategory = new ArrayList<DefaultCategory>();
+                        for (int i = 0; i < newIdList.size(); i++) {
+                            DefaultCategory defaultCategory = new DefaultCategory();
+                            defaultCategory.setId(newIdList.get(i));
+                            defaultCategory.setIsDeleted(OmsConst.IsDeleted.NOT_DELETED.getCode());
+                            defaultCategory.setGmtCreate(new Date());
+                            defaultCategory.setShelfTemplatesNumber(num);
+                            for (int j = 0; j < defaultCategorys.size(); j++) {
+                                if(String.valueOf(defaultCategorys.get(j).getId()).equals(String.valueOf(newIdList.get(i)))){
+                                    defaultCategory.setCategoryName(defaultCategorys.get(j).getCategoryName());
+                                    break;
+                                }
+                            }
+                            addDefaultCategory.add(defaultCategory);
+                        }
+                        if(addDefaultCategory.size()>0){
+                            for (int i = 0; i < addDefaultCategory.size(); i++) {
+                                defaultCategoryManager.insertDefaultCatagory(addDefaultCategory.get(i));
+                            }
+                        }
+                    }
+                    resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+                    resultVO.setResultData("更新成功");
+                    resultVO.setResultMsg("success");
+                }
+            }
+        } catch (Exception e) {
+            log.info("CloudShelfServiceImpl modifyCloudShelfByParam Exception={} ",e);
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultData(e.getMessage());
+        }
+        return resultVO;
+    }
+
+}
+

@@ -1,0 +1,63 @@
+package com.iwhalecloud.retail.oms.manager;
+
+import com.iwhalecloud.retail.oms.dto.CloudShelfDTO;
+import com.iwhalecloud.retail.oms.entity.CloudShelf;
+import com.iwhalecloud.retail.oms.mapper.CloudShelfMapper;
+import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+
+/**
+ * @Auther: lin.wh
+ * @Date: 2018/10/21 20:15
+ * @Description:
+ */
+
+@Component
+public class CloudShelfManager {
+    @Resource
+    private CloudShelfMapper cloudShelfMapper;
+
+    public List<CloudShelfDTO> queryCloudShelfList(HashMap<String, Object> map) {
+        /*int id = map.get("id") != null ? 0 : (int) map.get("id");
+        EntityWrapper ew = new EntityWrapper();
+        ew.setEntity(new CloudShelfDTO());
+        ew.where("id = {0}", id);
+        Page<CloudShelfDTO> page = new Page<CloudShelfDTO>(1, 1);
+        return cloudShelfMapper.selectPage(page, ew);*/
+//        Page<CloudShelfDTO> page = new Page<CloudShelfDTO>(1,1);
+        return cloudShelfMapper.queryCloudShelfList(map);
+    }
+
+    public CloudShelfDTO queryCloudShelfListDetails(String num) {
+        return cloudShelfMapper.queryCloudShelfListDetails(num);
+    }
+
+    public int createCloudShelf(CloudShelfDTO dto) {
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        dto.setGmtCreate(df.format(new Date()));
+        dto.setGmtModified(df.format(new Date()));
+        CloudShelf total = new CloudShelf();
+        BeanUtils.copyProperties(dto, total);
+        int t = cloudShelfMapper.insert(total);
+        return t;
+    }
+
+    public int editCloudShelf(CloudShelfDTO dto) {
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        dto.setGmtModified(df.format(new Date()));
+        int t = cloudShelfMapper.editCloudShelf(dto);
+        return t;
+    }
+
+    public int deleteCloudShelf(CloudShelfDTO dto) {
+        int t = cloudShelfMapper.deleteCloudShelf(dto);
+        return t;
+    }
+}
+

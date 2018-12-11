@@ -1,0 +1,71 @@
+package com.iwhalecloud.retail.oms.dto;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+
+
+/**
+ * 默认运营位及内容
+ * @author generator
+ * @version 1.0
+ * @since 1.0
+ */
+@Data
+@ApiModel(value = "对应模型DEFAULT_OPERATING_POSTION, 对应实体DefaultOperation类")
+public class DefaultOperationDTO implements java.io.Serializable {
+    
+  	private static final long serialVersionUID = 1L;
+  
+  	
+  	//属性 begin
+	/**
+  	 * ID
+  	 */
+	@ApiModelProperty(value = "ID")
+  	private java.lang.Long id;
+	
+	/**
+  	 * 创建时间
+  	 */
+	@ApiModelProperty(value = "创建时间")
+  	private java.util.Date gmtCreate;
+	
+	/**
+  	 * 修改时间
+  	 */
+	@ApiModelProperty(value = "修改时间")
+  	private java.util.Date gmtModified;
+	
+	/**
+  	 * 创建人
+  	 */
+	@ApiModelProperty(value = "创建人")
+  	private java.lang.Object creator;
+	
+	/**
+  	 * 修改人
+  	 */
+	@ApiModelProperty(value = "修改人")
+  	private java.lang.Object modifier;
+	
+	/**
+  	 * 是否删除：0未删、1删除	
+  	 */
+	@ApiModelProperty(value = "是否删除：0未删、1删除	")
+  	private java.lang.Long isDeleted;
+	
+	/**
+  	 * 默认运营位ID
+  	 */
+	@ApiModelProperty(value = "默认运营位ID")
+  	private java.lang.Object operatingPositionId;
+	
+	/**
+  	 * 默认内容ID
+  	 */
+	@ApiModelProperty(value = "默认内容ID")
+  	private java.lang.Object defaultContentId;
+	
+  	
+}

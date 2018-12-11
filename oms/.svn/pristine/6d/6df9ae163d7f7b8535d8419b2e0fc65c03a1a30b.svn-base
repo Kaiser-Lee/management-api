@@ -1,0 +1,194 @@
+package com.iwhalecloud.retail.oms.service.impl;
+
+import com.alibaba.dubbo.config.annotation.Service;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.iwhalecloud.retail.oms.dto.ContentBaseDTO;
+import com.iwhalecloud.retail.oms.dto.resquest.ContentAddReq;
+import com.iwhalecloud.retail.oms.dto.resquest.ContentBasePageReq;
+import com.iwhalecloud.retail.oms.entity.*;
+import com.iwhalecloud.retail.oms.manager.*;
+import com.iwhalecloud.retail.oms.service.ContentBaseService;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.alibaba.dubbo.config.annotation.Service;
+import org.springframework.transaction.annotation.Transactional;
+import rx.exceptions.Exceptions;
+
+import java.util.Date;
+
+import java.util.List;
+
+@Service
+public class ContentBaseServiceImpl implements ContentBaseService {
+
+    @Autowired
+    private ContentBaseManager contentBaseManager;
+    @Autowired
+    private ContentTagManager contentTagManager;
+    @Autowired
+    private ContentMaterialManager contentMaterialManager;
+    @Autowired
+    private ContentTextManager contentTextManager;
+    @Autowired
+    private ContentPicManager contentPicManager;
+    @Autowired
+    private ContentOrderpicManager contentOrderpicManager;
+    @Autowired
+    private ContentPicsetManager contentPicsetManager;
+    @Autowired
+    private ContentVideosDefaultContentManager contentVideosDefaultContentManager;
+    @Autowired
+    private ContentVediolv2Manager contentVediolv2Manager;
+
+
+    @Override
+    public Page<ContentBaseDTO> qryContentBasePageList(ContentBasePageReq page) {
+        return contentBaseManager.qryContentBasePageList(page);
+    }
+
+    @Override
+    public List<ContentBaseDTO> qryContentBaseList(ContentBaseDTO contentBaseDTO) {
+        return contentBaseManager.qryContentBaseList(contentBaseDTO);
+    }
+
+
+    @Override
+    public ContentBaseDTO queryContentBase(ContentBaseDTO contentBaseDTO) {
+        return contentBaseManager.queryContentBase(contentBaseDTO);
+    }
+
+    @Override
+    @Transactional
+    public boolean addContentBase(ContentAddReq contentAddReq, String userId) throws Exception{
+        try {
+            ContentBase contentBase = contentAddReq.getContentBase();
+            ContentTag contentTag = contentAddReq.getContentTag();
+            ContentMaterial contentMaterial = contentAddReq.getContentMaterial();
+            //创建时间
+            Date date = new Date();
+
+            //插入内容基础信息
+            contentBase.setUpdDate(date);
+            contentBase.setStatus(0);
+            contentBase.setOprId(userId);
+            ContentBase contentBase1 = contentBaseManager.insertContentBase(contentBase);
+            //内容ID
+            Long contentId = contentBase1.getContentId();
+            Integer type = contentBase1.getType();
+
+            //插入标签内容
+            contentTag.setContentId(contentId);
+            contentTag.setOprDate(date);
+            contentTag.setOprId(userId);
+            contentTagManager.insertContentTag(contentTag);
+
+            //插入内容素材
+            contentMaterial.setContentid(contentId);
+            contentMaterial.setName(contentBase.getTitle()+"的素材");
+            contentMaterial.setUpddate(date);
+            contentMaterial.setLel(1);
+            contentMaterial.setOprid(userId);
+            ContentMaterial contentMaterial1 = contentMaterialManager.insertContentMaterial(contentMaterial);
+            //素材ID
+            Long matid = contentMaterial1.getMatid();
+
+            switch (type){
+                case 0:
+                    //软文
+                    ContentText contentText = contentAddReq.getContentText();
+                    contentText.setContentid(contentId);
+                    contentText.setUpddate(date);
+                    contentText.setOprid(userId);
+                    contentTextManager.insertContentText(contentText);
+                    break;
+                case 1:
+                    //单图
+                    ContentPic contentPic = contentAddReq.getContentPic();
+                    contentPic.setMatid(matid);
+                    contentPic.setContentid(contentId);
+                    contentPic.setUpddate(date);
+                    contentPic.setOprid(userId);
+                    contentPicManager.insertContentPic(contentPic);
+                    break;
+                case 2:
+                    //轮播图
+                    ContentOrderpic contentOrderpic = contentAddReq.getContentOrderpic();
+                    contentOrderpic.setMatid(matid);
+                    contentOrderpic.setContentid(contentId);
+                    contentOrderpic.setUpddate(date);
+                    contentOrderpic.setOprid(userId);
+                    contentOrderpicManager.insertContentOrderpic(contentOrderpic);
+                    break;
+                case 3:
+                    //推广图集
+                    ContentPicset contentPicset = contentAddReq.getContentPicset();
+                    contentPicset.setMatid(matid);
+                    contentPicset.setContentid(contentId);
+                    contentPicset.setUpddate(date);
+                    contentPicset.setOprid(userId);
+                    contentPicsetManager.insertContentPicset(contentPicset);
+                    break;
+                case 4:
+                    //纯视频
+                    ContentVideosDefaultContent contentVideosDefaultContent = contentAddReq.getContentVideosDefaultContent();
+                    contentVideosDefaultContent.setMatid(matid);
+                    contentVideosDefaultContent.setContentid(contentId);
+                    contentVideosDefaultContent.setUpddate(date);
+                    contentVideosDefaultContent.setHavelv2mat(0);
+                    contentVideosDefaultContent.setOprid(userId);
+                    contentVideosDefaultContentManager.insertContentVideosDefaultContent(contentVideosDefaultContent);
+                    break;
+                case 5:
+                    //关联视频
+                    ContentVediolv2 contentVediolv2 = contentAddReq.getContentVediolv2();
+                    ContentVideosDefaultContent contentVideosDefaultContent1 = contentAddReq.getContentVideosDefaultContent();
+                    contentVideosDefaultContent1.setMatid(matid);
+                    contentVideosDefaultContent1.setContentid(contentId);
+                    contentVideosDefaultContent1.setUpddate(date);
+                    contentVideosDefaultContent1.setHavelv2mat(1);
+                    contentVideosDefaultContent1.setOprid(userId);
+                    ContentVideosDefaultContent contentVideosDefaultContent2 = contentVideosDefaultContentManager.insertContentVideosDefaultContent(contentVideosDefaultContent1);
+                    Long videoMatid = contentVideosDefaultContent2.getMatid();
+
+                    //插入内容素材
+                    contentMaterial.setContentid(videoMatid);
+                    contentMaterial.setName(contentBase.getTitle()+"的素材");
+                    contentMaterial.setUpddate(date);
+                    contentMaterial.setLel(2);
+                    contentMaterial.setOprid(userId);
+                    ContentMaterial contentMaterial2 = contentMaterialManager.insertContentMaterial(contentMaterial);
+                    //素材ID
+                    Long matidForVediolv2 = contentMaterial2.getMatid();
+
+                    contentVediolv2.setMatid(matidForVediolv2);
+                    contentVediolv2.setUpmatid(videoMatid);
+                    contentVediolv2.setUpddate(date);
+                    contentVediolv2.setOprid(userId);
+                    contentVediolv2Manager.insertContentVediolv2(contentVediolv2);
+                    break;
+            }
+            return true;
+        }catch (Exception e){
+            return false;
+        }
+    }
+
+    /**
+     * 对内容基础信息进行删除操作，将表中该记录的状态更新为已作废/删除
+     * @param contentId
+     * @return
+     */
+    @Override
+    @Transactional
+    public boolean deleteContentBase(Long contentId) throws Exception{
+        try {
+            ContentBase contentBase = contentBaseManager.queryContentBaseById(contentId);
+            contentBase.setStatus(7);
+            contentBaseManager.updateContentBase(contentBase);
+            return true;
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+}

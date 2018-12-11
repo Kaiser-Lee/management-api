@@ -1,0 +1,649 @@
+package com.iwhalecloud.retail.oms.service.impl;
+
+import com.alibaba.dubbo.config.annotation.Service;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.iwhalecloud.retail.oms.consts.OmsConst;
+import com.iwhalecloud.retail.oms.dto.*;
+import com.iwhalecloud.retail.oms.dto.resquest.content.ContentAddReq;
+import com.iwhalecloud.retail.oms.dto.resquest.content.ContentBaseByObjTypePageReq;
+import com.iwhalecloud.retail.oms.dto.resquest.content.ContentBasePageReq;
+import com.iwhalecloud.retail.oms.dto.resquest.content.ContentEditReq;
+import com.iwhalecloud.retail.oms.entity.*;
+import com.iwhalecloud.retail.oms.manager.*;
+import com.iwhalecloud.retail.oms.service.ContentBaseService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+@Service
+public class ContentBaseServiceImpl implements ContentBaseService {
+
+    @Autowired
+    private ContentBaseManager contentBaseManager;
+    @Autowired
+    private ContentTagManager contentTagManager;
+    @Autowired
+    private ContentMaterialManager contentMaterialManager;
+    @Autowired
+    private ContentTextManager contentTextManager;
+    @Autowired
+    private ContentPicManager contentPicManager;
+    @Autowired
+    private ContentOrderpicManager contentOrderpicManager;
+    @Autowired
+    private ContentPicsetManager contentPicsetManager;
+    @Autowired
+    private ContentVideosManager contentVideosManager;
+    @Autowired
+    private ContentVediolv2Manager contentVediolv2Manager;
+    @Autowired
+    private ContentChkhisManager contentChkhisManager;
+
+    @Override
+    public Page<ContentBaseDTO> qryContentBasePageList(ContentBasePageReq page) {
+        return contentBaseManager.qryContentBasePageList(page);
+    }
+
+    @Override
+    public List<ContentBaseDTO> qryContentBaseList(ContentBaseDTO contentBaseDTO) {
+        return contentBaseManager.qryContentBaseList(contentBaseDTO);
+    }
+
+
+    @Override
+    public ContentBaseDTO queryContentBase(ContentBaseDTO contentBaseDTO) {
+        return contentBaseManager.queryContentBase(contentBaseDTO);
+    }
+
+    @Override
+    public List<ContentBaseDTO> remindBeforeInvalidate() {
+        List<ContentBaseDTO> contentBaseDTOS = contentBaseManager.getExpContentBases(3); //暂时天数写死，预留未来可配置参数;
+        return contentBaseDTOS;
+    }
+
+    @Override
+    public int invalidateContentBase() {
+        return contentBaseManager.invalidateContentBase();
+    }
+
+    @Override
+    @Transactional
+    public int updateContentBase(ContentBaseDTO contentBaseDTO, ContentChkhis contentChkhis) {
+        ContentBaseDTO contentBase = contentBaseManager.queryContentBaseById(contentBaseDTO.getContentId());
+        int updateNum = 0;
+        if(contentBase!=null){
+            updateNum = contentBaseManager.updateContentBase(contentBaseDTO);
+            if(updateNum>0){
+                contentChkhisManager.insertContentChkhis(contentChkhis);
+            }
+        }
+        return updateNum;
+    }
+
+    @Override
+    public Page<ContentBaseDTO> qryContentBaseByObjTypePageList(ContentBaseByObjTypePageReq page) {
+        return contentBaseManager.qryContentBaseByObjTypePageList(page);
+    }
+
+    @Override
+    @Transactional
+    public boolean addContentBase(ContentAddReq contentAddReq, String userId) throws Exception{
+        try {
+            ContentBaseDTO contentBaseDTO = contentAddReq.getContentBase();
+            List<ContentTagDTO> contentTagDTOList = contentAddReq.getContentTagList();
+            List<Map<String,Object>> itemInfo = contentAddReq.getItemInfo();
+            //创建时间
+            Date date = new Date();
+            Integer type = contentBaseDTO.getType();
+            //插入内容基础信息
+            contentBaseDTO.setUpdDate(date);
+            contentBaseDTO.setStatus(OmsConst.ContentStatusEnum.NOT_AUDIT.getCode());
+            contentBaseDTO.setOprId(userId);
+            ContentBaseDTO contentBaseDTO1 = contentBaseManager.insertContentBase(contentBaseDTO);
+            //内容ID
+            Long contentId = contentBaseDTO1.getContentId();
+
+            if(contentTagDTOList != null && contentTagDTOList.size() > 0){
+                //插入标签内容
+                for(ContentTagDTO contentTagDTO:contentTagDTOList){
+                    contentTagDTO.setContentId(contentId);
+                    contentTagDTO.setOprDate(date);
+                    contentTagDTO.setOprId(userId);
+                    contentTagManager.insertContentTag(contentTagDTO);
+                }
+            }
+
+            List<Map<String,Object>> objInfoList = null;
+            Map<String,Object> objInfo = null;
+            List<String> contentUrlList = null;
+            String contentUrl = null;
+            Integer objtype = null;
+            String objid = null;
+            String objurl = null;
+            ContentMaterialDTO contentMaterialDTO = null;
+            ContentMaterialDTO contentMaterialDTO1 = null;
+            Long matid = null;
+            switch (type){
+                case OmsConst.CONTENT_TEXT:
+                    //软文
+                    ContentTextDTO contentTextDTO = contentAddReq.getContentText();
+                    contentTextDTO.setContentid(contentId);
+                    contentTextDTO.setUpddate(date);
+                    contentTextDTO.setOprid(userId);
+                    contentTextManager.insertContentText(contentTextDTO);
+                    break;
+                case OmsConst.CONTENT_PIC:
+                    //单图
+                    contentUrlList = (List<String>)(itemInfo.get(0).get("contentUrl"));
+                     contentUrl= contentUrlList.get(0);
+                    objInfoList = (List<Map<String,Object>>)itemInfo.get(0).get("objInfo");
+                    objInfo = objInfoList.get(0);
+                    objtype = (Integer)objInfo.get("objType");
+                    objid = (String)objInfo.get("objId");
+                    objurl = (String)objInfo.get("objUrl");
+
+                    contentMaterialDTO = new ContentMaterialDTO();
+                    contentMaterialDTO.setContentid(contentId);
+                    contentMaterialDTO.setName(contentBaseDTO.getTitle()+"的素材");
+                    contentMaterialDTO.setUpddate(date);
+                    contentMaterialDTO.setPath(contentUrl);
+                    contentMaterialDTO.setThumbpath(contentUrl);
+                    contentMaterialDTO.setLel(OmsConst.CONTENT_MATERIAL_ONE_LEVEL);
+                    contentMaterialDTO.setOprid(userId);
+                    contentMaterialDTO1 = contentMaterialManager.insertContentMaterial(contentMaterialDTO);
+                    matid = contentMaterialDTO1.getMatid();
+
+                    ContentPicDTO contentPicDTO = new ContentPicDTO();
+                    contentPicDTO.setMatid(matid);
+                    contentPicDTO.setContentid(contentId);
+                    contentPicDTO.setUpddate(date);
+                    contentPicDTO.setOprid(userId);
+                    contentPicDTO.setObjid(objid);
+                    contentPicDTO.setObjtype(objtype);
+                    contentPicDTO.setObjurl(objurl);
+                    contentPicManager.insertContentPic(contentPicDTO);
+                    break;
+                case OmsConst.CONTENT_ORDERPIC:
+                    //轮播图
+                    ContentOrderpicDTO contentOrderpicDTO = null;
+                    int order = 0;
+                    for(Map<String,Object> item:itemInfo){
+                        contentUrlList = (List<String>)(item.get("contentUrl"));
+                        contentUrl = contentUrlList.get(0);
+                        objInfoList = (List<Map<String,Object>>)item.get("objInfo");
+                        objInfo = objInfoList.get(0);
+                        objtype = (Integer)objInfo.get("objType");
+                        objid = (String)objInfo.get("objId");
+                        objurl = (String)objInfo.get("objUrl");
+
+                        contentMaterialDTO = new ContentMaterialDTO();
+                        contentMaterialDTO.setContentid(contentId);
+                        contentMaterialDTO.setName(contentBaseDTO.getTitle()+"的素材");
+                        contentMaterialDTO.setUpddate(date);
+                        contentMaterialDTO.setPath(contentUrl);
+                        contentMaterialDTO.setThumbpath(contentUrl);
+                        contentMaterialDTO.setLel(OmsConst.CONTENT_MATERIAL_ONE_LEVEL);
+                        contentMaterialDTO.setOprid(userId);
+                        contentMaterialDTO1 = contentMaterialManager.insertContentMaterial(contentMaterialDTO);
+                        matid = contentMaterialDTO1.getMatid();
+
+                        contentOrderpicDTO = new ContentOrderpicDTO();
+                        contentOrderpicDTO.setMatid(matid);
+                        contentOrderpicDTO.setContentid(contentId);
+                        contentOrderpicDTO.setUpddate(date);
+                        contentOrderpicDTO.setOprid(userId);
+                        contentOrderpicDTO.setObjid(objid);
+                        contentOrderpicDTO.setObjtype(objtype);
+                        contentOrderpicDTO.setObjurl(objurl);
+                        contentOrderpicDTO.setPlayorder(order++);
+                        contentOrderpicManager.insertContentOrderpic(contentOrderpicDTO);
+                    }
+                    break;
+                case OmsConst.CONTENT_PICSET:
+                    //推广图集
+                    contentUrlList = (List<String>)itemInfo.get(0).get("contentUrl");
+                    objInfoList = (List<Map<String,Object>>)itemInfo.get(0).get("objInfo");
+                    objInfo = objInfoList.get(0);
+                    objtype = (Integer)objInfo.get("objType");
+                    objid = (String)objInfo.get("objId");
+                    objurl = (String)objInfo.get("objUrl");
+                    for(String contentUrlStr:contentUrlList){
+                        contentMaterialDTO = new ContentMaterialDTO();
+                        contentMaterialDTO.setContentid(contentId);
+                        contentMaterialDTO.setName(contentBaseDTO.getTitle()+"的素材");
+                        contentMaterialDTO.setUpddate(date);
+                        contentMaterialDTO.setPath(contentUrlStr);
+                        contentMaterialDTO.setThumbpath(contentUrlStr);
+                        contentMaterialDTO.setLel(OmsConst.CONTENT_MATERIAL_ONE_LEVEL);
+                        contentMaterialDTO.setOprid(userId);
+                        contentMaterialDTO1 = contentMaterialManager.insertContentMaterial(contentMaterialDTO);
+                        matid = contentMaterialDTO1.getMatid();
+
+                        ContentPicsetDTO contentPicsetDTO = new ContentPicsetDTO();
+                        contentPicsetDTO.setMatid(matid);
+                        contentPicsetDTO.setContentid(contentId);
+                        contentPicsetDTO.setUpddate(date);
+                        contentPicsetDTO.setOprid(userId);
+                        contentPicsetDTO.setObjtype(objtype);
+                        contentPicsetDTO.setObjid(objid);
+                        contentPicsetDTO.setObjurl(objurl);
+                        contentPicsetManager.insertContentPicset(contentPicsetDTO);
+                    }
+                    break;
+                case OmsConst.CONTENT_VIDEO:
+                    //纯视频
+                    contentUrlList = (List<String>)(itemInfo.get(0).get("contentUrl"));
+                    contentUrl = contentUrlList.get(0);
+                    objInfoList = (List<Map<String,Object>>)itemInfo.get(0).get("objInfo");
+                    objInfo = objInfoList.get(0);
+                    objtype = (Integer)objInfo.get("objType");
+                    objid = (String)objInfo.get("objId");
+
+                    contentMaterialDTO = new ContentMaterialDTO();
+                    contentMaterialDTO.setContentid(contentId);
+                    contentMaterialDTO.setName(contentBaseDTO.getTitle()+"的素材");
+                    contentMaterialDTO.setUpddate(date);
+                    contentMaterialDTO.setPath(contentUrl);
+                    contentMaterialDTO.setThumbpath(contentUrl);
+                    contentMaterialDTO.setLel(OmsConst.CONTENT_MATERIAL_ONE_LEVEL);
+                    contentMaterialDTO.setOprid(userId);
+                    contentMaterialDTO1 = contentMaterialManager.insertContentMaterial(contentMaterialDTO);
+                    matid = contentMaterialDTO1.getMatid();
+
+                    ContentVideosDTO contentVideosDTO = new ContentVideosDTO();
+                    contentVideosDTO.setMatid(matid);
+                    contentVideosDTO.setContentid(contentId);
+                    contentVideosDTO.setUpddate(date);
+                    contentVideosDTO.setHavelv2mat(OmsConst.ContentVedioStatusEnum.NOT_LV2.getCode());
+                    contentVideosDTO.setOprid(userId);
+                    contentVideosDTO.setObjid(objid);
+                    contentVideosDTO.setObjtype(objtype);
+                    contentVideosManager.insertContentVideosDefaultContent(contentVideosDTO);
+                    break;
+                case OmsConst.CONTENT_VIDEO_REL:
+                    //关联视频
+                    contentUrlList = (List<String>)(itemInfo.get(0).get("contentUrl"));
+                    contentUrl = contentUrlList.get(0);
+                    objInfoList = (List<Map<String,Object>>)itemInfo.get(0).get("objInfo");
+
+                    contentMaterialDTO = new ContentMaterialDTO();
+                    contentMaterialDTO.setContentid(contentId);
+                    contentMaterialDTO.setName(contentBaseDTO.getTitle()+"的素材");
+                    contentMaterialDTO.setUpddate(date);
+                    contentMaterialDTO.setPath(contentUrl);
+                    contentMaterialDTO.setThumbpath(contentUrl);
+                    contentMaterialDTO.setLel(OmsConst.CONTENT_MATERIAL_ONE_LEVEL);
+                    contentMaterialDTO.setOprid(userId);
+                    contentMaterialDTO1 = contentMaterialManager.insertContentMaterial(contentMaterialDTO);
+                    matid = contentMaterialDTO1.getMatid();
+
+                    //插入一级视频
+                    ContentVideosDTO contentVideosDTO1 = new ContentVideosDTO();
+                    contentVideosDTO1.setMatid(matid);
+                    contentVideosDTO1.setContentid(contentId);
+                    contentVideosDTO1.setUpddate(date);
+                    contentVideosDTO1.setHavelv2mat(OmsConst.ContentVedioStatusEnum.HAVE_LV2.getCode());
+                    contentVideosDTO1.setOprid(userId);
+                    ContentVideosDTO contentVideosDTO2 = contentVideosManager.insertContentVideosDefaultContent(contentVideosDTO1);
+                    Long videoMatid = contentVideosDTO2.getMatid();
+
+                    ContentVediolv2DTO contentVediolv2DTO = new ContentVediolv2DTO();
+                    for(Map<String,Object> objInfoItem:objInfoList){
+                        objtype = (Integer)objInfoItem.get("objType");
+                        objid = (String)objInfoItem.get("objId");
+                        objurl = (String)objInfoItem.get("objUrl");
+                        Integer beginTime = (Integer)objInfoItem.get("beginTime");
+                        Integer endTime = (Integer)objInfoItem.get("endTime");
+
+                        //插入内容素材
+                        contentMaterialDTO = new ContentMaterialDTO();
+                        contentMaterialDTO.setContentid(videoMatid);
+                        contentMaterialDTO.setName(contentBaseDTO.getTitle()+"的素材");
+                        contentMaterialDTO.setUpddate(date);
+                        contentMaterialDTO.setLel(OmsConst.CONTENT_MATERIAL_TWO_LEVEL);
+                        contentMaterialDTO.setOprid(userId);
+                        contentMaterialDTO.setPath(contentUrl);
+                        contentMaterialDTO.setThumbpath(contentUrl);
+                        ContentMaterialDTO contentMaterialDTO2 = contentMaterialManager.insertContentMaterial(contentMaterialDTO);
+                        //素材ID
+                        Long matidForVediolv2 = contentMaterialDTO2.getMatid();
+
+                        contentVediolv2DTO.setMatid(matidForVediolv2);
+                        contentVediolv2DTO.setUpmatid(videoMatid);
+                        contentVediolv2DTO.setUpddate(date);
+                        contentVediolv2DTO.setOprid(userId);
+                        contentVediolv2DTO.setObjtype(objtype);
+                        contentVediolv2DTO.setObjid(objid);
+                        contentVediolv2DTO.setObjurl(objurl);
+                        contentVediolv2DTO.setStartsec(beginTime);
+                        contentVediolv2DTO.setEndsec(endTime);
+                        contentVediolv2Manager.insertContentVediolv2(contentVediolv2DTO);
+                    }
+                    break;
+            }
+            return true;
+        }catch (Exception e){
+            return false;
+        }
+    }
+
+    @Override
+    @Transactional
+    public boolean editContentBase(ContentEditReq contentEditReq, String userId) throws Exception{
+        try {
+            //暂时按内容类型不可变更处理
+            List<Map<String,Object>> itemInfo = contentEditReq.getItemInfo();
+            ContentBaseDTO contentBaseDTO = contentEditReq.getContentBase();
+            //创建时间
+            Date date = new Date();
+            Integer type = contentBaseDTO.getType();
+            //内容ID
+            Long contentId = contentBaseDTO.getContentId();
+            //插入内容基础信息
+            contentBaseDTO.setUpdDate(date);
+            contentBaseDTO.setStatus(OmsConst.ContentStatusEnum.NOT_AUDIT.getCode());
+            contentBaseDTO.setOprId(userId);
+            contentBaseManager.updateContentBaseForEdit(contentBaseDTO);
+
+            //删除旧的关联标签
+            List<ContentTagDTO> oldContentTags = contentTagManager.queryContentTagByContentId(contentBaseDTO.getContentId());
+            for(ContentTagDTO oldContentTagsItem:oldContentTags){
+                contentTagManager.deleteContentTag(oldContentTagsItem);
+            }
+            List<ContentTagDTO> contentTags = contentEditReq.getContentTagList();
+
+            if(contentTags != null && contentTags.size() > 0) {
+                //插入标签内容
+                for (ContentTagDTO contentTag : contentTags) {
+                    contentTag.setContentId(contentId);
+                    contentTag.setOprDate(date);
+                    contentTag.setOprId(userId);
+                    contentTagManager.insertContentTag(contentTag);
+                }
+            }
+
+            List<Map<String,Object>> objInfoList = null;
+            Map<String,Object> objInfo = null;
+            List<String> contentUrlList = null;
+            String contentUrl = null;
+            Integer objtype = null;
+            String objid = null;
+            String objurl = null;
+            ContentMaterialDTO contentMaterialDTO = null;
+            ContentMaterialDTO contentMaterialDTO1 = null;
+            Long matid = null;
+            List<ContentMaterialDTO> oldContentMaterial = null;
+            List<Long> contentIds = null;
+            ContentVideosDTO contentVideosDefaultContent = null;
+            switch (type){
+                case OmsConst.CONTENT_TEXT:
+                    //软文
+                    ContentTextDTO contentText = contentEditReq.getContentText();
+                    contentText.setContentid(contentId);
+                    contentText.setUpddate(date);
+                    contentText.setOprid(userId);
+                    contentTextManager.updateContentText(contentText);
+                    break;
+                case OmsConst.CONTENT_PIC:
+                    //单图
+                    contentUrlList = (List<String>)(itemInfo.get(0).get("contentUrl"));
+                    contentUrl= contentUrlList.get(0);
+                    objInfoList = (List<Map<String,Object>>)itemInfo.get(0).get("objInfo");
+                    objInfo = objInfoList.get(0);
+                    objtype = (Integer)objInfo.get("objType");
+                    objid = (String)objInfo.get("objId");
+                    objurl = (String)objInfo.get("objUrl");
+                    contentMaterialDTO = new ContentMaterialDTO();
+                    contentMaterialDTO.setContentid(contentId);
+                    contentMaterialManager.deleteContentMaterial(contentMaterialDTO);
+
+                    contentMaterialDTO = new ContentMaterialDTO();
+                    contentMaterialDTO.setContentid(contentId);
+                    contentMaterialDTO.setName(contentBaseDTO.getTitle()+"的素材");
+                    contentMaterialDTO.setUpddate(date);
+                    contentMaterialDTO.setPath(contentUrl);
+                    contentMaterialDTO.setThumbpath(contentUrl);
+                    contentMaterialDTO.setLel(OmsConst.CONTENT_MATERIAL_ONE_LEVEL);
+                    contentMaterialDTO.setOprid(userId);
+                    contentMaterialDTO1 = contentMaterialManager.insertContentMaterial(contentMaterialDTO);
+                    matid = contentMaterialDTO1.getMatid();
+
+                    ContentPicDTO contentPic = new ContentPicDTO();
+                    contentPic.setContentid(contentId);
+                    contentPicManager.deleteContentPic(contentPic);
+
+                    contentPic = new ContentPicDTO();
+                    contentPic.setMatid(matid);
+                    contentPic.setContentid(contentId);
+                    contentPic.setUpddate(date);
+                    contentPic.setOprid(userId);
+                    contentPic.setObjid(objid);
+                    contentPic.setObjtype(objtype);
+                    contentPic.setObjurl(objurl);
+                    contentPicManager.insertContentPic(contentPic);
+                    break;
+                case OmsConst.CONTENT_ORDERPIC:
+                    //轮播图
+                    ContentOrderpicDTO contentOrderpic = null;
+                    contentMaterialDTO = new ContentMaterialDTO();
+                    contentMaterialDTO.setContentid(contentId);
+                    contentMaterialManager.deleteContentMaterial(contentMaterialDTO);
+
+                    contentOrderpic = new ContentOrderpicDTO();
+                    contentOrderpic.setContentid(contentId);
+                    contentOrderpicManager.deleteContentOrderpic(contentOrderpic);
+
+                    int i = 0;
+                    for(Map<String,Object> item:itemInfo){
+                        contentUrlList = (List<String>)(item.get("contentUrl"));
+                        contentUrl= contentUrlList.get(0);
+                        objInfoList = (List<Map<String,Object>>)item.get("objInfo");
+                        objInfo = objInfoList.get(0);
+                        objtype = (Integer)objInfo.get("objType");
+                        objid = (String)objInfo.get("objId");
+                        objurl = (String)objInfo.get("objUrl");
+
+                        contentMaterialDTO = new ContentMaterialDTO();
+                        contentMaterialDTO.setContentid(contentId);
+                        contentMaterialDTO.setName(contentBaseDTO.getTitle()+"的素材");
+                        contentMaterialDTO.setUpddate(date);
+                        contentMaterialDTO.setPath(contentUrl);
+                        contentMaterialDTO.setThumbpath(contentUrl);
+                        contentMaterialDTO.setLel(OmsConst.CONTENT_MATERIAL_ONE_LEVEL);
+                        contentMaterialDTO.setOprid(userId);
+                        contentMaterialDTO1 = contentMaterialManager.insertContentMaterial(contentMaterialDTO);
+                        matid = contentMaterialDTO1.getMatid();
+
+                        contentOrderpic = new ContentOrderpicDTO();
+                        contentOrderpic.setMatid(matid);
+                        contentOrderpic.setContentid(contentId);
+                        contentOrderpic.setUpddate(date);
+                        contentOrderpic.setOprid(userId);
+                        contentOrderpic.setObjid(objid);
+                        contentOrderpic.setObjtype(objtype);
+                        contentOrderpic.setObjurl(objurl);
+                        contentOrderpic.setPlayorder(i++);
+                        contentOrderpicManager.insertContentOrderpic(contentOrderpic);
+                    }
+                    break;
+                case OmsConst.CONTENT_PICSET:
+                    //推广图集
+                    contentMaterialDTO = new ContentMaterialDTO();
+                    contentMaterialDTO.setContentid(contentId);
+                    contentMaterialManager.deleteContentMaterial(contentMaterialDTO);
+
+                    ContentPicsetDTO contentPicset = new ContentPicsetDTO();
+                    contentPicset.setContentid(contentId);
+                    contentPicsetManager.deleteContentPicset(contentPicset);
+
+                    contentUrlList = (List<String>)itemInfo.get(0).get("contentUrl");
+                    objInfoList = (List<Map<String,Object>>)itemInfo.get(0).get("objInfo");
+                    objInfo = objInfoList.get(0);
+                    objtype = (Integer)objInfo.get("objType");
+                    objid = (String)objInfo.get("objId");
+                    objurl = (String)objInfo.get("objUrl");
+                    for(String contentUrlStr:contentUrlList){
+                        contentMaterialDTO = new ContentMaterialDTO();
+                        contentMaterialDTO.setContentid(contentId);
+                        contentMaterialDTO.setName(contentBaseDTO.getTitle()+"的素材");
+                        contentMaterialDTO.setUpddate(date);
+                        contentMaterialDTO.setPath(contentUrlStr);
+                        contentMaterialDTO.setThumbpath(contentUrlStr);
+                        contentMaterialDTO.setLel(OmsConst.CONTENT_MATERIAL_ONE_LEVEL);
+                        contentMaterialDTO.setOprid(userId);
+                        contentMaterialDTO1 = contentMaterialManager.insertContentMaterial(contentMaterialDTO);
+                        matid = contentMaterialDTO1.getMatid();
+
+                        contentPicset = new ContentPicsetDTO();
+                        contentPicset.setMatid(matid);
+                        contentPicset.setContentid(contentId);
+                        contentPicset.setUpddate(date);
+                        contentPicset.setOprid(userId);
+                        contentPicset.setObjtype(objtype);
+                        contentPicset.setObjid(objid);
+                        contentPicset.setObjurl(objurl);
+                        contentPicsetManager.insertContentPicset(contentPicset);
+                    }
+                    break;
+                case OmsConst.CONTENT_VIDEO:
+                    //纯视频
+                    contentUrlList = (List<String>)(itemInfo.get(0).get("contentUrl"));
+                    contentUrl= contentUrlList.get(0);
+                    objInfoList = (List<Map<String,Object>>)itemInfo.get(0).get("objInfo");
+                    objInfo = objInfoList.get(0);
+                    objtype = (Integer)objInfo.get("objType");
+                    objid = (String)objInfo.get("objId");
+
+                    contentMaterialDTO = new ContentMaterialDTO();
+                    contentMaterialDTO.setContentid(contentId);
+                    contentMaterialManager.deleteContentMaterial(contentMaterialDTO);
+
+                    contentMaterialDTO.setName(contentBaseDTO.getTitle()+"的素材");
+                    contentMaterialDTO.setUpddate(date);
+                    contentMaterialDTO.setPath(contentUrl);
+                    contentMaterialDTO.setThumbpath(contentUrl);
+                    contentMaterialDTO.setOprid(userId);
+                    contentMaterialDTO.setLel(OmsConst.CONTENT_MATERIAL_ONE_LEVEL);
+                    contentMaterialDTO1 = contentMaterialManager.insertContentMaterial(contentMaterialDTO);
+                    matid = contentMaterialDTO1.getMatid();
+
+                    contentVideosDefaultContent = new ContentVideosDTO();
+                    contentVideosDefaultContent.setContentid(contentId);
+                    contentVideosManager.deleteContentVideosDefaultContent(contentVideosDefaultContent);
+
+                    contentVideosDefaultContent.setUpddate(date);
+                    contentVideosDefaultContent.setOprid(userId);
+                    contentVideosDefaultContent.setObjid(objid);
+                    contentVideosDefaultContent.setObjtype(objtype);
+                    contentVideosDefaultContent.setMatid(matid);
+                    contentVideosDefaultContent.setHavelv2mat(OmsConst.ContentVedioStatusEnum.NOT_LV2.getCode());
+                    contentVideosManager.insertContentVideosDefaultContent(contentVideosDefaultContent);
+                    break;
+                case OmsConst.CONTENT_VIDEO_REL:
+                    //关联视频
+                    ContentVediolv2DTO contentVediolv2 = null;
+                    contentUrlList = (List<String>)(itemInfo.get(0).get("contentUrl"));
+                    contentUrl= contentUrlList.get(0);
+                    objInfoList = (List<Map<String,Object>>)itemInfo.get(0).get("objInfo");
+                    oldContentMaterial = contentMaterialManager.queryContentMaterialList(contentId);
+                    for(ContentMaterialDTO oldContentMaterialItem:oldContentMaterial){
+                        contentVediolv2 = new ContentVediolv2DTO();
+                        contentVediolv2.setMatid(oldContentMaterialItem.getMatid());
+                        contentVediolv2Manager.deleteContentVediolv2(contentVediolv2);
+                        contentMaterialManager.deleteContentMaterial(oldContentMaterialItem);
+                    }
+
+                    contentVideosDefaultContent = new ContentVideosDTO();
+                    contentVideosDefaultContent.setContentid(contentId);
+                    contentVideosManager.deleteContentVideosDefaultContent(contentVideosDefaultContent);
+                    contentIds = new ArrayList<Long>();
+                    contentIds.add(0,contentId);
+
+                    contentMaterialDTO = new ContentMaterialDTO();
+                    contentMaterialDTO.setContentid(contentId);
+                    contentMaterialDTO.setName(contentBaseDTO.getTitle()+"的素材");
+                    contentMaterialDTO.setUpddate(date);
+                    contentMaterialDTO.setPath(contentUrl);
+                    contentMaterialDTO.setThumbpath(contentUrl);
+                    contentMaterialDTO.setLel(OmsConst.CONTENT_MATERIAL_ONE_LEVEL);
+                    contentMaterialDTO.setOprid(userId);
+                    contentMaterialDTO1 = contentMaterialManager.insertContentMaterial(contentMaterialDTO);
+                    matid = contentMaterialDTO1.getMatid();
+
+                    //插入一级视频
+                    contentVideosDefaultContent.setUpddate(date);
+                    contentVideosDefaultContent.setOprid(userId);
+                    contentVideosDefaultContent.setObjid(objid);
+                    contentVideosDefaultContent.setObjtype(objtype);
+                    contentVideosDefaultContent.setMatid(matid);
+                    contentVideosDefaultContent.setHavelv2mat(OmsConst.ContentVedioStatusEnum.HAVE_LV2.getCode());
+                    ContentVideosDTO contentVideosDefaultContent2 = contentVideosManager.insertContentVideosDefaultContent(contentVideosDefaultContent);
+                    Long videoMatid = contentVideosDefaultContent2.getMatid();
+
+
+                    for(Map<String,Object> objInfoItem:objInfoList){
+                        objtype = (Integer)objInfoItem.get("objType");
+                        objid = (String)objInfoItem.get("objId");
+                        objurl = (String)objInfoItem.get("objUrl");
+                        Integer beginTime = (Integer)objInfoItem.get("beginTime");
+                        Integer endTime = (Integer)objInfoItem.get("endTime");
+
+                        //插入内容素材
+                        contentMaterialDTO = new ContentMaterialDTO();
+                        contentMaterialDTO.setContentid(videoMatid);
+                        contentMaterialDTO.setName(contentBaseDTO.getTitle()+"的素材");
+                        contentMaterialDTO.setUpddate(date);
+                        contentMaterialDTO.setLel(OmsConst.CONTENT_MATERIAL_TWO_LEVEL);
+                        contentMaterialDTO.setOprid(userId);
+                        contentMaterialDTO.setPath(contentUrl);
+                        contentMaterialDTO.setThumbpath(contentUrl);
+                        ContentMaterialDTO contentMaterialDTO2 = contentMaterialManager.insertContentMaterial(contentMaterialDTO);
+                        //素材ID
+                        Long matidForVediolv2 = contentMaterialDTO2.getMatid();
+                        contentVediolv2 = new ContentVediolv2DTO();
+                        contentVediolv2.setMatid(matidForVediolv2);
+                        contentVediolv2.setUpmatid(videoMatid);
+                        contentVediolv2.setUpddate(date);
+                        contentVediolv2.setOprid(userId);
+                        contentVediolv2.setObjtype(objtype);
+                        contentVediolv2.setObjid(objid);
+                        contentVediolv2.setObjurl(objurl);
+                        contentVediolv2.setStartsec(beginTime);
+                        contentVediolv2.setEndsec(endTime);
+                        contentVediolv2Manager.insertContentVediolv2(contentVediolv2);
+                    }
+                    break;
+            }
+            return true;
+        }catch (Exception e){
+            return false;
+        }
+    }
+
+    /**
+     * 对内容基础信息进行删除操作，将表中该记录的状态更新为已作废/删除
+     * @param contentId
+     * @return
+     */
+    @Override
+    @Transactional
+    public boolean contentBaseStatusChange(Long contentId,Integer status) throws Exception{
+        try {
+            ContentBaseDTO contentBaseDTO = contentBaseManager.queryContentBaseById(contentId);
+            contentBaseDTO.setStatus(status);
+            if(contentBaseManager.updateContentBase(contentBaseDTO) > 0){
+                return true;
+            }else{
+                return false;
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+}

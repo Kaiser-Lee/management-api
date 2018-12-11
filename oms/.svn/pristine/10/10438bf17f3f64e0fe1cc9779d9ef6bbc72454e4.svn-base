@@ -1,0 +1,27 @@
+package com.iwhalecloud.retail.oms.manager;
+
+import com.iwhalecloud.retail.oms.dto.ContentMaterialDTO;
+import com.iwhalecloud.retail.oms.dto.response.ContentMaterialListRespDTO;
+import com.iwhalecloud.retail.oms.entity.ContentMaterial;
+
+import com.iwhalecloud.retail.oms.entity.ContentMaterial;
+import org.springframework.stereotype.Component;
+import javax.annotation.Resource;
+import com.iwhalecloud.retail.oms.mapper.ContentMaterialMapper;
+import java.util.List;
+
+
+@Component
+public class ContentMaterialManager{
+    @Resource
+    private ContentMaterialMapper contentMaterialMapper;
+
+    public List<ContentMaterial> queryContentMaterialList(Long contentId) {
+        return contentMaterialMapper.queryContentMaterialList(contentId);
+    }
+
+    public ContentMaterial insertContentMaterial(ContentMaterial contentMaterial){
+        contentMaterialMapper.insert(contentMaterial);
+        return contentMaterial;
+    }
+}

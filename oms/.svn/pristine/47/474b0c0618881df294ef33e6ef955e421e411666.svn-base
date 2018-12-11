@@ -1,0 +1,119 @@
+package com.iwhalecloud.retail.oms.service.impl;
+
+import com.alibaba.fastjson.JSON;
+import com.github.tobato.fastdfs.domain.StorePath;
+import com.github.tobato.fastdfs.service.FastFileStorageClient;
+import com.iwhalecloud.retail.oms.OmsCommonConsts;
+import com.iwhalecloud.retail.oms.dto.response.CommonResultResp;
+import com.iwhalecloud.retail.oms.dto.response.FileManagerRespDTO;
+import com.iwhalecloud.retail.oms.dto.resquest.FileManagerDTO;
+import com.iwhalecloud.retail.oms.multithread.SynchroThread;
+import com.iwhalecloud.retail.oms.service.FileManagerService;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import com.alibaba.dubbo.config.annotation.Service;
+import org.springframework.util.StringUtils;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
+
+@Service
+@Slf4j
+public class FileManagerServiceImpl implements FileManagerService {
+
+    @Value("${fdfs.showUrl}")
+    private String dfsShowIp;
+
+    @Autowired
+    public FastFileStorageClient fastFileStorageClient;
+
+    public CommonResultResp uploadImage(FileManagerDTO file) {
+        CommonResultResp resultVO = new CommonResultResp();
+//        File file = new File("C:/Users/gongsheng9/Pictures/1.jpg");
+        InputStream fis = null;
+
+        try {
+            fis = new ByteArrayInputStream(Base64.decodeBase64(file.getImage()));
+
+            String fileName = file.getFileName();
+
+            String strs = fileName.substring(fileName.lastIndexOf(".") + 1);
+            if (!StringUtils.hasText(strs)) {
+                resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+                resultVO.setResultMsg("图片格式不对");
+                return resultVO;
+            }
+            StorePath storePath = fastFileStorageClient.uploadFile(fis, file.getFileSize(), strs, null);
+            FileManagerRespDTO resp = new FileManagerRespDTO();
+            BeanUtils.copyProperties(storePath, resp);
+            resp.setFileUrl(dfsShowIp + storePath.getFullPath());
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+            resultVO.setResultData(resp);
+            resultVO.setResultMsg("上传成功");
+            log.info("gs_10010_uploadImage,storePath{}", JSON.toJSONString(storePath));
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.info("gs_10010_上传图片异常，e{}", JSON.toJSONString(e));
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultMsg(e.getMessage());
+        } finally {
+            IOUtils.closeQuietly(fis);
+        }
+
+
+        return resultVO;
+    }
+
+    @Override
+    public CommonResultResp uploadImage(List<FileManagerDTO> files) {
+        CommonResultResp resultVO = new CommonResultResp();
+        Vector<Map<String, Object>> vector = new Vector<>();
+        SynchroThread synchroThread = new SynchroThread<FileManagerDTO>() {
+            @Override
+            public void exe(FileManagerDTO file) {
+                if (StringUtils.isEmpty(file.getImage()) || StringUtils.isEmpty(file.getFileName())) {
+                    return;
+                }
+                Map<String, Object> respImage = new HashMap<>();
+                CommonResultResp resp = uploadImage(file);
+                respImage.put("fileName", file.getFileName());
+                respImage.put("uploadObject", resp.getResultData());
+                vector.add(respImage);
+            }
+        };
+        synchroThread.start(files);
+        resultVO.setResultMsg("上传成功");
+        resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+        resultVO.setResultData(vector);
+        return resultVO;
+    }
+
+
+    public CommonResultResp deleteImg(FileManagerDTO fileName) {
+        CommonResultResp resultVO = new CommonResultResp();
+        if (fileName == null || StringUtils.isEmpty(fileName.getDeleteImgName())) {
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultMsg("图片名不能为空");
+            return resultVO;
+        }
+        try {
+            fastFileStorageClient.deleteFile(fileName.getDeleteImgName());
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+            resultVO.setResultMsg("删除成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultMsg(e.getMessage());
+        }
+        return resultVO;
+    }
+
+}

@@ -1,0 +1,86 @@
+package com.iwhalecloud.retail.oms.web.controller;
+
+import java.io.IOException;
+import java.sql.SQLException;
+
+import javax.servlet.http.HttpServletRequest;
+
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
+import com.alibaba.dubbo.rpc.RpcException;
+import com.iwhalecloud.retail.oms.common.ResultCodeEnum;
+import com.iwhalecloud.retail.oms.dto.ResultVO;
+import com.iwhalecloud.retail.oms.web.exception.UserNotLoginException;
+
+/**
+ * 统一异常控制类，捕获系统抛出的异常进行封装后返回到前台
+ * @author Z
+ *
+ */
+@ControllerAdvice  
+@Slf4j
+public class GlobalExceptionHandler extends BaseController<Object>{  
+  
+    @ResponseStatus(HttpStatus.OK)  
+    @ResponseBody  
+    @ExceptionHandler(SQLException.class)  
+    public ResultVO<Object> handleSQLException(HttpServletRequest request, Exception ex) {  
+        
+    	log.error("请求失败[" + request.getRequestURI() + "]", ex);
+        return resultVO(ResultCodeEnum.SYSTEM_ERROR.getCode(), ResultCodeEnum.SYSTEM_ERROR.getDesc(), ex.getMessage());
+    }  
+       
+    @ResponseStatus(value=HttpStatus.NOT_FOUND, reason="IOException occured")  
+    @ExceptionHandler(IOException.class)  
+    @ResponseBody  
+    public void handleIOException(){  
+    	log.error("handleIOException");
+    }  
+    
+    @ResponseStatus(HttpStatus.OK)  
+    @ResponseBody  
+    @ExceptionHandler(HttpMessageNotReadableException.class)  
+    public ResultVO<Object> handleHttpMessageNotReadableException(HttpServletRequest request, Exception ex){  
+    	log.error("请求失败[" + request.getRequestURI() + "]，参数异常", ex);
+    	
+    	return resultVO(ResultCodeEnum.PARAMTER_ERROR.getCode(), ResultCodeEnum.PARAMTER_ERROR.getDesc(), ex.getMessage());
+    }
+    
+    
+      
+    @ResponseStatus(HttpStatus.OK)  
+    @ResponseBody  
+    @ExceptionHandler(UserNotLoginException.class)  
+    public ResultVO<Object> signException(HttpServletRequest request,UserNotLoginException ex) {  
+    	log.error("请求失败[" + request.getRequestURI() + "]，用户未登录");
+        return ex.getResultVo(); 
+    }  
+  
+    
+    @ResponseStatus(HttpStatus.OK)  
+    @ResponseBody  
+    @ExceptionHandler(Exception.class)  
+    public ResultVO<Object> handleException(HttpServletRequest request,Exception ex){  
+    	log.error("请求失败[" + request.getRequestURI() + "]", ex);
+    	
+    	return resultVO(ResultCodeEnum.SYSTEM_ERROR.getCode(), ResultCodeEnum.SYSTEM_ERROR.getDesc(), ex.getMessage());
+    }
+    
+    @ResponseStatus(HttpStatus.OK)  
+    @ResponseBody  
+    @ExceptionHandler(RpcException.class)  
+    public ResultVO<Object> handleException(HttpServletRequest request,RpcException ex){  
+    	log.error("请求失败[" + request.getRequestURI() + "]，缺少服务提供", ex);
+    	
+    	return resultVO(ResultCodeEnum.FORBID_CONSUMER.getCode(), ResultCodeEnum.FORBID_CONSUMER.getDesc(), ex.getMessage());
+    }
+    
+    
+}  

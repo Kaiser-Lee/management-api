@@ -1,0 +1,57 @@
+package com.iwhalecloud.retail.oms.service.impl.order;
+
+import com.alibaba.dubbo.config.annotation.Service;
+import com.alibaba.fastjson.JSON;
+import com.iwhalecloud.retail.oms.dto.response.OrderDetailListDTO;
+import com.iwhalecloud.retail.oms.dto.response.OrderQueryListResp;
+import com.iwhalecloud.retail.oms.dto.resquest.order.SelectOrderRequestDTO;
+import com.iwhalecloud.retail.oms.handler.OrderSelectHandler;
+import com.iwhalecloud.retail.oms.rop.ZteRopClient;
+import com.iwhalecloud.retail.oms.service.order.MemberOrderService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import zte.params.order.req.OrderQueryReq;
+import zte.params.order.resp.OrderQueryResp;
+
+import java.util.List;
+import java.util.Map;
+
+@Service
+@Slf4j
+public class MemberOrderServiceImpl implements MemberOrderService {
+
+    @Autowired
+    private ZteRopClient zteRopClient;
+
+    @Autowired
+    private OrderSelectHandler orderSelectHandler;
+
+    @Override
+    public OrderQueryListResp selectOrder(SelectOrderRequestDTO request) {
+
+        OrderQueryReq orderQueryReq = orderSelectHandler.builderSelectWhere(request);
+
+        log.info("gs_10010_memberId orderQueryReq{}",JSON.toJSONString(orderQueryReq));
+        OrderQueryResp respQuery = zteRopClient.execute(orderQueryReq, OrderQueryResp.class);
+        OrderQueryListResp resp = new OrderQueryListResp();
+        BeanUtils.copyProperties(respQuery, resp);
+        resp.setPage(resp.getWebPage());
+        if (!"0".equals(resp.getError_code())) {
+            return resp;
+        }
+
+        List<OrderDetailListDTO> list = JSON.parseArray(JSON.toJSONString(resp.getPage().getData()), OrderDetailListDTO.class);
+        resp.getPage().setResult(list);
+        for (int i = 0; i < list.size(); i++) {
+            OrderDetailListDTO orderMap = list.get(i);
+            //查询订单商品信息
+            Map map=orderSelectHandler.selectGoodsByOrderId(orderMap.getOrder_id());
+            orderMap.setOrderItems((List) map.get("list"));
+            orderMap.setGoods_num((Integer) map.get("goodsSum"));
+            //查询物流信息
+            orderMap.setDeliveryList(orderSelectHandler.selectDeliveryByOrderId(orderMap.getOrder_id()));
+        }
+        return resp;
+    }
+}

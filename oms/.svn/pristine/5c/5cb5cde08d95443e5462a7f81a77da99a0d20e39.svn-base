@@ -1,0 +1,19 @@
+package com.iwhalecloud.retail.oms.dto.resquest;
+
+import lombok.Data;
+import params.cart.req.CartAddReq;
+
+import java.io.Serializable;
+import java.util.List;
+
+/**
+ * @Author My
+ * @Date 2018/11/13
+ **/
+@Data
+public class CartBatchAddReq implements Serializable {
+    /**
+     * 增加购物车列表
+     */
+    List<CartAddReq> cartAddReqList;
+}

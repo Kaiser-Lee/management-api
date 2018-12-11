@@ -1,0 +1,29 @@
+package com.iwhalecloud.retail.oms.dto.resquest;
+
+import com.ztesoft.net.annotation.ZteSoftCommentAnnotationParam;
+import com.ztesoft.net.mall.core.model.Comments;
+import lombok.Data;
+
+import java.io.Serializable;
+
+/**
+ * @Author My
+ * @Date 2018/10/10
+ **/
+@Data
+public class CommentsRequestDTO implements Serializable {
+    @ZteSoftCommentAnnotationParam(
+            name = "用户ID",
+            type = "String",
+            isNecessary = "Y",
+            desc = "用户ID"
+    )
+    private Comments comment;
+    @ZteSoftCommentAnnotationParam(
+            name = "类型",
+            type = "String",
+            isNecessary = "Y",
+            desc = "类型：1商品 2订单 默认为1"
+    )
+    private String action = "1";
+}

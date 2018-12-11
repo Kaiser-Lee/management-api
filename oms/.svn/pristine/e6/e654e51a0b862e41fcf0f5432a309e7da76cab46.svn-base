@@ -1,0 +1,37 @@
+package com.iwhalecloud.retail.oms.service.impl;
+
+import com.iwhalecloud.retail.oms.dto.ResultVO;
+import com.iwhalecloud.retail.oms.rop.ZteRopClient;
+import com.iwhalecloud.retail.oms.service.RegionService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.alibaba.dubbo.config.annotation.Service;
+import zte.params.region.req.RegionsListReq;
+import zte.params.region.resp.RegionsListResp;
+
+/**
+ * @Author pjq
+ * @Date 2018/10/11
+ **/
+@Slf4j
+@Service
+public class RegionServiceImpl implements RegionService {
+    @Autowired
+    private ZteRopClient client;
+
+    @Override
+    public ResultVO<RegionsListResp> listRegions(RegionsListReq req) {
+        log.info("RegionServiceImpl listRegions req={} ",req);
+        RegionsListResp resp = null;
+        try {
+            resp = client.execute(req,RegionsListResp.class);
+        }catch (Exception e){
+            log.error("RegionServiceImpl listRegions Exception={} ",e);
+            return ResultVO.error();
+        }
+        if(null == resp){
+            return ResultVO.error();
+        }
+        return ResultVO.success(resp);
+    }
+}

@@ -1,0 +1,39 @@
+package com.iwhalecloud.retail.oms.dto;
+
+import java.io.Serializable;
+
+/**
+ * @Auther: lin.wh
+ * @Date: 2018/10/25 00:10
+ * @Description:
+ */
+public class SelectTagListDTO implements Serializable {
+    private String tagName;
+    private Integer relaId;
+    private String tagDesc;
+
+    public String getTagName() {
+        return tagName;
+    }
+
+    public void setTagName(String tagName) {
+        this.tagName = tagName;
+    }
+
+    public Integer getRelaId() {
+        return relaId;
+    }
+
+    public void setRelaId(Integer relaId) {
+        this.relaId = relaId;
+    }
+
+    public String getTagDesc() {
+        return tagDesc;
+    }
+
+    public void setTagDesc(String tagDesc) {
+        this.tagDesc = tagDesc;
+    }
+}
+

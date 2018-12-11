@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="FrameworkDetectionExcludesConfiguration">
+    <file type="web" url="file://$PROJECT_DIR$/oms-boot" />
+    <file type="web" url="file://$PROJECT_DIR$/oms-service-boot" />
+    <file type="web" url="file://$PROJECT_DIR$/oms-web-boot" />
+  </component>
+  <component name="MavenProjectsManager">
+    <option name="originalFiles">
+      <list>
+        <option value="$PROJECT_DIR$/../partner/pom.xml" />
+        <option value="$PROJECT_DIR$/../partner/partner-web/pom.xml" />
+        <option value="$PROJECT_DIR$/pom.xml" />
+        <option value="$PROJECT_DIR$/../goods/pom.xml" />
+        <option value="$PROJECT_DIR$/../other/pom.xml" />
+        <option value="$PROJECT_DIR$/../order/pom.xml" />
+        <option value="$PROJECT_DIR$/../system/pom.xml" />
+      </list>
+    </option>
+    <option name="ignoredFiles">
+      <set>
+        <option value="$PROJECT_DIR$/../other/partner-client/pom.xml" />
+        <option value="$PROJECT_DIR$/../other/partner-datasource/pom.xml" />
+        <option value="$PROJECT_DIR$/../other/partner-service-boot/pom.xml" />
+        <option value="$PROJECT_DIR$/../other/partner-service/pom.xml" />
+        <option value="$PROJECT_DIR$/../other/pom.xml" />
+      </set>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/classes" />
+  </component>
+  <component name="SvnBranchConfigurationManager">
+    <option name="myConfigurationMap">
+      <map>
+        <entry key="$PROJECT_DIR$/../goods">
+          <value>
+            <SvnBranchConfiguration>
+              <option name="trunkUrl" value="http://10.45.47.119/svn/NewRetail/V1.0.1/goods" />
+            </SvnBranchConfiguration>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$">
+          <value>
+            <SvnBranchConfiguration>
+              <option name="trunkUrl" value="http://10.45.47.119/svn/NewRetail/V1.0.1/oms" />
+            </SvnBranchConfiguration>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/../order">
+          <value>
+            <SvnBranchConfiguration>
+              <option name="trunkUrl" value="http://10.45.47.119/svn/NewRetail/V1.0.1/retail/order" />
+            </SvnBranchConfiguration>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/../partner">
+          <value>
+            <SvnBranchConfiguration>
+              <option name="trunkUrl" value="http://10.45.47.119/svn/NewRetail/V1.0.1/partner" />
+            </SvnBranchConfiguration>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/../system">
+          <value>
+            <SvnBranchConfiguration>
+              <option name="trunkUrl" value="http://10.45.47.119/svn/NewRetail/V1.0.1/retail/system" />
+            </SvnBranchConfiguration>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>

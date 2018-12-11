@@ -1,0 +1,71 @@
+package com.iwhalecloud.retail.oms.service.impl;
+
+import com.iwhalecloud.retail.oms.dto.CloudShelfDTO;
+import com.iwhalecloud.retail.oms.dto.resquest.cloud.CloudShelfAddReq;
+import com.iwhalecloud.retail.oms.manager.CloudShelfManager;
+import com.iwhalecloud.retail.oms.rop.ZteRopClient;
+import com.iwhalecloud.retail.oms.service.CloudShelfService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.alibaba.dubbo.config.annotation.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * @Auther: lin.wh
+ * @Date: 2018/10/15 10:28
+ * @Description: 云货架实现类
+ */
+
+@Slf4j
+@Service
+public class CloudShelfServiceImpl implements CloudShelfService {
+
+    @Autowired
+    private ZteRopClient client;
+
+    @Autowired
+    private CloudShelfManager cloudShelfManager;
+
+    @Override
+    public List<CloudShelfDTO> queryCloudShelfList(HashMap<String, Object> map) {
+        return cloudShelfManager.queryCloudShelfList(map);
+    }
+
+    @Override
+    public CloudShelfDTO queryCloudShelfListDetails(String num) {
+        return cloudShelfManager.queryCloudShelfListDetails(num);
+    }
+
+    @Override
+    @Transactional
+    public List<CloudShelfDTO> createCloudShelf(CloudShelfAddReq req) {
+        List<CloudShelfDTO> cloudShelfDTOs = new ArrayList<>();
+        for (Map<String, String> shelfCategory: req.getShelfCategorys()) {
+            CloudShelfDTO cloudShelfDTO = new CloudShelfDTO();
+            cloudShelfDTO.setShelfTemplatesNumber(req.getShelfTemplatesNumber());
+            cloudShelfDTO.setShelfCategoryId(shelfCategory.get("shelfCategoryId"));
+            cloudShelfDTO.setShelfCategoryName(shelfCategory.get("shelfCategoryName"));
+            int t = cloudShelfManager.createCloudShelf(cloudShelfDTO);
+        }
+        return null;
+    }
+
+    @Override
+    public int updateCloudShelfStatus(CloudShelfDTO dto) {
+        int t = cloudShelfManager.editCloudShelf(dto);
+        return t;
+    }
+
+    @Override
+    public int deleteCloudShelf(CloudShelfDTO dto) {
+        int t = cloudShelfManager.deleteCloudShelf(dto);
+        return t;
+    }
+}
+

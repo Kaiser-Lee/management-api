@@ -1,0 +1,26 @@
+project:
+  name: 测试环境
+
+server:
+  port: 8026
+
+spring:
+  dubbo:
+    application:
+      name: order-consumer
+    registry:
+      address: zookeeper://10.45.47.181:2181
+    #      address: zookeeper://localhost:2181
+    protocol:
+      name: dubbo
+      port: 20880
+    scan: com.iwhalecloud.retail
+
+
+wechat:
+  mp:
+    appId: wxce5f9c8f47cbcebf
+    secret: 16713f0f1df5c6d2a6c281dca29952e0
+    token: iwhalecloud
+    aesKey: 1CLJdwSqEoIS9Ym7HucEGdgsTbZ9m5hKdCQTEUAKKih
+    notifyServer: https://gy.ztesoft.com

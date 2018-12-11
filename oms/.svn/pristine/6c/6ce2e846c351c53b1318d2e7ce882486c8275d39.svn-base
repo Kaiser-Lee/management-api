@@ -1,0 +1,27 @@
+package com.iwhalecloud.retail.oms.service.impl;
+
+import com.iwhalecloud.retail.oms.entity.ContentChkhis;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.alibaba.dubbo.config.annotation.Service;
+import lombok.extern.slf4j.Slf4j;
+import com.iwhalecloud.retail.oms.manager.ContentChkhisManager;
+import com.iwhalecloud.retail.oms.service.ContentChkhisService;
+import org.springframework.transaction.annotation.Transactional;
+
+
+@Service
+@Slf4j
+public class ContentChkhisServiceImpl implements ContentChkhisService {
+
+    @Autowired
+    private ContentChkhisManager contentChkhisManager;
+
+
+    @Override
+    @Transactional
+    public int insertContentChkhis(ContentChkhis contentChkhis) {
+        return  contentChkhisManager.insertContentChkhis(contentChkhis);
+    }
+
+
+}

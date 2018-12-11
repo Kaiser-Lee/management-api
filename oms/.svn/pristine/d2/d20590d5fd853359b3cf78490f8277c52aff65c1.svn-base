@@ -1,0 +1,79 @@
+package com.iwhalecloud.retail.oms.service.impl.order;
+
+import com.alibaba.dubbo.config.annotation.Service;
+import com.alibaba.fastjson.JSON;
+import com.iwhalecloud.retail.oms.dto.response.OrderDetailListDTO;
+import com.iwhalecloud.retail.oms.dto.response.OrderQueryListResp;
+import com.iwhalecloud.retail.oms.dto.resquest.order.SelectOrderRequestDTO;
+import com.iwhalecloud.retail.oms.rop.ZteRopClient;
+import com.iwhalecloud.retail.oms.service.order.MemberOrderService;
+import com.ztesoft.net.mall.core.model.OrderQueryParam;
+import com.ztesoft.net.model.OrderGoodsItemModel;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
+import zte.params.order.req.OrderGoodsItemModelsReq;
+import zte.params.order.req.OrderQueryReq;
+import zte.params.order.resp.OrderGoodsItemModelsResp;
+import zte.params.order.resp.OrderQueryResp;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Service
+@Slf4j
+public class MemberOrderServiceImpl implements MemberOrderService {
+
+    @Autowired
+    private ZteRopClient zteRopClient;
+
+    @Override
+    public OrderQueryListResp selectOrder(SelectOrderRequestDTO request) {
+
+        OrderQueryReq orderQueryReq = new OrderQueryReq();
+        OrderQueryParam orderQueryParam = new OrderQueryParam();
+
+        if(StringUtils.isEmpty(request.getOrderStatus())){    //查询全部订单状态
+            orderQueryParam.setInOrderStatus("2,4,5,6,7,-10");//待付款，待发货，待收货，完成，带评价，取消，已删除
+        }else{    //指定订单状态
+            orderQueryParam.setOrderstatus(request.getOrderStatus());
+        }
+
+        orderQueryParam.setEndTime(request.getEndTime());  //结束时间
+        orderQueryParam.setStartTime(request.getStartTime()); //起始时间
+        orderQueryParam.setOrderId(request.getOrderId()); //订单号
+
+        orderQueryParam.setMember_id(request.getMemberId());  //memberID
+        orderQueryReq.setPage_index(String.valueOf(request.getPageNo())); //分页
+        orderQueryReq.setPage_size(String.valueOf(request.getPageSize())); //数量
+        orderQueryReq.setOrderQueryParam(orderQueryParam);
+
+        log.info("gs_10010_memberId orderQueryReq{}",JSON.toJSONString(orderQueryReq));
+        OrderQueryResp respQuery = zteRopClient.execute(orderQueryReq, OrderQueryResp.class);
+        OrderQueryListResp resp = new OrderQueryListResp();
+        BeanUtils.copyProperties(respQuery, resp);
+        resp.setPage(resp.getWebPage());
+        if (!"0".equals(resp.getError_code())) {
+            return resp;
+        }
+
+        List<OrderDetailListDTO> list = JSON.parseArray(JSON.toJSONString(resp.getPage().getData()), OrderDetailListDTO.class);
+        resp.getPage().setResult(list);
+        for (int i = 0; i < list.size(); i++) {
+            List item_list = new ArrayList();
+            OrderDetailListDTO orderMap = list.get(i);
+            //根据订单ID查询商品
+            OrderGoodsItemModelsReq itemReq = new OrderGoodsItemModelsReq();
+            itemReq.setOrder_id(orderMap.getOrder_id());
+            OrderGoodsItemModelsResp itemResp = zteRopClient.execute(itemReq, OrderGoodsItemModelsResp.class);
+            List<OrderGoodsItemModel> orderItemsList = itemResp.getOrderItems();
+            for (int j = 0; j < orderItemsList.size(); j++) {
+                OrderGoodsItemModel orderGoodsItem = orderItemsList.get(j);
+                item_list.add(orderGoodsItem);
+            }
+            orderMap.setOrderItems(item_list);
+        }
+        return resp;
+    }
+}

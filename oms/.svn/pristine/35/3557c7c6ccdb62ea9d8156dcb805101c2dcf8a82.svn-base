@@ -1,0 +1,42 @@
+package com.iwhalecloud.retail.oms.manager;
+
+import com.iwhalecloud.retail.oms.entity.ContentPublish;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
+
+import com.iwhalecloud.retail.oms.mapper.ContentPublishMapper;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+
+@Component
+public class ContentPublishManager {
+    @Resource
+    private ContentPublishMapper contentPublishMapper;
+
+
+    public List<ContentPublish> queryContentPublishList(HashMap<String, Object> map) {
+        return contentPublishMapper.queryContentPublishList(map);
+    }
+
+    public int deleteContentPublish(ContentPublish dto) {
+        return contentPublishMapper.deleteContentPublish(dto);
+    }
+
+    public int createContentPublish(ContentPublish dto) {
+        int t = contentPublishMapper.insert(dto);
+        try {
+//            contentPublishMapper.up
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return t;
+    }
+
+    public int updateContentPublishStatus(ContentPublish dto) {
+        return contentPublishMapper.updateById(dto);
+    }
+}

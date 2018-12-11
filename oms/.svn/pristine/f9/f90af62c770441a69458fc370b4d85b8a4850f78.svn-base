@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 指定工作空间，要与接口名相同，源代码没有去看，猜测应该是通过"这里的namespace.下边方法的id"来定位方法的 -->
+<mapper namespace="com.iwhalecloud.retail.oms.mapper.CloudShelfMapper">
+
+    <select id="queryCloudShelfList" parameterType="com.iwhalecloud.retail.oms.dto.resquest.CloudShelfPageReq"
+            resultType="com.iwhalecloud.retail.oms.dto.CloudShelfDTO">
+        SELECT * FROM cloud_shelf t
+        <where>
+            <if test="pageReq.adscriptionShopId!=null">
+                and t.adscription_shop_id =#{pageReq.adscriptionShopId}
+            </if>
+            <if test="pageReq.param!=null">
+                and t.name like concat(concat('%',#{pageReq.param}),'%') or t.num=#{pageReq.param}
+            </if>
+        </where>
+        order by gmt_create desc
+    </select>
+
+    <select id="queryCloudShelfListDetails" parameterType="String"
+            resultType="com.iwhalecloud.retail.oms.dto.CloudShelfDTO">
+		SELECT * FROM cloud_shelf t WHERE t.num=#{num}
+	</select>
+
+    <select id="queryCloudShelfListDetails1" parameterType="String"
+            resultType="com.iwhalecloud.retail.oms.dto.CloudShelfDetailDTO">
+		SELECT * FROM cloud_shelf_detail t WHERE t.cloud_shelf_number=#{num} and is_deleted = 0
+	</select>
+
+    <select id="queryCloudShelfListDetails2" parameterType="String"
+            resultType="com.iwhalecloud.retail.oms.dto.OperatingPositionBindDTO">
+		SELECT * FROM OPERATING_POSITION_BIND t WHERE t.OPERATING_POSITION_ID=#{operatingPositionId} and is_deleted = 0
+	</select>
+
+    <select id="queryCloudShelfListDetails3" parameterType="String"
+            resultType="com.iwhalecloud.retail.oms.dto.CloudDeviceDTO">
+		SELECT * FROM cloud_device t WHERE t.cloud_shelf_number in #{num} and is_deleted = 0
+	</select>
+
+    <select id="queryCloudShelfListDetails4" parameterType="String"
+            resultType="com.iwhalecloud.retail.oms.dto.ContentMaterialDTO">
+		SELECT * FROM t_content_material t WHERE t.contentid = #{contentNumber}
+	</select>
+
+    <insert id="createCloudShelf" parameterType="com.iwhalecloud.retail.oms.dto.CloudShelfDTO">
+		insert into cloud_Shelf (gmt_create,gmt_modified,creator,modifier,is_deleted,number,shelf_templates_number,content_templates_number,status,shelf_category_id,support_device_type,adscription_shop,adscription_city) values (#{gmtCreate},#{gmtModified},#{creator},#{modifier},#{isDeleted},#{number},#{shelfTemplatesNumber},#{contentTemplatesNumber},#{status},#{shelfCategoryId},#{supportDeviceType},#{adscriptionShop},#{adscriptionCity})
+	</insert>
+
+    <update id="editCloudShelf" parameterType="com.iwhalecloud.retail.oms.dto.CloudShelfDTO">
+		UPDATE cloud_shelf set status = #{status}
+		WHERE id=#{id}
+	</update>
+
+    <delete id="deleteCloudShelf" parameterType="com.iwhalecloud.retail.oms.dto.CloudShelfDTO">
+		delete from cloud_shelf WHERE id=#{id}
+	</delete>
+
+    <update id="modifyCloudShelfByParam"
+            parameterType="com.iwhalecloud.retail.oms.dto.resquest.cloud.CloudShelfRequestDTO">
+        UPDATE cloud_shelf
+        <set>
+            <if test="status!=null">
+                status = #{status},
+            </if>
+            <if test="shelfName!=null">
+                name = #{shelfName},
+            </if>
+        </set>
+        WHERE num=#{num}
+    </update>
+
+</mapper>

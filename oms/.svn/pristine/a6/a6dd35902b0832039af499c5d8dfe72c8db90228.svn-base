@@ -1,0 +1,30 @@
+package com.iwhalecloud.retail.oms.manager;
+
+import com.iwhalecloud.retail.oms.dto.DefaultContentDTO;
+import com.iwhalecloud.retail.oms.mapper.DefaultContentMapper;
+import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
+
+
+@Component
+public class DefaultContentManager{
+    @Resource
+    private DefaultContentMapper defaultContentMapper;
+
+    /**
+     * 查询默认内容
+     * @param ID
+     * @return
+     * @author Ji.kai
+     * @date 2018/11/1 15:27
+     */
+    public DefaultContentDTO selectById(String ID) {
+
+        DefaultContentDTO defaultContentDTO = new DefaultContentDTO();
+        BeanUtils.copyProperties(defaultContentMapper.selectById(ID), defaultContentDTO);
+        return defaultContentDTO;
+    }
+    
+}

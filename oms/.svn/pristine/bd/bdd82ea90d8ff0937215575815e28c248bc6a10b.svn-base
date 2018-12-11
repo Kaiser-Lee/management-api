@@ -1,0 +1,25 @@
+package com.iwhalecloud.retail.oms.web.controller.cloud;
+
+import com.alibaba.dubbo.config.annotation.Reference;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.CrossOrigin;
+
+import lombok.extern.slf4j.Slf4j;
+import com.iwhalecloud.retail.oms.service.DefaultContentService;
+import com.iwhalecloud.retail.oms.entity.DefaultContent;
+
+@Slf4j
+@RestController
+@CrossOrigin
+@RequestMapping("/api/defaultContent")
+public class DefaultContentController {
+	
+    @Reference
+    private DefaultContentService defaultContentService;
+
+    
+    
+    
+    
+}

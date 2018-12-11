@@ -1,0 +1,174 @@
+package com.iwhalecloud.retail.oms.service.impl;
+
+import com.iwhalecloud.retail.oms.VO.CartVO;
+import com.iwhalecloud.retail.oms.common.ResultCodeEnum;
+import com.iwhalecloud.retail.oms.dto.ResultVO;
+import com.iwhalecloud.retail.oms.rop.ZteRopClient;
+import com.iwhalecloud.retail.oms.service.CartService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.alibaba.dubbo.config.annotation.Service;
+import params.cart.req.CartAddReq;
+import params.cart.req.CartListReq;
+import params.cart.req.CartReverseSelectionReq;
+import params.cart.resp.CartAddResp;
+import params.cart.resp.CartListResp;
+import params.cart.resp.CartReverseSelectionResp;
+import zte.params.cart.req.CartDeleteReq;
+import zte.params.cart.resp.CartDeleteResp;
+import zte.params.goods.resp.GoodsPageListResp;
+import zte.params.order.req.CartUpdateReq;
+import zte.params.order.resp.CartUpdateResp;
+
+import java.util.List;
+
+/**
+ * @author pjq
+ * @date 2018/10/8
+ */
+@Slf4j
+@Service
+public class CartServiceImpl implements CartService {
+
+    @Autowired
+    private ZteRopClient client;
+
+    @Override
+    public ResultVO listCart(CartListReq req) {
+        log.info("CartServiceImpl listCart req={} ", req);
+        CartListResp resp = null;
+        try {
+            resp = client.execute(req, CartListResp.class);
+            if(null == resp){
+                return ResultVO.error("resp is null");
+            }
+            if(ResultCodeEnum.ERROR.getCode().equals(resp.getError_code())){
+                return ResultVO.error(resp.getError_msg());
+            }
+        }catch (Exception e){
+            log.error("CartServiceImpl listCart  Exception={} ",e);
+            return ResultVO.error();
+        }
+        CartVO cartVO = new CartVO();
+        if(null != resp.getCoupon()){
+            cartVO.setCoupon(resp.getCoupon());
+        }
+       if(null != resp.getGiftItemList()){
+            cartVO.setGiftItemList(resp.getGiftItemList());
+        }
+        if(null != resp.getGoodsItemList()){
+            cartVO.setGoodsItemList(resp.getGoodsItemList());
+        }
+        if(null != resp.getGroupBuyList()){
+            cartVO.setGroupBuyList(resp.getGroupBuyList());
+        }
+        if(null != resp.getLimitBuyList()){
+            cartVO.setLimitBuyList(resp.getLimitBuyList());
+        }
+        if(null != resp.getPgkItemList()){
+            cartVO.setPgkItemList(resp.getPgkItemList());
+        }
+        log.info("CartServiceImpl listCart resp={} ",resp);
+        return ResultVO.success(cartVO);
+    }
+
+    @Override
+    public CartAddResp addCart(CartAddReq req) {
+        log.info("CartServiceImpl addCart req={} ", req);
+        CartAddResp  resp = null;
+        try{
+            resp = client.execute(req, CartAddResp.class);
+        }catch (Exception e){
+            log.error("CartServiceImpl addCart  Exception={} ",e);
+            resp = new CartAddResp();
+            resp.setError_code(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getCode());
+            resp.setError_msg(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getDesc());
+        }
+        return resp;
+    }
+
+    @Override
+    public ResultVO batchAddCart(List<CartAddReq> cartAddReqList) {
+        log.info("CartServiceImpl batchAddCart cartAddReqList={} ",cartAddReqList);
+        for(CartAddReq cartAddReq:cartAddReqList){
+            CartAddResp  resp = null;
+            try{
+                resp = client.execute(cartAddReq, CartAddResp.class);
+                if (org.springframework.util.StringUtils.isEmpty(resp)) {
+                    return ResultVO.error();
+                }
+                if (ResultCodeEnum.SUCCESS.getCode().equals(resp.getError_code())) {
+                    return ResultVO.success(resp.getCart());
+                } else {
+                    return ResultVO.error(resp.getError_code(),resp.getError_msg());
+                }
+            }catch (Exception e){
+                log.error("CartServiceImpl batchAddCart  Exception={} ",e);
+                resp = new CartAddResp();
+                resp.setError_code(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getCode());
+                resp.setError_msg(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getDesc());
+            }
+        }
+        return ResultVO.success();
+    }
+
+    @Override
+    public ResultVO<Boolean> updateCartNum(CartUpdateReq req) {
+        log.info("CartServiceImpl updateCartNum req={} ", req);
+        CartUpdateResp  resp = null;
+        try {
+            resp = client.execute(req, CartUpdateResp.class);
+            if(null == resp){
+                return ResultVO.error("resp is null");
+            }
+            if(ResultCodeEnum.ERROR.getCode().equals(resp.getError_code())){
+                return ResultVO.error(resp.getError_msg());
+            }
+        }catch (Exception e){
+            log.error("CartServiceImpl updateCartNum  Exception={} ",e);
+            return ResultVO.error();
+        }
+        log.info("CartServiceImpl updateCartNum resp={} ",resp);
+        return ResultVO.success(true);
+    }
+
+    @Override
+    public ResultVO<Boolean> deleteCart(CartDeleteReq req) {
+        log.info("CartServiceImpl deleteCart req={} ",req);
+        CartDeleteResp resp  = null;
+        try{
+            resp =  client.execute(req, CartDeleteResp.class);
+            if(null == resp){
+                return ResultVO.error("resp is null");
+            }
+            if(ResultCodeEnum.ERROR.getCode().equals(resp.getError_code())){
+                return ResultVO.error(resp.getError_msg());
+            }
+        }catch (Exception e){
+            log.error("CartServiceImpl deleteCart Exception={} ",e);
+            return ResultVO.error();
+        }
+        log.info("CartServiceImpl deleteCart resp={} ",resp);
+        return ResultVO.success(true);
+    }
+
+    @Override
+    public ResultVO<Boolean> cartReverseSelection(CartReverseSelectionReq req) {
+        log.info("CartServiceImpl deleteCart req={} ",req);
+        CartReverseSelectionResp resp  = null;
+        try{
+            resp =  client.execute(req, CartReverseSelectionResp.class);
+            if(null == resp){
+                return ResultVO.error("resp is null");
+            }
+            if(ResultCodeEnum.ERROR.getCode().equals(resp.getError_code())){
+                return ResultVO.error(resp.getError_msg());
+            }
+        }catch (Exception e){
+            log.error("CartServiceImpl deleteCart Exception={} ",e);
+            return ResultVO.error();
+        }
+        log.info("CartServiceImpl deleteCart resp={} ",resp);
+        return ResultVO.success(true);
+    }
+}

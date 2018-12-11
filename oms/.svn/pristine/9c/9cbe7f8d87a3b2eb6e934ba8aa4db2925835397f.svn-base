@@ -1,0 +1,98 @@
+package com.iwhalecloud.retail.oms.web.controller.rop;
+
+import com.alibaba.dubbo.config.annotation.Reference;
+import com.iwhalecloud.retail.member.dto.request.AddMemberAdressReqDTO;
+import com.iwhalecloud.retail.member.dto.request.UpdateMemberAdressReqDTO;
+import com.iwhalecloud.retail.member.dto.response.MemberAdressRespDTO;
+import com.iwhalecloud.retail.member.service.MemberAdressService;
+import com.iwhalecloud.retail.oms.consts.DateUtils;
+import com.iwhalecloud.retail.oms.dto.ResultVO;
+import com.iwhalecloud.retail.oms.web.annotation.UserLoginToken;
+import com.iwhalecloud.retail.oms.web.controller.BaseController;
+import com.iwhalecloud.retail.oms.web.interceptor.MemberContext;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.web.bind.annotation.*;
+import zte.params.addr.req.MemberAddressDeleteReq;
+
+import java.util.List;
+/**
+ * @author pjq
+ * @date 2018/10/8
+ */
+@RestController
+@RequestMapping("/api/rop/address")
+@Slf4j
+public class MemberAddressROPController extends BaseController {
+	@Reference
+   private MemberAdressService memberAddressService;
+
+
+
+    @GetMapping(value="listMemberAddress")
+    @UserLoginToken
+   public ResultVO<List<MemberAdressRespDTO>> listMemberAddress(){
+        String memberId = MemberContext.getMemberId();
+        if(StringUtils.isEmpty(memberId)){
+            return failResultVO();
+        }
+        List<MemberAdressRespDTO> resultVO = memberAddressService.listMemberAddress(memberId);
+        log.info("MemberAddressController listMemberAddress resultVO={} ",resultVO);
+        return ResultVO.success(resultVO);
+   }
+
+    @RequestMapping(value="addMemberAddress",method = RequestMethod.POST)
+    @UserLoginToken
+    public ResultVO<Integer> addMemeberAddress(@RequestBody AddMemberAdressReqDTO memberAddress){
+        log.info("MemberAddressController addMemeberAddress memberAddress={} ",memberAddress);
+        if(null == memberAddress){
+            return failResultVO();
+        }
+        String memberId = MemberContext.getMemberId();
+        if(StringUtils.isEmpty(memberId)){
+            return failResultVO();
+        }
+        memberAddress.setMemberId(memberId);
+        AddMemberAdressReqDTO req = new AddMemberAdressReqDTO();
+        int resp = memberAddressService.addAddress(req);
+        log.info("MemberAddressController addMemeberAddress resp={} ",resp);
+        if(resp<0){
+            return ResultVO.error();
+        }
+        return ResultVO.success(resp);
+    }
+
+    @RequestMapping(value="editMemberAddress",method = RequestMethod.POST)
+    @UserLoginToken
+    public ResultVO<Integer> editMemberAddress(@RequestBody UpdateMemberAdressReqDTO memberAddress){
+        log.info("MemberAddressController editMemberAddress memberAddress={} ",memberAddress);
+        if(null == memberAddress){
+            return failResultVO();
+        }
+        String memberId = MemberContext.getMemberId();
+        memberAddress.setMemberId(memberId);
+        memberAddress.setLastUpdate(DateUtils.currentSysTimeForStr());
+        int resp = memberAddressService.updateAddress(memberAddress);
+        log.info("MemberAddressController editMemberAddress resp={} ",resp);
+        if(resp<0){
+            return ResultVO.error();
+        }
+        return ResultVO.success(resp);
+    }
+
+    @GetMapping(value="deleteMemberAddress")
+    public ResultVO deleteMemberAddress(@RequestParam(value = "addressId", required=false) String addressId){
+        log.info("MemberAddressController deleteMemberAddress addressId={} ",addressId);
+        if(StringUtils.isEmpty(addressId)){
+            return failResultVO();
+        }
+        MemberAddressDeleteReq req = new MemberAddressDeleteReq();
+        req.setAddress_id(addressId);
+        int resp = memberAddressService.deleteAddress(addressId);
+        log.info("MemberAddressController deleteMemberAddress resp={} ",resp);
+        if(resp<0){
+            return ResultVO.error();
+        }
+        return ResultVO.success(resp);
+    }
+}

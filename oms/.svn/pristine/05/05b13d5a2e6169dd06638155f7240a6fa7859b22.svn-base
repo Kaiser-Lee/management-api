@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 指定工作空间，要与接口名相同，源代码没有去看，猜测应该是通过"这里的namespace.下边方法的id"来定位方法的 -->
+<mapper namespace="com.iwhalecloud.retail.oms.mapper.CloudShelfMapper">
+
+    <select id="queryCloudShelfList" parameterType="Map"
+            resultType="com.iwhalecloud.retail.oms.dto.CloudShelfDTO">
+        SELECT * FROM cloud_shelf t
+        <where>
+            <if test="id!=null">
+                t.adscription_city=#{id} or t.shelf_name=#{id} or t.id=#{id} or t.adscription_shop=#{id}
+            </if>
+        </where>
+        limit #{pageIndex},#{pageSize}
+    </select>
+
+    <select id="queryCloudShelfListDetails" parameterType="String"
+            resultType="com.iwhalecloud.retail.oms.dto.CloudShelfDTO">
+		SELECT * FROM cloud_shelf t WHERE t.num=#{num}
+	</select>
+
+    <insert id="createCloudShelf" parameterType="com.iwhalecloud.retail.oms.dto.CloudShelfDTO">
+		insert into cloud_Shelf (gmt_create,gmt_modified,creator,modifier,is_deleted,number,shelf_templates_number,content_templates_number,status,shelf_category_id,support_device_type,adscription_shop,adscription_city) values (#{gmtCreate},#{gmtModified},#{creator},#{modifier},#{isDeleted},#{number},#{shelfTemplatesNumber},#{contentTemplatesNumber},#{status},#{shelfCategoryId},#{supportDeviceType},#{adscriptionShop},#{adscriptionCity})
+	</insert>
+
+    <update id="editCloudShelf" parameterType="com.iwhalecloud.retail.oms.dto.CloudShelfDTO">
+		UPDATE cloud_shelf set status = #{status}
+		WHERE id=#{id}
+	</update>
+
+    <delete id="deleteCloudShelf" parameterType="com.iwhalecloud.retail.oms.dto.CloudShelfDTO">
+		delete from cloud_shelf WHERE id=#{id}
+	</delete>
+
+</mapper>

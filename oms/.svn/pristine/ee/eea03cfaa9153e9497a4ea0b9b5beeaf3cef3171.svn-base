@@ -1,0 +1,99 @@
+package com.iwhalecloud.retail.oms.service.impl;
+
+import com.iwhalecloud.retail.oms.common.ResultCodeEnum;
+import com.iwhalecloud.retail.oms.rop.ZteRopClient;
+import com.iwhalecloud.retail.oms.service.GoodsBrandService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.alibaba.dubbo.config.annotation.Service;
+import zte.params.brand.req.*;
+import zte.params.brand.resp.BrandGetResp;
+import zte.params.brand.resp.BrandListResp;
+import zte.params.brand.resp.BrandOperateResp;
+
+/**
+ * @author mzl
+ * @date 2018/10/23
+ */
+@Slf4j
+@Service
+public class GoodsBrandServiceImpl implements GoodsBrandService {
+
+    @Autowired
+    private ZteRopClient client;
+
+    @Override
+    public BrandGetResp getBrand(BrandGetReq req) {
+        log.info("GoodsBrandServiceImpl.getBrand req={}", req);
+        BrandGetResp resp;
+        try {
+            resp = client.execute(req, BrandGetResp.class);
+        } catch (Exception ex) {
+            log.error("GoodsBrandServiceImpl.getBrand Rop Invoke Exception, ex={}", ex);
+            resp = new BrandGetResp();
+            resp.setError_code(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getCode());
+            resp.setError_msg(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getDesc());
+        }
+        return resp;
+    }
+
+    @Override
+    public BrandListResp listBrand() {
+        BrandListAllReq req = new BrandListAllReq();
+        BrandListResp resp;
+        try {
+            resp = client.execute(req, BrandListResp.class);
+        } catch (Exception ex) {
+            log.error("GoodsBrandServiceImpl.listBrand Rop Invoke Exception, ex={}", ex);
+            resp = new BrandListResp();
+            resp.setError_code(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getCode());
+            resp.setError_msg(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getDesc());
+        }
+        return resp;
+    }
+
+    @Override
+    public BrandOperateResp addBrand(BrandAddReq req) {
+        log.info("GoodsBrandServiceImpl.addBrand req={}", req);
+        BrandOperateResp resp;
+        try {
+            resp = client.execute(req, BrandOperateResp.class);
+        } catch (Exception ex) {
+            log.error("GoodsBrandServiceImpl.addBrand Rop Invoke Exception, ex={}", ex);
+            resp = new BrandOperateResp();
+            resp.setError_code(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getCode());
+            resp.setError_msg(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getDesc());
+        }
+        return resp;
+    }
+
+    @Override
+    public BrandOperateResp updateBrand(BrandUpdateReq req) {
+        log.info("GoodsBrandServiceImpl.updateBrand req={}", req);
+        BrandOperateResp resp;
+        try {
+            resp = client.execute(req, BrandOperateResp.class);
+        } catch (Exception ex) {
+            log.error("GoodsBrandServiceImpl.updateBrand Rop Invoke Exception, ex={}", ex);
+            resp = new BrandOperateResp();
+            resp.setError_code(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getCode());
+            resp.setError_msg(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getDesc());
+        }
+        return resp;
+    }
+
+    @Override
+    public BrandOperateResp deleteBrand(BrandDeleteReq req) {
+        log.info("GoodsBrandServiceImpl.deleteBrand req={}", req);
+        BrandOperateResp resp;
+        try {
+            resp = client.execute(req, BrandOperateResp.class);
+        } catch (Exception ex) {
+            log.error("GoodsBrandServiceImpl.deleteBrand Rop Invoke Exception, ex={}", ex);
+            resp = new BrandOperateResp();
+            resp.setError_code(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getCode());
+            resp.setError_msg(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getDesc());
+        }
+        return resp;
+    }
+}

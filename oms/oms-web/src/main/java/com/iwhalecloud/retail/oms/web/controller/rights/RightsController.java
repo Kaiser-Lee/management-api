@@ -1,0 +1,135 @@
+package com.iwhalecloud.retail.oms.web.controller.rights;
+
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+
+import java.text.ParseException;
+
+import javax.validation.Valid;
+
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.alibaba.dubbo.config.annotation.Reference;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.iwhalecloud.retail.oms.web.annotation.UserLoginToken;
+import com.iwhalecloud.retail.oms.web.interceptor.MemberContext;
+import com.iwhalecloud.retail.rights.dto.ResultVO;
+import com.iwhalecloud.retail.rights.dto.request.CheckRightsRequestDTO;
+import com.iwhalecloud.retail.rights.dto.request.InputRightsRequestDTO;
+import com.iwhalecloud.retail.rights.dto.request.QueryCouponInstPageReq;
+import com.iwhalecloud.retail.rights.dto.request.QueryRightsReqDTO;
+import com.iwhalecloud.retail.rights.dto.request.SaveRightsRequestDTO;
+import com.iwhalecloud.retail.rights.dto.request.UserightsRequestDTO;
+import com.iwhalecloud.retail.rights.dto.response.QueryCouponInstRespDTO;
+import com.iwhalecloud.retail.rights.dto.response.QueryRightsRespDTO;
+import com.iwhalecloud.retail.rights.service.CouponInstService;
+import com.iwhalecloud.retail.rights.service.MktResCouponService;
+
+@RestController
+@RequestMapping("/api/rights")
+@Slf4j
+public class RightsController {
+
+	@Reference
+	private CouponInstService couponInstService;
+	@Reference
+	private MktResCouponService mktResCouponService;
+	
+	@ApiOperation(value = "权益查询", notes = "传入mktResName、mktResTypeId，进行查询操作")
+	@RequestMapping(value = "/queryRights", method = RequestMethod.POST)
+	public ResultVO queryRights(@RequestBody @ApiParam(value = "查询条件", required = true) QueryRightsReqDTO request ) {
+        ResultVO resultVO = new ResultVO();
+        log.info("request parameter request {}",request);
+        Page<QueryRightsRespDTO> queryRights = mktResCouponService.queryRights(request);
+        resultVO.setResultMsg("成功");
+        resultVO.setResultCode("0");
+        resultVO.setResultData(queryRights);
+        return resultVO;
+    }
+	
+	@ApiOperation(value = "权益实例查询", notes = "传入custNum，进行查询操作")
+    @ApiResponses({
+            @ApiResponse(code=400,message="请求参数没填好"),
+            @ApiResponse(code=404,message="请求路径没有或页面跳转路径不对")
+    })
+    @RequestMapping(value = "/queryCouponinst", method = RequestMethod.POST)
+	public ResultVO queryCouponinst(@RequestBody @ApiParam(value = "查询条件", required = true) QueryCouponInstPageReq request ) {
+        ResultVO resultVO = new ResultVO();
+        Page<QueryCouponInstRespDTO> queryCouponinst = couponInstService.queryCouponinst(request);
+        resultVO.setResultMsg("成功");
+        resultVO.setResultCode("0");
+        resultVO.setResultData(queryCouponinst);
+        return resultVO;
+    }
+	
+	
+	@ApiOperation(value = "实例入库", notes = "传入InputRightsRequestDTO")
+    @ApiResponses({
+            @ApiResponse(code=400,message="请求参数没填好"),
+            @ApiResponse(code=404,message="请求路径没有或页面跳转路径不对")
+    })
+	@RequestMapping(value = "/InputRights", method = RequestMethod.POST)
+    public ResultVO InputRights(@RequestBody @Valid InputRightsRequestDTO request) throws ParseException {
+        ResultVO resultVO = new ResultVO();
+        log.info("request parameter orderId {}",request);
+        return couponInstService.InputRights(request);
+    }
+	
+	@ApiOperation(value = "权益领取", notes = "传入InputRightsRequestDTO")
+	@ApiResponses({
+		@ApiResponse(code=400,message="请求参数没填好"),
+		@ApiResponse(code=404,message="请求路径没有或页面跳转路径不对")
+	})
+	@RequestMapping(value = "/saveRights", method = RequestMethod.POST)
+	@UserLoginToken
+	public ResultVO saveRights(@RequestBody SaveRightsRequestDTO request) {
+		ResultVO resultVO = new ResultVO();
+		log.info("request parameter orderId {}",request);
+		//获取memberId
+        String memberId = MemberContext.getMemberId();
+        request.setCustNum(memberId);
+		return couponInstService.saveRights(request);
+	}
+	
+	@ApiOperation(value = "权益校验", notes = "传入CheckRightsRequestDTO")
+	@ApiResponses({
+		@ApiResponse(code=400,message="请求参数没填好"),
+		@ApiResponse(code=404,message="请求路径没有或页面跳转路径不对")
+	})
+	@RequestMapping(value = "/checkRights", method = RequestMethod.POST)
+	@UserLoginToken
+	public ResultVO checkRights(@RequestBody CheckRightsRequestDTO request) {
+		ResultVO resultVO = new ResultVO();
+		log.info("request parameter orderId {}",request);
+		//获取memberId
+        String memberId = MemberContext.getMemberId();
+        request.setCustNum(memberId);
+		return couponInstService.checkRights(request);
+	}
+	
+	@ApiOperation(value = "权益权益核销", notes = "传入UserightsRequestDTO")
+	@ApiResponses({
+		@ApiResponse(code=400,message="请求参数没填好"),
+		@ApiResponse(code=404,message="请求路径没有或页面跳转路径不对")
+	})
+	@RequestMapping(value = "/userights", method = RequestMethod.POST)
+	@UserLoginToken
+	public ResultVO userights(@RequestBody UserightsRequestDTO request) {
+		ResultVO resultVO = new ResultVO();
+		log.info("request parameter orderId {}",request);
+		
+        //获取memberId
+        String memberId = MemberContext.getMemberId();
+        request.setCustNum(memberId);
+		return couponInstService.userights(request);
+	}
+	
+
+}

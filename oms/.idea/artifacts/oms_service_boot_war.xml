@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="oms-service-boot:war">
+    <output-path>$PROJECT_DIR$/oms-service-boot/target</output-path>
+    <root id="archive" name="oms-service-boot-0.0.1-SNAPSHOT.war">
+      <element id="artifact" artifact-name="oms-service-boot:war exploded" />
+    </root>
+  </artifact>
+</component>

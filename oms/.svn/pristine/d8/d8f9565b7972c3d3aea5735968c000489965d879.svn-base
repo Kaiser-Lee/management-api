@@ -1,0 +1,345 @@
+package com.iwhalecloud.retail.oms.web.controller.pay;
+
+import com.alibaba.dubbo.config.annotation.Reference;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.iwhalecloud.retail.oms.OmsCommonConsts;
+import com.iwhalecloud.retail.oms.consts.DateUtils;
+import com.iwhalecloud.retail.oms.dto.ResultVO;
+import com.iwhalecloud.retail.oms.web.annotation.PassToken;
+import com.iwhalecloud.retail.oms.web.controller.pay.param.NotifyRequest;
+import com.iwhalecloud.retail.oms.web.controller.pay.param.ToPayRequest;
+import com.iwhalecloud.retail.order.entity.Order;
+import com.iwhalecloud.retail.order.service.OrderService;
+import com.iwhalecloud.retail.pay.dto.OrderPayDTO;
+import com.iwhalecloud.retail.pay.dto.request.SaveOrderPayRequestDTO;
+import com.iwhalecloud.retail.pay.dto.request.UpdateOrderPayRequestDTO;
+import com.iwhalecloud.retail.pay.dto.response.SaveOrderPayResponseDTO;
+import com.iwhalecloud.retail.pay.dto.response.UpdateOrderPayResponseDTO;
+import com.iwhalecloud.retail.pay.service.OrderPayService;
+import com.ztesoft.form.util.StringUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.util.*;
+
+import static utils.MD5Util.MD5;
+
+@Slf4j
+@RestController
+@RequestMapping("/api/pay")
+public class PayController {
+
+    @Value("${pay.pay_url}")
+    private String payUrl;
+
+    @Value("${pay.return_url}")
+    private String returnUrl;
+
+    @Value("${pay.notify_url}")
+    private String notifyUrl;
+
+    @Value("${pay.busi_channel}")
+    private String busiChannel;
+
+    @Value("${pay.account_id}")
+    private String accountId;
+
+    @Value("${pay.key}")
+    private String key;
+
+    @Reference
+    private OrderPayService orderPayService;
+
+    @Reference
+    private OrderService orderService;
+    /**
+     *  去支付
+     * @return
+     */
+    @PostMapping("/toPay")
+    @PassToken
+    public ResultVO toPay(@RequestBody ToPayRequest toPayRequest){
+        Order order = orderService.getOrder(toPayRequest.getOrderId());
+        ResultVO resultVO = new ResultVO();
+        JSONObject payObj = new JSONObject();
+        // 业务渠道编码:业务渠道编码 说明：需要向电渠支付网关管理负责人申请。
+        payObj.put("busi_channel",busiChannel);
+        // 支付主帐号:业务渠道帐号    说明：需要向电渠支付网关管理负责人申请。
+        payObj.put("account_id",accountId);
+        // 支付渠道编码:
+        // 支付渠道编码(支付平台分配）
+        // BEST：翼支付
+        // ALI：支付宝
+        // WX：微信
+        // TEN: 财付通
+        // JT ： 集团电渠
+        // 说明：如需使用该字段，需向电渠支付网关管理负责人申请开通。
+        payObj.put("pay_channel", toPayRequest.getPayChannel());
+        // 业务渠道支付请求流水
+        // 由业务渠道提供，建议：yyyyMMddhhmmss + 6位随机数
+        payObj.put("request_seq", CreateSeq());
+        // 支付类型
+        //支付类型编码（支付平台定义）WEB：web网关
+        // WAP：wap网关
+        // NATIVE：扫码
+        // JSAPI : 微信公众号
+        // MWEB：微信H5
+        // NST：分期支付
+        payObj.put("pay_type", toPayRequest.getPayType());
+        // 请求时间:yyyyMMddhhmmss
+        payObj.put("request_time", DateUtils.dateToStr(new Date(),"yyyyMMddhhmmss"));
+        // 支付金额 单位：分
+        double pay_amount = order.getOrderAmount() * 100;
+        int pay_amount_int = (new Double(pay_amount)).intValue();
+        payObj.put("pay_amount",String.valueOf(pay_amount_int));
+        // 前台返回地址 用于接收交易返回的前台url。支付类型为WEB,WAP时此字段必填
+        payObj.put("return_url",returnUrl);
+        // 后台返回地址 用于接收交易返回的后台url
+        payObj.put("notify_url",notifyUrl);
+        //  银行编码 此参数对应银行编码表
+        payObj.put("bank_id", toPayRequest.getBankId());
+        // 分账明细 分账填写,不分账为空。格式：account1:800|account2:100|account3:100
+        payObj.put("div_details","");
+        // 分期数 只有选择银行分期支付时，此项才会校验
+        //中国工商银行:分期期数：3，6，9，12，18，24
+        // 中国银行 分期期数：3，6，12，24
+        payObj.put("ped_cnt","");
+        // 客户端IP 用户IP
+        payObj.put("client_ip","127.0.0.1");
+        // 指定支付方式
+        payObj.put("limit_pay","");
+        // 加密串 MD5签名
+        String sign = createSign(payObj, key);
+        payObj.put("sign",sign);
+        JSONObject order_info = new JSONObject();
+        // 订单号 业务渠道订单号
+        order_info.put("order_id", toPayRequest.getOrderId());
+        // 订单日期 yyyyMMddhhmmss
+        order_info.put("order_date", DateUtils.dateToStr(new Date(),"yyyyMMddhhmmss"));
+        // 订单关闭时间
+        // 超过此时间后订单不能支付，格式yyyyMMddhhmmss
+        //取值范围：5分钟~15天
+        order_info.put("over_time", CreateSeq());
+        // 订单描述 订单简要描述，用于支付时页面展示。
+        order_info.put("order_desc","");
+        payObj.put("order_info",order_info);
+        JSONObject attach_info = new JSONObject();
+        // 附加信息 商户附加信息。支付结果后台通知时原文返回
+        attach_info.put("attach","");
+        // 业务类型 默认填0001
+        attach_info.put("busi_code","0001");
+        // 业务标识 请参看业务填写说明
+        attach_info.put("product_id","08"); // 08 一般网购
+        // 终端号码
+        attach_info.put("tmnum","");
+        // 客户标识 pay_type为JSAPI时，传微信用户ID
+        attach_info.put("cust_id", toPayRequest.getOpenId());
+        // 产品描述
+        // pay_type为MWEB时，传固定格式数据：wap_url=xxxxx&wap_name=xxxx&商户自定义参数，如
+        //wap_url=http://waphn.189.cn&wap_name=湖南电信。
+        //B2B类交易时，交易描述限制为8个中文，超过此限制可能导致交易失败 SELECT *         FROM ORDER_PAY          WHERE order_id = '2018110919540512200852811'
+        attach_info.put("product_desc","一般网购");
+        payObj.put("attach_info",attach_info);
+        SaveOrderPayRequestDTO saveOrderPayRequestDTO = covertOrderPay(payObj);
+        SaveOrderPayResponseDTO responseDTO = orderPayService.saveOrderPay(saveOrderPayRequestDTO);
+        if(responseDTO.isFlag()) {
+            String jsonstr = JSON.toJSONString(payObj);
+            HttpClient httpClient = new DefaultHttpClient();
+            HttpPost httpPost = new HttpPost(this.payUrl);
+            httpPost.addHeader(HTTP.CONTENT_TYPE, "application/json");
+            StringEntity se = null;
+            try {
+                se = new StringEntity(jsonstr);
+                se.setContentType("text/json");
+                se.setContentEncoding(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
+                httpPost.setEntity(se);
+                HttpResponse response= httpClient.execute(httpPost);
+                //输出调用结果
+                if(response != null && response.getStatusLine().getStatusCode() == 200) {
+                    String result = null;
+                    try {
+                        result = EntityUtils.toString(response.getEntity());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    // 生成 JSON 对象
+                    JSONObject obj = JSONObject.parseObject(result);
+                    String errorcode = obj.getString("code");
+                    if ("0000".equals(errorcode)) {
+                        JSONObject result_data = obj.getJSONObject("result_data");
+                        String toPayUrl = result_data.getString("url");
+                        resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+                        resultVO.setResultData(toPayUrl);
+                        resultVO.setResultMsg("成功");
+                    }else{
+                        resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+                        resultVO.setResultMsg("失败");
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+                resultVO.setResultMsg("请求支付网关出差 "+e.getMessage());
+            }
+        }else{
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultMsg("入库失败");
+        }
+        return resultVO;
+    }
+
+    @PostMapping("/notifyUrl")
+    @PassToken
+    public String notify(@RequestBody NotifyRequest notifyRequest){
+        OrderPayDTO orderPayDTO = this.orderPayService.getOrderPayByOrderId(notifyRequest.getOrder_id());
+        JSONObject jsonObject = covertOrderPay(orderPayDTO);
+        String s = createSign(jsonObject, key);
+        UpdateOrderPayRequestDTO updateOrderPayRequestDTO = new UpdateOrderPayRequestDTO();
+        updateOrderPayRequestDTO.setTransactionId(orderPayDTO.getTransactionId());
+        if(s.equals(notifyRequest.getSign())){
+            //支付成功
+            updateOrderPayRequestDTO.setStatus("1100");
+            //订单支付成功
+        }else{
+            updateOrderPayRequestDTO.setStatus("1200");
+        }
+        updateOrderPayRequestDTO.setPayId(notifyRequest.getPay_id());
+        updateOrderPayRequestDTO.setTransSeq(notifyRequest.getTrans_seq());
+        updateOrderPayRequestDTO.setUpTransSeq(notifyRequest.getUp_trans_seq());
+        updateOrderPayRequestDTO.setPayChanlReqTransSeq(notifyRequest.getPay_chanl_req_trans_seq());
+        updateOrderPayRequestDTO.setBankTransSeq(notifyRequest.getBank_trans_seq());
+        UpdateOrderPayResponseDTO ret = this.orderPayService.updateOrderPay(updateOrderPayRequestDTO);
+        return "SUCCESS";
+    }
+
+    private JSONObject covertOrderPay(OrderPayDTO orderPayDTO){
+        JSONObject payObj = new JSONObject();
+        // 业务渠道编码:业务渠道编码 说明：需要向电渠支付网关管理负责人申请。
+        payObj.put("busi_channel",busiChannel);
+        // 支付主帐号:业务渠道帐号    说明：需要向电渠支付网关管理负责人申请。
+        payObj.put("account_id",accountId);
+        // 支付渠道编码:
+        // 支付渠道编码(支付平台分配）
+        // BEST：翼支付
+        // ALI：支付宝
+        // WX：微信
+        // TEN: 财付通
+        // JT ： 集团电渠
+        // 说明：如需使用该字段，需向电渠支付网关管理负责人申请开通。
+        payObj.put("pay_channel", orderPayDTO.getPayChannel());
+        // 业务渠道支付请求流水
+        // 由业务渠道提供，建议：yyyyMMddhhmmss + 6位随机数
+        payObj.put("request_seq", orderPayDTO.getRequestSeq());
+        // 支付类型
+        //支付类型编码（支付平台定义）WEB：web网关
+        // WAP：wap网关
+        // NATIVE：扫码
+        // JSAPI : 微信公众号
+        // MWEB：微信H5
+        // NST：分期支付
+        payObj.put("pay_type", orderPayDTO.getPayType());
+        // 请求时间:yyyyMMddhhmmss
+        payObj.put("request_time", DateUtils.dateToStr(orderPayDTO.getRequestTime(),"yyyyMMddhhmmss"));
+        // 支付金额 单位：分
+        payObj.put("pay_amount",String.valueOf(orderPayDTO.getPayAmount()));
+        // 前台返回地址 用于接收交易返回的前台url。支付类型为WEB,WAP时此字段必填
+        payObj.put("return_url",returnUrl);
+        // 后台返回地址 用于接收交易返回的后台url
+        payObj.put("notify_url",notifyUrl);
+        //  银行编码 此参数对应银行编码表
+        payObj.put("bank_id", orderPayDTO.getBankId());
+        // 分账明细 分账填写,不分账为空。格式：account1:800|account2:100|account3:100
+        payObj.put("div_details","");
+        // 分期数 只有选择银行分期支付时，此项才会校验
+        //中国工商银行:分期期数：3，6，9，12，18，24
+        // 中国银行 分期期数：3，6，12，24
+        payObj.put("ped_cnt","");
+        // 客户端IP 用户IP
+        payObj.put("client_ip","127.0.0.1");
+        // 指定支付方式
+        payObj.put("limit_pay","");
+
+        return payObj;
+    }
+
+    private SaveOrderPayRequestDTO covertOrderPay(JSONObject payObj){
+        SaveOrderPayRequestDTO saveOrderPayRequestDTO = new SaveOrderPayRequestDTO();
+        saveOrderPayRequestDTO.setBankId(payObj.getString("bank_id"));
+        saveOrderPayRequestDTO.setPayChannel(payObj.getString("pay_channel"));
+        saveOrderPayRequestDTO.setPayType(payObj.getString("pay_type"));
+        saveOrderPayRequestDTO.setStatus("1000");
+        saveOrderPayRequestDTO.setAttachInfo(payObj.getString("attach_info"));
+        saveOrderPayRequestDTO.setClientIp(payObj.getString("client_ip"));
+        saveOrderPayRequestDTO.setDivDetails(payObj.getString("div_details"));
+        saveOrderPayRequestDTO.setLimitPay(payObj.getString("limit_pay"));
+        saveOrderPayRequestDTO.setNotifyUrl(payObj.getString("notify_url"));
+        saveOrderPayRequestDTO.setOrderInfo(payObj.getString("order_info"));
+        saveOrderPayRequestDTO.setPayAmount(payObj.getLong("pay_amount"));
+        saveOrderPayRequestDTO.setPedCnt(payObj.getString("ped_cnt"));
+        saveOrderPayRequestDTO.setRequestSeq(payObj.getString("request_seq"));
+        saveOrderPayRequestDTO.setOrderId((payObj.getJSONObject("order_info")).getString("order_id"));
+        saveOrderPayRequestDTO.setRequestTime(DateUtils.strToUtilDate(payObj.getString("request_time"),"yyyyMMddhhmmss"));
+        saveOrderPayRequestDTO.setReturnUrl(payObj.getString("return_url"));
+        return saveOrderPayRequestDTO;
+    }
+
+//    签名示例方法：
+//    将参数集合非空参数值的参数按照参数名ASCII码从小到大排序（字典序，参数名区分大小写），使用URL键值对的格式（即key1=value1&key2=value2…）拼接成字符串stringA。在stringA最后拼接上key得到stringSignTemp字符串，并对stringSignTemp进行MD5运算，再将得到的字符串所有字符转换为大写，得到sign值。
+//    注：传送的sign参数不参与签名。
+    private String createSign(JSONObject jsonObject, String key){
+        SortedMap<String,Object> parameters = new TreeMap<String,Object>();
+        for(String k: jsonObject.keySet()){
+            String v = (String) jsonObject.get(k);
+            if(null != v && !"".equals(v)) {
+                parameters.put(k, v);
+            }
+        }
+        StringBuffer sbkey = new StringBuffer();
+        Set es = parameters.entrySet();  //所有参与传参的参数按照accsii排序（升序）
+        Iterator it = es.iterator();
+        while(it.hasNext()) {
+            Map.Entry entry = (Map.Entry)it.next();
+            String k = (String)entry.getKey();
+            Object v = entry.getValue();
+            //空值不传递，不参与签名组串
+            if(null != v && !"".equals(v)) {
+                sbkey.append(k + "=" + v + "&");
+            }
+        }
+        sbkey=sbkey.append("key="+key);
+        log.debug("字符串:"+sbkey.toString());
+        //MD5加密,结果转换为大写字符
+        String md5 = null;
+        try {
+            md5 = MD5(sbkey.toString()).toUpperCase();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return md5;
+    }
+
+    //由业务渠道提供，建议：yyyyMMddhhmmss + 6位随机数
+    private String CreateSeq(){
+        String d = DateUtils.dateToStr(new Date(),"yyyyMMddhhmmss");
+        Random random = new Random();
+        int r = random.nextInt(999999);
+        return d+r;
+    }
+
+}

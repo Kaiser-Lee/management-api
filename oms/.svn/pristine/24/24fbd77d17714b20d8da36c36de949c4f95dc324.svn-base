@@ -1,0 +1,46 @@
+package com.iwhalecloud.retail.oms.manager;
+
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.iwhalecloud.retail.oms.dto.ShelfTemplatesDTO;
+import com.iwhalecloud.retail.oms.entity.ShelfTemplates;
+import com.iwhalecloud.retail.oms.mapper.ShelfTemplatesMapper;
+import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
+
+/**
+ * @Auther: lin.wh
+ * @Date: 2018/10/21 23:37
+ * @Description:
+ */
+
+@Component
+public class ShelfTemplatesManager {
+
+    @Resource
+    private ShelfTemplatesMapper shelfTemplatesMapper;
+
+    public int createShelfTemplates(ShelfTemplatesDTO dto) {
+        dto.setId(null);
+        ShelfTemplates shelfTemplates = new ShelfTemplates();
+        BeanUtils.copyProperties(dto, shelfTemplates);
+        int t = shelfTemplatesMapper.insert(shelfTemplates);
+        return t;
+    }
+
+    public int updateShelfTemplatesStatus(ShelfTemplatesDTO dto) {
+        int t = shelfTemplatesMapper.editShelfTemplates(dto);
+        return t;
+    }
+
+    public Page<ShelfTemplatesDTO> queryShelfTemplates(ShelfTemplatesDTO request) {
+        Page<ShelfTemplatesDTO> page = new Page<ShelfTemplatesDTO>(request.getPageNo(), request.getPageSize());
+        return shelfTemplatesMapper.queryShelfTemplates(page, request);
+    }
+
+    public int deleteShelfTemplates(ShelfTemplates dto) {
+        return shelfTemplatesMapper.deleteShelfTemplates(dto);
+    }
+}
+

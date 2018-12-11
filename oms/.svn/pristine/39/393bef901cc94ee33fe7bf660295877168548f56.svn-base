@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+
+    <!-- 提供方应用信息，用于计算依赖关系 -->
+    <dubbo:application name="oms-service"  />
+
+    <!-- 注册中心服务地址 -->
+    <dubbo:registry id="zookeeper" protocol="zookeeper" address="10.45.47.90:2121" />
+
+    <!-- 用dubbo协议在30001 -->
+    <dubbo:protocol name="dubbo" port="30001" />
+
+    <!-- start 声明需要暴露的服务接口 -->
+    <!--测试-->
+    <dubbo:service interface="com.iwhalecloud.retail.oms.service.TestService" ref="testService"
+                   version="1.0" registry="zookeeper"/>
+    <!--会员服务-->
+    <dubbo:service interface="com.iwhalecloud.retail.oms.service.MemberService" ref="memberService"
+                   version="1.0" registry="zookeeper"/>
+    <!-- 订单管理 -->
+    <dubbo:service interface="com.iwhalecloud.retail.oms.service.OrderManagerService"
+                   ref="orderManagerService" version="1.0" registry="zookeeper"/>
+    <!--商品服务-->
+    <dubbo:service interface="com.iwhalecloud.retail.oms.service.GoodsService" ref="goodsService"
+                   version="1.0" registry="zookeeper"/>
+    <!--商品分类服务-->
+    <dubbo:service interface="com.iwhalecloud.retail.oms.service.GoodsCatsService" ref="goodsCatsService"
+                   version="1.0" registry="zookeeper"/>
+    <!--系统服务-->
+    <dubbo:service interface="com.iwhalecloud.retail.oms.service.SystemService" ref="systemService"
+                   version="1.0" registry="zookeeper"/>
+    <!-- 购物车 -->
+    <dubbo:service interface="com.iwhalecloud.retail.oms.service.CartService" ref="cartService"
+                   version="1.0" registry="zookeeper"/>
+    <!-- 地址管理 -->
+    <dubbo:service interface="com.iwhalecloud.retail.oms.service.MemberAddressService" ref="memberAddressService"
+                   version="1.0" registry="zookeeper"/>
+
+    <!-- 评论 -->
+    <dubbo:service interface="com.iwhalecloud.retail.oms.service.CommentsService" ref="commentsService"
+                   version="1.0" registry="zookeeper"/>
+
+    <!-- 云货架终端设备 -->
+    <dubbo:service interface="com.iwhalecloud.retail.oms.service.CloudDeviceService" ref="cloudDeviceService"
+                   version="1.0" registry="zookeeper"/>
+
+    <!-- 云货架基本信息 -->
+    <dubbo:service interface="com.iwhalecloud.retail.oms.service.CloudShelfService" ref="cloudShelfService"
+                   version="1.0" registry="zookeeper"/>
+
+    <!-- 云货架模版 -->
+    <dubbo:service interface="com.iwhalecloud.retail.oms.service.ShelfTemplatesService" ref="shelfTemplatesService"
+                   version="1.0" registry="zookeeper"/>
+
+    <!-- 运营位 -->
+    <dubbo:service interface="com.iwhalecloud.retail.oms.service.OperationPositionService" ref="operationPositionService"
+                   version="1.0" registry="zookeeper"/>
+
+    <!-- 查询区域 -->
+    <dubbo:service interface="com.iwhalecloud.retail.oms.service.RegionService" ref="regionService"
+                   version="1.0" registry="zookeeper"/>
+    <!-- end 声明需要暴露的服务接口 -->
+
+    <!-- start 具体服务接口的实现 -->
+    <bean id="testService" class="com.iwhalecloud.retail.oms.service.impl.TestServiceImpl" />
+    <bean id="orderManagerService" class="com.iwhalecloud.retail.oms.service.impl.OrderManagerServiceImpl" />
+    <bean id="goodsService" class="com.iwhalecloud.retail.oms.service.impl.GoodsServiceImpl" />
+    <bean id="goodsCatsService" class="com.iwhalecloud.retail.oms.service.impl.GoodsCatsServiceImpl" />
+    <bean id="memberService" class="com.iwhalecloud.retail.oms.service.impl.MemberServiceImpl" />
+    <bean id="systemService" class="com.iwhalecloud.retail.oms.service.impl.SystemServiceImpl" />
+    <bean id="cartService" class="com.iwhalecloud.retail.oms.service.impl.CartServiceImpl" />
+    <bean id="memberAddressService" class="com.iwhalecloud.retail.oms.service.impl.MemberAddressServiceImpl" />
+    <bean id="commentsService" class="com.iwhalecloud.retail.oms.service.impl.CommentsServiceImpl" />
+    <bean id="regionService" class="com.iwhalecloud.retail.oms.service.impl.RegionServiceImpl" />
+    <bean id="cloudDeviceService" class="com.iwhalecloud.retail.oms.service.impl.CloudDeviceServiceImpl" />
+    <bean id="cloudShelfService" class="com.iwhalecloud.retail.oms.service.impl.CloudShelfServiceImpl" />
+    <bean id="shelfTemplatesService" class="com.iwhalecloud.retail.oms.service.impl.ShelfTemplatesServiceImpl" />
+    <bean id="operationPositionService" class="com.iwhalecloud.retail.oms.service.impl.OperationPositionServiceImpl" />
+    <!-- end 服务接口的实现 -->
+
+
+
+    <!-- JWS声明需要暴露的服务接口 -->
+    <dubbo:service interface="com.iwhalecloud.retail.oms.service.TokenService" ref="tokenService"
+                   version="1.0" registry="zookeeper"/>
+
+    <!-- JWS接口的实现 -->
+    <bean id="tokenService" class="com.iwhalecloud.retail.oms.service.impl.TokenServiceImpl" />
+
+
+    <!-- JWS声明需要暴露的服务接口 -->
+    <dubbo:service interface="com.iwhalecloud.retail.oms.service.UserService" ref="userService"
+                   version="1.0" registry="zookeeper"/>
+
+    <!-- JWS接口的实现 -->
+    <bean id="userService" class="com.iwhalecloud.retail.oms.service.impl.UserServiceImpl" />
+
+    <dubbo:service interface="com.iwhalecloud.retail.oms.service.ContentMenuService" ref="contentMenuService"
+                   version="1.0" registry="zookeeper"/>
+
+    <bean id="contentMenuService" class="com.iwhalecloud.retail.oms.service.impl.ContentMenuServiceImpl" />
+
+    <dubbo:service interface="com.iwhalecloud.retail.oms.service.FileManagerService" ref="fileManagerService"
+                   version="1.0" registry="zookeeper"/>
+
+    <bean id="fileManagerService" class="com.iwhalecloud.retail.oms.service.impl.FileManagerServiceImpl" />
+
+    <dubbo:service interface="com.iwhalecloud.retail.oms.service.GoodsBrandService" ref="goodsBrandService"
+                   version="1.0" registry="zookeeper"/>
+
+    <bean id="goodsBrandService" class="com.iwhalecloud.retail.oms.service.impl.GoodsBrandServiceImpl" />
+
+    <dubbo:service interface="com.iwhalecloud.retail.oms.service.GoodsEvaluateTotalService" ref="goodsEvaluateTotalService"
+                   version="1.0" registry="zookeeper"/>
+
+    <bean id="goodsEvaluateTotalService" class="com.iwhalecloud.retail.oms.service.impl.GoodsEvaluateTotalServiceImpl" />
+
+    <dubbo:service interface="com.iwhalecloud.retail.oms.service.PartnerShopService" ref="partnerShopService"
+                   version="1.0" registry="zookeeper"/>
+
+    <bean id="partnerShopService" class="com.iwhalecloud.retail.oms.service.impl.PartnerShopServiceImpl" />
+
+    <dubbo:service interface="com.iwhalecloud.retail.oms.service.RfidGoodsRelService" ref="rfidGoodsRelService"
+                   version="1.0" registry="zookeeper"/>
+
+    <bean id="rfidGoodsRelService" class="com.iwhalecloud.retail.oms.service.impl.RfidGoodsRelServiceImpl" />
+
+    <dubbo:service interface="com.iwhalecloud.retail.oms.service.ShelfDetailService" ref="shelfDetailService"
+                   version="1.0" registry="zookeeper"/>
+
+    <bean id="shelfDetailService" class="com.iwhalecloud.retail.oms.service.impl.ShelfDetailServiceImpl" />
+
+    <dubbo:service interface="com.iwhalecloud.retail.oms.service.ShopService" ref="shopService"
+                   version="1.0" registry="zookeeper"/>
+
+    <bean id="shopService" class="com.iwhalecloud.retail.oms.service.impl.ShopServiceImpl" />
+
+    <dubbo:service interface="com.iwhalecloud.retail.oms.service.SpecService" ref="specService"
+                   version="1.0" registry="zookeeper"/>
+
+    <bean id="specService" class="com.iwhalecloud.retail.oms.service.impl.SpecServiceImpl" />
+
+    <dubbo:service interface="com.iwhalecloud.retail.oms.service.TagService" ref="tagService"
+                   version="1.0" registry="zookeeper"/>
+
+    <bean id="tagService" class="com.iwhalecloud.retail.oms.service.impl.TagServiceImpl" />
+    <dubbo:service interface="com.iwhalecloud.retail.oms.service.ContentBaseService" ref="contentBaseService"
+                   version="1.0" registry="zookeeper"/>
+    <bean id="contentBaseService" class="com.iwhalecloud.retail.oms.service.impl.ContentBaseServiceImpl" />
+    <dubbo:service interface="com.iwhalecloud.retail.oms.service.ContentChkhisService" ref="contentChkhisService"
+                   version="1.0" registry="zookeeper"/>
+    <bean id="contentChkhisService" class="com.iwhalecloud.retail.oms.service.impl.ContentChkhisServiceImpl" />
+    <dubbo:service interface="com.iwhalecloud.retail.oms.service.ContentMaterialService" ref="contentMaterialService"
+                   version="1.0" registry="zookeeper"/>
+    <bean id="contentMaterialService" class="com.iwhalecloud.retail.oms.service.impl.ContentMaterialServiceImpl" />
+    <dubbo:service interface="com.iwhalecloud.retail.oms.service.ContentOrderpicService" ref="contentOrderpicService"
+                   version="1.0" registry="zookeeper"/>
+    <bean id="contentOrderpicService" class="com.iwhalecloud.retail.oms.service.impl.ContentOrderpicServiceImpl" />
+    <dubbo:service interface="com.iwhalecloud.retail.oms.service.ContentPicService" ref="contentPicService"
+                   version="1.0" registry="zookeeper"/>
+    <bean id="contentPicService" class="com.iwhalecloud.retail.oms.service.impl.ContentPicServiceImpl" />
+    <dubbo:service interface="com.iwhalecloud.retail.oms.service.ContentPicsetService" ref="contentPicsetService"
+                   version="1.0" registry="zookeeper"/>
+    <bean id="contentPicsetService" class="com.iwhalecloud.retail.oms.service.impl.ContentPicsetServiceImpl" />
+    <dubbo:service interface="com.iwhalecloud.retail.oms.service.ContentPublishService" ref="contentPublishService"
+                   version="1.0" registry="zookeeper"/>
+    <bean id="contentPublishService" class="com.iwhalecloud.retail.oms.service.impl.ContentPublishServiceImpl" />
+    <dubbo:service interface="com.iwhalecloud.retail.oms.service.ContentTagService" ref="contentTagService"
+                   version="1.0" registry="zookeeper"/>
+    <bean id="contentTagService" class="com.iwhalecloud.retail.oms.service.impl.ContentTagServiceImpl" />
+    <dubbo:service interface="com.iwhalecloud.retail.oms.service.ContentTextService" ref="contentTextService"
+                   version="1.0" registry="zookeeper"/>
+    <bean id="contentTextService" class="com.iwhalecloud.retail.oms.service.impl.ContentTextServiceImpl" />
+    <dubbo:service interface="com.iwhalecloud.retail.oms.service.ContentVediolv2Service" ref="contentVediolv2Service"
+                   version="1.0" registry="zookeeper"/>
+    <bean id="contentVediolv2Service" class="com.iwhalecloud.retail.oms.service.impl.ContentVediolv2ServiceImpl" />
+    <dubbo:service interface="com.iwhalecloud.retail.oms.service.ContentVideosDefaultContentService" ref="contentVideosDefaultContentService"
+                   version="1.0" registry="zookeeper"/>
+    <bean id="contentVideosDefaultContentService" class="com.iwhalecloud.retail.oms.service.impl.ContentVideosDefaultContentServiceImpl" />
+</beans>

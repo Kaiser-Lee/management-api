@@ -1,0 +1,58 @@
+{
+  "hints": [],
+  "groups": [
+    {
+      "sourceType": "com.iwhalecloud.retail.oms.web.controller.cache.RedisProperties",
+      "name": "spring.redis",
+      "type": "com.iwhalecloud.retail.oms.web.controller.cache.RedisProperties"
+    },
+    {
+      "sourceType": "com.iwhalecloud.retail.oms.web.config.WechatMpProperties",
+      "name": "wechat.mp",
+      "type": "com.iwhalecloud.retail.oms.web.config.WechatMpProperties"
+    }
+  ],
+  "properties": [
+    {
+      "sourceType": "com.iwhalecloud.retail.oms.web.controller.cache.RedisProperties",
+      "name": "spring.redis.cluster-nodes",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.iwhalecloud.retail.oms.web.controller.cache.RedisProperties",
+      "defaultValue": 0,
+      "name": "spring.redis.command-timeout",
+      "type": "java.lang.Integer"
+    },
+    {
+      "sourceType": "com.iwhalecloud.retail.oms.web.controller.cache.RedisProperties",
+      "defaultValue": 0,
+      "name": "spring.redis.expire-seconds",
+      "type": "java.lang.Integer"
+    },
+    {
+      "sourceType": "com.iwhalecloud.retail.oms.web.config.WechatMpProperties",
+      "name": "wechat.mp.aes-key",
+      "description": "设置微信公众号的EncodingAESKey",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.iwhalecloud.retail.oms.web.config.WechatMpProperties",
+      "name": "wechat.mp.app-id",
+      "description": "设置微信公众号的appid",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.iwhalecloud.retail.oms.web.config.WechatMpProperties",
+      "name": "wechat.mp.secret",
+      "description": "设置微信公众号的app secret",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.iwhalecloud.retail.oms.web.config.WechatMpProperties",
+      "name": "wechat.mp.token",
+      "description": "设置微信公众号的token",
+      "type": "java.lang.String"
+    }
+  ]
+}

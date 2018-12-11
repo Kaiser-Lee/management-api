@@ -1,0 +1,33 @@
+package com.iwhalecloud.retail.oms.manager;
+
+import com.iwhalecloud.retail.oms.entity.ContentPic;
+import org.springframework.stereotype.Component;
+import javax.annotation.Resource;
+import com.iwhalecloud.retail.oms.mapper.ContentPicMapper;
+import java.util.List;
+
+@Component
+public class ContentPicManager{
+    @Resource
+    private ContentPicMapper contentPicMapper;
+
+    /**
+     * 查询单图片内容
+     * @param contentPicDTO
+     * @return
+     */
+    public  List<ContentPic> queryContentPicList(Long contentId){
+        return contentPicMapper.queryContentPicList(contentId);
+    }
+
+    public ContentPic insertContentPic(ContentPic contentPic){
+        contentPicMapper.insert(contentPic);
+        return contentPic;
+    }
+
+    public ContentPic updateContentPic(ContentPic contentPic){
+        contentPicMapper.updateById(contentPic);
+        return contentPic;
+    }
+
+}

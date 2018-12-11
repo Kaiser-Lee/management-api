@@ -1,0 +1,170 @@
+package com.iwhalecloud.retail.oms.service;
+
+import com.ztesoft.net.eop.resource.model.AdminUser;
+import params.adminuser.req.*;
+import params.adminuser.resp.*;
+import params.member.req.MemberListQryPageReq;
+import params.member.req.MemberQryPageReq;
+import params.member.resp.MemberQryResp;
+import sun.security.krb5.internal.rcache.AuthList;
+
+public interface SystemService {
+
+    /**
+     * 管理员用户登陆
+     * @param req 管理员登陆请求对象
+     * @return
+     */
+    AdminUserLoginResp adminUserLogin(AdminUserLoginReq req);
+
+
+    /**
+     * 管理员用户登陆
+     * @param req 管理员登陆请求对象
+     * @return
+     */
+    UserWdLoginResp userWdLogin(UserWdLoginReq req);
+
+    /**
+     * 会员列表查询
+     * @param req 查询条件
+     * @return
+     */
+    MemberQryResp qryMemberList(MemberQryPageReq req);
+
+    /**
+     * 会员列表分页查询
+     * @param req 查询条件
+     * @return
+     */
+    MemberQryResp qryMemberListPage(MemberListQryPageReq req);
+
+    /**
+     * 获取用户列表带出角色
+     * @param req 查询条件
+     * @return
+     */
+    AdminUserRolePageResp getAdminListWithRole(AdminUserRolePageReq req);
+
+    /**
+     * 添加账户
+     * @param req 查询条件
+     * @return
+     */
+    AdminAddResp addAdmin(AdminAddReq req);
+
+      /**
+     * 编辑账户
+     * @param req 查询条件
+     * @return
+     */
+      AdminEditUserResp editAdmin(AdminUserEditReq req);
+
+
+    /**
+     * 编辑账户
+     * @param req 查询条件
+     * @return
+     */
+    UserPermissionResp editAdminRoles(UserPermissionReq req);
+
+    /**
+     * 编辑账户
+     * @param req 查询条件
+     * @return
+     */
+    RoleListResp getAdminRoles(RoleReq req);
+
+
+      /**
+     * 根据ID获取账户信息
+     * @param userId 查询条件
+     * @return
+     */
+    AdminUser getAdminById(String userId);
+
+    /**
+     * 根据账号获取账户信息
+     * @param userName 查询条件
+     * @return
+     */
+    AdminUser getAdminByUserName(String userName);
+
+
+    /**
+     * 删除账户
+     * @param req 查询条件
+     * @return
+     */
+    AdminUserDelResp deleteAdmin(AdminUserDelReq req);
+
+
+    /**
+     * 禁用账户
+     * @param req 查询条件
+     * @return
+     */
+    AdminUserDisableResp disableAdmin(AdminUserDisableReq req);
+
+
+
+    /**
+     * 获取所有角色查询
+     * @param req 查询条件
+     * @return
+     */
+    RolePageResp getAllRoles(RolePageReq req);
+
+    /**
+     * 获取所有角色查询
+     * @param req 查询条件
+     * @return
+     */
+    RoleListResp getAllRoleList(RoleListReq req);
+
+    /**
+     * 获取角色的所有权限
+     * @param req 查询条件
+     * @return
+     */
+    AuthResp getAuthsByRoleId(AuthReq req);
+
+    /**
+     * 获取所有权限查询
+     * @param req 查询条件
+     * @return
+     */
+    AuthListResp getAllAuths(AuthPageReq req);
+
+
+    /**
+     * 添加角色
+     * @param req 查询条件
+     * @return
+     */
+    AdminSetStatusResp setAdminStatus(AdminSetStatusReq req);
+
+
+    /**
+     * 添加角色
+     * @param req 查询条件
+     * @return
+     */
+    RoleAddResp addRole(RoleAddReq req);
+
+    /**
+     * 编辑角色
+     * @param req 查询条件
+     * @return
+     */
+    RoleAddResp editRole(RoleEditReq req);
+
+    /**
+     * 删除角色
+     * @param req 查询条件
+     * @return
+     */
+    RoleDelResp deleteRole(RoleDelReq req);
+
+
+}

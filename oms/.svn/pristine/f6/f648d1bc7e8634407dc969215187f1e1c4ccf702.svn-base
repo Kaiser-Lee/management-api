@@ -1,0 +1,142 @@
+package com.iwhalecloud.retail.oms.service.impl;
+
+import com.iwhalecloud.retail.oms.common.ResultCodeEnum;
+import com.iwhalecloud.retail.oms.rop.ZteRopClient;
+import com.iwhalecloud.retail.oms.service.SpecService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.alibaba.dubbo.config.annotation.Service;
+import zte.params.spec.req.*;
+import zte.params.spec.resp.*;
+
+/**
+ * @author mzl
+ * @date 2018/10/25
+ */
+@Slf4j
+@Service
+public class SpecServiceImpl implements SpecService {
+
+    @Autowired
+    private ZteRopClient client;
+
+    @Override
+    public SpecListResp listSpec() {
+        SpecListReq req = new SpecListReq();
+        SpecListResp resp;
+        try {
+            resp = client.execute(req, SpecListResp.class);
+        } catch (Exception ex) {
+            log.error("SpecServiceImpl.listSpec Rop Invoke Exception, ex={}", ex);
+            resp = new SpecListResp();
+            resp.setError_code(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getCode());
+            resp.setError_msg(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getDesc());
+        }
+        return resp;
+    }
+
+    @Override
+    public SpecOperatorResp addSpec(SpecAddReq req) {
+        log.info("SpecServiceImpl.addSpec req={}", req);
+        SpecOperatorResp resp;
+        try {
+            resp = client.execute(req, SpecOperatorResp.class);
+        } catch (Exception ex) {
+            log.error("SpecServiceImpl.addSpec Rop Invoke Exception, ex={}", ex);
+            resp = new SpecOperatorResp();
+            resp.setError_code(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getCode());
+            resp.setError_msg(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getDesc());
+        }
+        return resp;
+    }
+
+    @Override
+    public SpecOperatorResp updateSpec(SpecUpdateReq req) {
+        log.info("SpecServiceImpl.updateSpec req={}", req);
+        SpecOperatorResp resp;
+        try {
+            resp = client.execute(req, SpecOperatorResp.class);
+        } catch (Exception ex) {
+            log.error("SpecServiceImpl.updateSpec Rop Invoke Exception, ex={}", ex);
+            resp = new SpecOperatorResp();
+            resp.setError_code(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getCode());
+            resp.setError_msg(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getDesc());
+        }
+        return resp;
+    }
+
+    @Override
+    public SpecOperatorResp deleteSpec(SpecDeleteReq req) {
+        log.info("SpecServiceImpl.delete req={}", req);
+        SpecOperatorResp resp;
+        try {
+            resp = client.execute(req, SpecOperatorResp.class);
+        } catch (Exception ex) {
+            log.error("SpecServiceImpl.delete Rop Invoke Exception, ex={}", ex);
+            resp = new SpecOperatorResp();
+            resp.setError_code(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getCode());
+            resp.setError_msg(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getDesc());
+        }
+        return resp;
+    }
+
+    @Override
+    public SpecGetResp getSpec(SpecGetReq req) {
+        log.info("SpecServiceImpl.getSpec req={}", req);
+        SpecGetResp resp;
+        try {
+            resp = client.execute(req, SpecGetResp.class);
+        } catch (Exception ex) {
+            log.error("SpecServiceImpl.getSpec Rop Invoke Exception, ex={}", ex);
+            resp = new SpecGetResp();
+            resp.setError_code(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getCode());
+            resp.setError_msg(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getDesc());
+        }
+        return resp;
+    }
+
+    @Override
+    public SpecOperatorResp addSpecValue(SpecValueAddReq req) {
+        log.info("SpecServiceImpl.addSpecValue req={}", req);
+        SpecOperatorResp resp;
+        try {
+            resp = client.execute(req, SpecOperatorResp.class);
+        } catch (Exception ex) {
+            log.error("SpecServiceImpl.addSpecValue Rop Invoke Exception, ex={}", ex);
+            resp = new SpecOperatorResp();
+            resp.setError_code(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getCode());
+            resp.setError_msg(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getDesc());
+        }
+        return resp;
+    }
+
+    @Override
+    public SpecValueListResp listSpecValue(SpecValueListReq req) {
+        log.info("SpecServiceImpl.listSpecValue req={}", req);
+        SpecValueListResp resp;
+        try {
+            resp = client.execute(req, SpecValueListResp.class);
+        } catch (Exception ex) {
+            log.error("SpecServiceImpl.listSpecValue Rop Invoke Exception, ex={}", ex);
+            resp = new SpecValueListResp();
+            resp.setError_code(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getCode());
+            resp.setError_msg(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getDesc());
+        }
+        return resp;
+    }
+
+    @Override
+    public SpecValueGetResp getSpecValue(SpecValueGetReq req) {
+        log.info("SpecServiceImpl.getSpecValue req={}", req);
+        SpecValueGetResp resp;
+        try {
+            resp = client.execute(req, SpecValueGetResp.class);
+        } catch (Exception ex) {
+            log.error("SpecServiceImpl.getSpecValue Rop Invoke Exception, ex={}", ex);
+            resp = new SpecValueGetResp();
+            resp.setError_code(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getCode());
+            resp.setError_msg(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getDesc());
+        }
+        return resp;
+    }
+}

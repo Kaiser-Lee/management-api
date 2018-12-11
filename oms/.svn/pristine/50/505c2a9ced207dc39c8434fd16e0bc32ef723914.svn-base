@@ -1,0 +1,92 @@
+package com.iwhalecloud.retail.oms.web.controller.rop;
+
+import lombok.extern.slf4j.Slf4j;
+
+import org.apache.commons.lang.StringUtils;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import params.member.req.CommentAddReq;
+import zte.params.member.req.CommentPageListReq;
+
+import com.alibaba.dubbo.config.annotation.Reference;
+import com.iwhalecloud.retail.oms.dto.ResultVO;
+import com.iwhalecloud.retail.oms.dto.SelectBaseRequest;
+import com.iwhalecloud.retail.oms.dto.resquest.CommentsRequestDTO;
+import com.iwhalecloud.retail.oms.service.CommentsService;
+import com.iwhalecloud.retail.oms.web.annotation.UserLoginToken;
+import com.iwhalecloud.retail.oms.web.controller.BaseController;
+import com.iwhalecloud.retail.oms.web.interceptor.MemberContext;
+import com.ztesoft.net.framework.database.Page;
+import com.ztesoft.net.mall.core.model.Comments;
+
+/**
+ * @Author pjq
+ * @Date 2018/10/10
+ **/
+@RestController
+@RequestMapping("/api/rop/comment")
+@Slf4j
+public class CommentsROPController extends BaseController{
+
+	@Reference
+    private CommentsService commentsService;
+
+    /**
+     * 添加评论
+     * @param commentsRequestDTO
+     * @return
+     */
+    @RequestMapping(value="/addComments",method = RequestMethod.POST)
+    @UserLoginToken
+    public ResultVO<Boolean> addComments(@RequestBody CommentsRequestDTO commentsRequestDTO){
+        log.info("CommentsController addComments commentsRequestDTO={} ",commentsRequestDTO);
+        if(null == commentsRequestDTO){
+            return failResultVO();
+        }
+        //获取memberId
+        String memberId = MemberContext.getMemberId();
+        CommentAddReq req = new CommentAddReq();
+        if(StringUtils.isEmpty(memberId)){
+            return failResultVO();
+        }
+        req.setMember_id(memberId);
+
+        if(StringUtils.isNotEmpty(commentsRequestDTO.getAction())){
+            req.setAction(commentsRequestDTO.getAction());
+        }
+        if(null == commentsRequestDTO.getComment()){
+            log.info("CommentsController addComments comment is null");
+            ResultVO.error("comment is null");
+        }
+        //将评论先设置为true
+        Comments comments = commentsRequestDTO.getComment();
+        comments.setDisplay("true");
+        req.setComment(comments);
+        ResultVO<Boolean> resultVO=commentsService.addComments(req);
+        return resultVO;
+    }
+
+    @RequestMapping(value="/queryCommoentForPage",method = RequestMethod.POST)
+    @UserLoginToken
+    public ResultVO<Page> queryCommoentForPage(@RequestBody SelectBaseRequest request){
+        log.info("CommentsController addComments req={} ",request);
+        if(null == request){
+            return failResultVO();
+        }
+        request.checkPage();
+        String memberId = MemberContext.getMemberId();
+        String sessionId = MemberContext.getUserSessionId();
+        CommentPageListReq  req = new CommentPageListReq();
+        req.setMember_id(memberId);
+        req.setUserSessionId(sessionId);
+
+        ResultVO<Page> resultVO=commentsService.queryCommoentForPage(req);
+        return resultVO;
+    }
+
+
+
+}

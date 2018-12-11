@@ -1,0 +1,113 @@
+package com.iwhalecloud.retail.oms.service;
+
+import com.iwhalecloud.retail.oms.dto.ResultVO;
+import com.iwhalecloud.retail.oms.dto.response.MemberLoginDTO;
+import com.iwhalecloud.retail.oms.dto.resquest.RandomLogAddReq;
+import com.iwhalecloud.retail.oms.dto.resquest.RandomLogQueryReq;
+import com.iwhalecloud.retail.oms.entity.MemberBinding;
+import com.ztesoft.net.app.base.core.model.Member;
+import zte.params.member.req.MemberIsExistsReq;
+import zte.params.member.req.MemberLoginReq;
+import zte.params.member.resp.MemberIsExistsResp;
+import zte.params.member.resp.MemberLoginResp;
+import zte.params.member.resp.MemberRegisterResp;
+
+public interface MemberService {
+
+    /**
+     * 会员登录
+     * @param userName 用户名
+     * @param pwd 密码
+     * @return
+     */
+    MemberLoginResp login(String userName,String pwd);
+
+    /**
+     * 会员登录（需要密码、免密）
+     * @param req 会员登陆对象（
+     *            1、pwd为空时，是免密登陆；
+     *            2、userName属性不空，使用userName（pwd）登陆；
+     *            3、mobile属性不空，使用mobile（pwd）登陆）
+     * @return
+     */
+    MemberLoginResp login(MemberLoginReq req);
+
+
+    /**
+     * 会员注册
+     * @param member 会员对象
+     * @return
+     */
+    MemberRegisterResp register(Member member);
+
+    /**
+     * 会员是否存在
+     * @param req 要查询的对象
+     * @return
+     */
+    MemberIsExistsResp isExists(MemberIsExistsReq req);
+
+    /**
+     * 会员是否绑定第三方平台
+     * @param targetId 第三方平台账号特定ID
+     * @return
+     */
+    MemberBinding getMemberBinding(String targetId);
+
+    /**
+     * 添加会员绑定第三方平台
+     * @param memberBinding 绑定数据
+     * @return
+     */
+    int addMemberBinding(MemberBinding memberBinding);
+
+    /**
+     * 删除会员绑定的第三方平台
+     * @param targetId 第三方平台账号特定ID
+     * @return
+     */
+    int deleteMemberBinding(String targetId);
+
+    /**
+     * 更新会员绑定的第三方平台
+     * @param memberBinding
+     * @return
+     */
+    int updateMemberBinding(MemberBinding memberBinding);
+
+    /**
+     * 会员登录并获取token
+     * @param req
+     * @param sessionId
+     * @return
+     */
+    public ResultVO<MemberLoginDTO> login(MemberLoginReq req,String sessionId);
+
+    /**
+     * 获取验证码
+     * @param req 获取验证码参数
+     * @return
+     */
+    ResultVO insertRandomLog(String sessionId, RandomLogAddReq req);
+
+    /**
+     * 获取验证码
+     * @param req 获取验证码参数
+     * @return
+     */
+    ResultVO<String> selectLogIdByRandomCode(RandomLogQueryReq req);
+
+    /**
+     * 根据SessionId进行查询
+     * @param logId
+     * @return
+     */
+    ResultVO updateValidStatus(String logId);
+    
+    /**
+   	 * 根据会员ID获取会员信息
+   	 * @param memberId 会员ID
+   	 * @return
+   	 */
+   	Member getMember(String memberId);
+}

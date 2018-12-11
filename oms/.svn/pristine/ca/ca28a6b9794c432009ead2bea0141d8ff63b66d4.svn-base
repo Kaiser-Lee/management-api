@@ -1,0 +1,79 @@
+package com.iwhalecloud.retail.oms.web.controller.rop;
+
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import zte.params.goodscats.req.CatComplexAddReq;
+import zte.params.goodscats.req.CatsListByIdReq;
+import zte.params.goodscats.req.ComplexGoodsGetReq;
+import zte.params.goodscats.resp.CatComplexAddResp;
+import zte.params.goodscats.resp.CatsListByIdResp;
+import zte.params.goodscats.resp.ComplexGoodsGetResp;
+
+import com.alibaba.dubbo.config.annotation.Reference;
+import com.iwhalecloud.retail.oms.common.ResultCodeEnum;
+import com.iwhalecloud.retail.oms.dto.ResultVO;
+import com.iwhalecloud.retail.oms.service.GoodsCatsService;
+
+/**
+ * @author mzl
+ * @date 2018/10/11
+ */
+@RestController
+@RequestMapping("/api/rop/goodsCats")
+public class GoodsCatsROPController {
+
+	@Reference
+    private GoodsCatsService goodsCatsService;
+
+    @GetMapping(value="listCats")
+    public ResultVO listCats() {
+        CatsListByIdReq req = new CatsListByIdReq();
+        req.setCat_id("-1");
+        req.setParent_cat_id("0");
+        CatsListByIdResp resp = goodsCatsService.listCats(req);
+        if (StringUtils.isEmpty(resp)) {
+            return ResultVO.error();
+        }
+        if (ResultCodeEnum.SUCCESS.getCode().equals(resp.getError_code())) {
+            return ResultVO.success(resp.getCats());
+        } else {
+            return ResultVO.error(resp.getError_code(),resp.getError_msg());
+        }
+    }
+
+
+    @GetMapping(value="getComplexGoods")
+    public ResultVO getComplexGoods(@RequestParam(value = "catId") String catId) {
+        ComplexGoodsGetReq req = new ComplexGoodsGetReq();
+        req.setCat_id(catId);
+        ComplexGoodsGetResp resp = goodsCatsService.getComplexGoods(req);
+        if (StringUtils.isEmpty(resp)) {
+            return ResultVO.error();
+        }
+        if (ResultCodeEnum.SUCCESS.getCode().equals(resp.getError_code())) {
+            return ResultVO.success(resp.getGoods());
+        } else {
+            return ResultVO.error(resp.getError_code(),resp.getError_msg());
+        }
+    }
+
+
+    @PostMapping(value="addCatComplex")
+    public ResultVO addCatComplex(@RequestBody CatComplexAddReq req) {
+        CatComplexAddResp resp = goodsCatsService.addCatComplex(req);
+        if (StringUtils.isEmpty(resp)) {
+            return ResultVO.error();
+        }
+        if (ResultCodeEnum.SUCCESS.getCode().equals(resp.getError_code())) {
+            return ResultVO.success(resp.getResp());
+        } else {
+            return ResultVO.error(resp.getError_code(),resp.getError_msg());
+        }
+    }
+}

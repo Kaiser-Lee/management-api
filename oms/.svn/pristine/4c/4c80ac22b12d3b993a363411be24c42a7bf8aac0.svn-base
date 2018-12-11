@@ -1,0 +1,278 @@
+package com.iwhalecloud.retail.oms.web.controller.cloud;
+
+import com.alibaba.dubbo.config.annotation.Reference;
+import com.iwhalecloud.retail.oms.OmsCommonConsts;
+import com.iwhalecloud.retail.oms.dto.*;
+import com.iwhalecloud.retail.oms.dto.resquest.CountGoodsReq;
+import com.iwhalecloud.retail.oms.dto.resquest.CountKeyWordReq;
+import com.iwhalecloud.retail.oms.dto.resquest.EventInteractionTimeReq;
+import com.iwhalecloud.retail.oms.service.CSInteractionTimeService;
+import com.iwhalecloud.retail.oms.service.CloudDeviceService;
+import com.iwhalecloud.retail.oms.web.annotation.UserLoginToken;
+import com.iwhalecloud.retail.oms.web.controller.BaseController;
+import com.iwhalecloud.retail.oms.web.interceptor.UserContext;
+import com.ztesoft.form.util.StringUtil;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+/**
+ * @Auther: lin.wh
+ * @Date: 2018/11/5 17:30
+ * @Description: 云货架交互时间统计分析
+ */
+
+@Slf4j
+@RestController
+@CrossOrigin
+@RequestMapping("/api/csInteractionTime")
+public class CSInteractionTimeController extends BaseController {
+
+    @Reference
+    private CSInteractionTimeService csInteractionTimeService;
+
+    @Reference
+    private CloudDeviceService cloudDeviceService;
+
+    @ApiOperation(value = "统计交互时长", notes = "将交互时长写入事件采集日志")
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "请求参数没填好"),
+            @ApiResponse(code = 404, message = "请求路径没有或页面跳转路径不对")
+    })
+    //计算交互时长，写入交互时长表
+    @RequestMapping(value = "/countInteractionTime", method = RequestMethod.POST)
+    public ResultVO countInteractionTime(@RequestBody EventInteractionTimeDTO dto) {
+        ResultVO resultVO = new ResultVO();
+        try {
+            csInteractionTimeService.countInteractionTime(dto);
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+            resultVO.setResultData("写入成功");
+            resultVO.setResultMsg("success");
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultMsg(e.getMessage());
+        }
+        return resultVO;
+    }
+
+    @ApiOperation(value = "埋点", notes = "将埋点事件写入事件表")
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "请求参数没填好"),
+            @ApiResponse(code = 404, message = "请求路径没有或页面跳转路径不对")
+    })
+    //埋点事件接口
+    @RequestMapping(value = "/buryingPointEvent", method = RequestMethod.POST)
+    @UserLoginToken
+    public ResultVO buryingPointEvent(@RequestBody List<EventDTO> dto) {
+        ResultVO resultVO = new ResultVO();
+        try {
+            String userId = UserContext.getUserId();
+            long totalSec = 0;
+            for (int i = 0; i < dto.size(); i++) {
+                if (i == 0) {
+                    if (StringUtil.equals(dto.get(0).getIsExpire(), "0")) {
+                        //查询库里第一条对应设备编码的时间
+                        List<EventDTO> eventDTOS = csInteractionTimeService.queryBeforeInteractionTime(dto.get(i));
+                        if (eventDTOS.size() > 0) {
+                            // TODO 入参首个创建时间减去最后创建时间，？？？？？
+                            Date startTime = eventDTOS.get(0).getGmtCreate();
+                            Date endTime = dto.get(0).getGmtCreate();
+                            long sec = calcSecond(endTime, startTime);
+                            List<CloudDeviceDTO> cloudDeviceDTO = cloudDeviceService.queryCloudDeviceListDetails(dto.get(0).getDeviceNumber());
+                            if (cloudDeviceDTO.size() > 0) {
+                                String adscriptionShop = cloudDeviceDTO.get(0).getAdscriptionShop();
+                                String adscriptionCity = cloudDeviceDTO.get(0).getAdscriptionCity();
+                                String adscriptionCityArea = cloudDeviceDTO.get(0).getAdscriptionCityArea();
+                                EventInteractionTimeDTO eventInteractionTimeDTO = new EventInteractionTimeDTO();
+                                eventInteractionTimeDTO.setGmtCreate(new Date());
+                                eventInteractionTimeDTO.setCreator(userId);
+                                eventInteractionTimeDTO.setIsDeleted(0);
+                                eventInteractionTimeDTO.setDeviceNumber(dto.get(0).getDeviceNumber());
+                                eventInteractionTimeDTO.setAdscriptionShopId(adscriptionShop);
+                                eventInteractionTimeDTO.setAdscriptionCity(adscriptionCity);
+                                eventInteractionTimeDTO.setAdscriptionCityArea(adscriptionCityArea);
+                                eventInteractionTimeDTO.setInteractionTime(sec);
+                                csInteractionTimeService.countInteractionTime(eventInteractionTimeDTO);
+                            } else {
+                                resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+                                resultVO.setResultMsg("查询不到终端设备");
+                            }
+                        }
+                    }
+                } else if (i == dto.size() - 1) {
+                    if (StringUtil.equals(dto.get(i).getIsExpire(), "0")) {
+                        // TODO 入参是否能确保按时间升序传送
+                        Date endTime = dto.get(i).getGmtCreate();
+                        Date startTime = dto.get((i - 1)).getGmtCreate();
+                        long sec = calcSecond(endTime, startTime);
+                        totalSec = totalSec + sec;
+                    }
+                    List<CloudDeviceDTO> cloudDeviceDTO = cloudDeviceService.queryCloudDeviceListDetails(dto.get(0).getDeviceNumber());
+                    if (cloudDeviceDTO.size() > 0) {
+                        String adscriptionShop = cloudDeviceDTO.get(0).getAdscriptionShop();
+                        String adscriptionCity = cloudDeviceDTO.get(0).getAdscriptionCity();
+                        String adscriptionCityArea = cloudDeviceDTO.get(0).getAdscriptionCityArea();
+                        EventInteractionTimeDTO eventInteractionTimeDTO = new EventInteractionTimeDTO();
+                        eventInteractionTimeDTO.setGmtCreate(new Date());
+                        eventInteractionTimeDTO.setCreator(userId);
+                        eventInteractionTimeDTO.setIsDeleted(0);
+                        eventInteractionTimeDTO.setDeviceNumber(dto.get(0).getDeviceNumber());
+                        eventInteractionTimeDTO.setAdscriptionShopId(adscriptionShop);
+                        eventInteractionTimeDTO.setAdscriptionCity(adscriptionCity);
+                        eventInteractionTimeDTO.setAdscriptionCityArea(adscriptionCityArea);
+                        eventInteractionTimeDTO.setInteractionTime(totalSec);
+                        csInteractionTimeService.countInteractionTime(eventInteractionTimeDTO);
+                    } else {
+                        resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+                        resultVO.setResultMsg("查询不到终端设备");
+                    }
+                } else {
+                    if (!StringUtil.equals(dto.get(i).getIsExpire(), "1")) {
+                        Date endTime = dto.get(i).getGmtCreate();
+                        Date startTime = dto.get((i - 1)).getGmtCreate();
+                        long sec = calcSecond(endTime, startTime);
+                        totalSec = totalSec + sec;
+                    }
+                }
+                csInteractionTimeService.buryingPointEvent(dto.get(i));
+                resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+                resultVO.setResultData("埋点成功");
+                resultVO.setResultMsg("success");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultMsg(e.getMessage());
+        }
+        return resultVO;
+    }
+
+    public static long calcSecond(Date endDate, Date startDate) {
+        long ns = 1000;
+        long sec = (endDate.getTime() - startDate.getTime()) / ns;
+        return sec;
+    }
+
+    @ApiOperation(value = "云货架交互时间统计分析", notes = "根据厅店ID统计设备数量及每个设备的工作时长")
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "请求参数没填好"),
+            @ApiResponse(code = 404, message = "请求路径没有或页面跳转路径不对")
+    })
+    //根据厅店ID/地区/城市、统计设备数量及每个设备的工作时长
+    @RequestMapping(value = "/queryInteractionTime", method = RequestMethod.POST)
+    public ResultVO queryInteractionTime(@RequestBody EventInteractionTimeReq dto) {
+        ResultVO resultVO = new ResultVO();
+        try {
+            List<EventInteractionTimeDTO> eventInteractionTimeDTO = csInteractionTimeService.queryInteractionTime(dto);
+            if (eventInteractionTimeDTO != null && eventInteractionTimeDTO.size() > 0) {
+                InteractionTimeResDTO interactionTimeResDTO = new InteractionTimeResDTO();
+                interactionTimeResDTO.setAdscriptionCity(eventInteractionTimeDTO.get(0).getAdscriptionCity());
+                interactionTimeResDTO.setAdscriptionCityArea(eventInteractionTimeDTO.get(0).getAdscriptionCityArea());
+                List<CloudDeviceNumberDTO> cloudDeviceNumberDTO = new ArrayList<CloudDeviceNumberDTO>();
+                for (int i = 0; i < eventInteractionTimeDTO.size(); i++) {
+                    CloudDeviceNumberDTO cloudDeviceNumberDTO1 = new CloudDeviceNumberDTO();
+                    cloudDeviceNumberDTO1.setAdscriptionShopId(eventInteractionTimeDTO.get(i).getAdscriptionShopId());
+                    cloudDeviceNumberDTO1.setCloudDeviceNumber(eventInteractionTimeDTO.get(i).getDeviceNumber());
+                    cloudDeviceNumberDTO1.setInteractionTime(eventInteractionTimeDTO.get(i).getInteractionTime());
+                    cloudDeviceNumberDTO.add(cloudDeviceNumberDTO1);
+                }
+                interactionTimeResDTO.setCloudDeviceNumberDTO(cloudDeviceNumberDTO);
+                resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+                resultVO.setResultData(interactionTimeResDTO);
+                resultVO.setResultMsg("success");
+            } else {
+                resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+                resultVO.setResultMsg("未查询到数据");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultMsg(e.getMessage());
+        }
+        return resultVO;
+    }
+
+    @ApiOperation(value = "关键字统计接口", notes = "根据所属城市、搜索关键词统计关键词排名列表")
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "请求参数没填好"),
+            @ApiResponse(code = 404, message = "请求路径没有或页面跳转路径不对")
+    })
+    //关键字统计接口
+    @RequestMapping(value = "/countKeyWord", method = RequestMethod.POST)
+    public ResultVO countKeyWord(@RequestBody CountKeyWordReq req) {
+        ResultVO resultVO = new ResultVO();
+        try {
+            String eventCode = req.getEventCode();
+            req.setEventCode("%" + eventCode + "%");
+            List<RankDTO> rankDTO = csInteractionTimeService.countKeyWord(req);
+            if (rankDTO.size() > 0) {
+                List<RankDTO> rankDTOList = new ArrayList<RankDTO>();
+                CountKeyWordResDTO countKeyWordResDTO = new CountKeyWordResDTO();
+                for (int i = 0; i < rankDTO.size(); i++) {
+                    RankDTO rankDTO1 = new RankDTO();
+                    rankDTO1.setRank(rankDTO.get(i).getRank());
+                    rankDTO1.setEventCount(rankDTO.get(i).getEventCount());
+                    rankDTO1.setEventExtend(rankDTO.get(i).getEventExtend());
+                    rankDTOList.add(rankDTO1);
+                    countKeyWordResDTO.setRankList(rankDTO);
+                }
+                resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+                resultVO.setResultData(countKeyWordResDTO);
+                resultVO.setResultMsg("success");
+            } else {
+                resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+                resultVO.setResultMsg("未查询到关键词");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultMsg(e.getMessage());
+        }
+        return resultVO;
+    }
+
+    @ApiOperation(value = "商品统计接口", notes = "根据所属城市统计商品排名列表")
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "请求参数没填好"),
+            @ApiResponse(code = 404, message = "请求路径没有或页面跳转路径不对")
+    })
+    //关键字统计接口
+    @RequestMapping(value = "/countGoods", method = RequestMethod.POST)
+    public ResultVO countGoods(@RequestBody CountGoodsReq req) {
+        ResultVO resultVO = new ResultVO();
+        try {
+            List<RankDTO> rankDTO = csInteractionTimeService.countGoods(req);
+            if (rankDTO.size() > 0) {
+                List<RankDTO> rankDTOList = new ArrayList<RankDTO>();
+                CountKeyWordResDTO countKeyWordResDTO = new CountKeyWordResDTO();
+                for (int i = 0; i < rankDTO.size(); i++) {
+                    RankDTO rankDTO1 = new RankDTO();
+                    rankDTO1.setRank(rankDTO.get(i).getRank());
+                    rankDTO1.setEventCount(rankDTO.get(i).getEventCount());
+                    rankDTO1.setEventExtend(rankDTO.get(i).getEventExtend());
+                    rankDTOList.add(rankDTO1);
+                    countKeyWordResDTO.setRankList(rankDTO);
+                }
+                resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+                resultVO.setResultData(countKeyWordResDTO);
+                resultVO.setResultMsg("success");
+            } else {
+                resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+                resultVO.setResultMsg("未查询到关键词");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultMsg(e.getMessage());
+        }
+        return resultVO;
+    }
+}
+

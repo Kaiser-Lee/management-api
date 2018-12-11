@@ -1,0 +1,84 @@
+package com.iwhalecloud.retail.oms.consts;
+
+
+public class OrderManagerConsts {
+
+    /**
+     * 订单状态更新action
+     */
+    public final static String ORDER_HANDLER_ZF = "C"; //支付
+    public final static String ORDER_HANDLER_FH = "H"; //发货
+    public final static String ORDER_HANDLER_SH = "J"; //确认收货
+    public final static String ORDER_HANDLER_QX = "QX"; //取消订单
+    public final static String ORDER_HANDLER_PJ = "PJ"; //评价
+
+    /**
+     * 支付方式
+     */
+    public final static String ORDER_PAY_CODE_1 = "1"; //在线支付
+    public final static String ORDER_PAY_CODE_2 = "2"; //货到付款
+
+    /**
+     * 购买方式
+     */
+    public final static String ORDER_SOURCE_TYPE_LJGM = "LJGM"; //立即购买
+    public final static String ORDER_SOURCE_TYPE_GWC = "GWCGM";  //购物车购买
+
+    /**
+     * 售后类型
+     */
+    public final static String ORDER_SERVICE_TYPE_TH = "4"; //退货
+    public final static String ORDER_SERVICE_TYPE_HH = "3"; //换货
+    public final static String ORDER_SERVICE_TYPE_TK = "2"; //退款
+
+    /**
+     * 新建售后单 类型
+     */
+    public final static String ORDER_ACTION_STATUS_ADD = "new";//新增退货单
+    public final static String ORDER_ACTION_STATUS_EDIT = "edit";//编辑退货单
+
+    /**
+     * 退货 action
+     */
+    public final static String ORDER_TH_ACTION_STATUS_SH = "shth";//审核退货单
+    public final static String ORDER_TH_ACTION_STATUS_TH = "qrth";//退货确认
+
+    /**
+     * 换货 action
+     */
+    public final static String ORDER_HH_ACTION_STATUS_SH = "shhh";//审核换货单
+    public final static String ORDER_HH_ACTION_STATUS_HH = "qrhh";//换货确认
+
+    /**
+     * 审核 action
+     */
+    public final static String ORDER_AUDITING_STATUS_YES = "1"; //同意
+    public final static String ORDER_AUDITING_STATUS_NO = "2";  //拒绝
+
+
+    /**
+     * 订单状态 status
+     */
+    public final static String ORDER_STATUS_2 = "2"; //待支付
+    public final static String ORDER_STATUS_4 = "4"; //待发货
+    public final static String ORDER_STATUS_5 = "5"; //待收货确认
+    public final static String ORDER_STATUS_6 = "6"; //完成
+    public final static String ORDER_STATUS_7 = "7"; //收货确认（待评价）
+
+    public final static String ORDER_STATUS_10_ = "-10"; //取消完成
+    public final static String ORDER_STATUS_10 = "10"; //取消审核中
+
+    public final static String ORDER_STATUS_20 = "20"; //退货申请
+    public final static String ORDER_STATUS_21 = "21"; //退货申请审核通过
+    public final static String ORDER_STATUS_2_ = "-2"; //退货完成
+
+    public final static String ORDER_STATUS_22 = "22"; //换货申请
+    public final static String ORDER_STATUS_23 = "23"; //换货申请通过
+
+    public final static String ORDER_STATUS_25 = "25"; //退款申请
+    public final static String ORDER_STATUS_26 = "26"; //退款申请通过
+    public final static String ORDER_STATUS_27 = "27"; //退款中
+    public final static String ORDER_STATUS_1_ = "-1"; //退款完成
+
+
+}

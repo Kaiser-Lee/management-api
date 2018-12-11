@@ -1,0 +1,174 @@
+package com.iwhalecloud.retail.oms.web.controller.cloud;
+
+import java.util.HashMap;
+import java.util.List;
+
+import io.swagger.annotations.*;
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.web.bind.annotation.*;
+
+import com.alibaba.dubbo.config.annotation.Reference;
+import com.iwhalecloud.retail.oms.OmsCommonConsts;
+import com.iwhalecloud.retail.oms.dto.CloudDeviceDTO;
+import com.iwhalecloud.retail.oms.service.CloudDeviceService;
+import com.iwhalecloud.retail.oms.web.controller.BaseController;
+import com.iwhalecloud.retail.oms.dto.ResultVO;
+
+/**
+ * @Auther: lin.wh
+ * @Date: 2018/10/17 16:28
+ * @Description: 云货架终端设备（增删改查）
+ */
+
+@Slf4j
+@RestController
+@CrossOrigin
+@RequestMapping("/api/cloudDevice")
+public class CloudDeviceController extends BaseController {
+
+    @Reference
+    private CloudDeviceService cloudDeviceService;
+
+    @ApiOperation(value = "查询CloudDeviceDTO列表", notes = "根据adscriptionCity adscriptionShop id deviceName status onlineType deviceType，查询CloudDeviceDTO对象")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "adscriptionCity", value = "所属城市", paramType = "path", dataType = "String"),
+            @ApiImplicitParam(name = "adscriptionShop", value = "所属厅店", paramType = "path", dataType = "String"),
+            @ApiImplicitParam(name = "num", value = "设备编码", paramType = "path", dataType = "String"),
+            @ApiImplicitParam(name = "deviceName", value = "设备名称", paramType = "path", dataType = "String"),
+            @ApiImplicitParam(name = "status", value = "设备状态", paramType = "path", dataType = "int"),
+            @ApiImplicitParam(name = "onlineType", value = "在线状态", paramType = "path", dataType = "String"),
+            @ApiImplicitParam(name = "deviceType", value = "设备类型", paramType = "path", dataType = "String")
+    })
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "请求参数没填好"),
+            @ApiResponse(code = 404, message = "请求路径没有或页面跳转路径不对")
+    })
+    //查询云货架终端设备列表
+    @GetMapping(value = "queryCloudDeviceList")
+    public ResultVO<List<CloudDeviceDTO>> queryCloudDeviceList(@RequestParam(value = "adscriptionCity", required = false) String adscriptionCity,
+                                                               @RequestParam(value = "adscriptionShop", required = false) String adscriptionShop,
+                                                               @RequestParam(value = "num", required = false) String num,
+                                                               @RequestParam(value = "deviceName", required = false) String deviceName,
+                                                               @RequestParam(value = "status", required = false) Integer status,
+                                                               @RequestParam(value = "onlineType", required = false) String onlineType,
+                                                               @RequestParam(value = "deviceType", required = false) String deviceType) {
+        ResultVO resultVO = new ResultVO();
+        HashMap<String, Object> map = new HashMap<String, Object>();
+        map.put("adscriptionCity", adscriptionCity);
+        map.put("adscriptionShop", adscriptionShop);
+        map.put("num", num);
+        if (deviceName != null) {
+            map.put("deviceName", '%' + deviceName + '%');
+        } else {
+            map.put("deviceName", deviceName);
+        }
+
+        map.put("status", status);
+        map.put("onlineType", onlineType);
+        map.put("deviceType", deviceType);
+        try {
+            List<CloudDeviceDTO> cloudDeviceDTO = cloudDeviceService.queryCloudDeviceList(map);
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+            resultVO.setResultData(cloudDeviceDTO);
+            resultVO.setResultMsg("success");
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultData(e.getMessage());
+        }
+        return resultVO;
+    }
+
+    @ApiOperation(value = "查询CloudDeviceDTO详情", notes = "根据id，查询CloudDeviceDTO对象")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "num", value = "设备编码", paramType = "path", required = true, dataType = "String")
+    })
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "请求参数没填好"),
+            @ApiResponse(code = 404, message = "请求路径没有或页面跳转路径不对")
+    })
+    //查询云货架终端设备详情
+    @RequestMapping(value = "/queryCloudDeviceListDetails/{id}", method = RequestMethod.GET)
+    public ResultVO<CloudDeviceDTO> queryCloudDeviceListDetails(@PathVariable String num) {
+        ResultVO resultVO = new ResultVO();
+        try {
+            CloudDeviceDTO cloudDeviceDTO = cloudDeviceService.queryCloudDeviceListDetails(num);
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+            resultVO.setResultData(cloudDeviceDTO);
+            resultVO.setResultMsg("success");
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultData(e.getMessage());
+        }
+        return resultVO;
+    }
+
+    @ApiOperation(value = "新增CloudDeviceDTO", notes = "传入CloudDeviceDTO对象，进行保存操作")
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "请求参数没填好"),
+            @ApiResponse(code = 404, message = "请求路径没有或页面跳转路径不对")
+    })
+    //云货架终端设备新增
+    @RequestMapping(value = "/createCloudDevice", method = RequestMethod.POST)
+    public ResultVO createCloudDevice(@RequestBody @ApiParam(value = "CloudDeviceDTO", required = true) CloudDeviceDTO request) {
+        ResultVO resultVO = new ResultVO();
+        try {
+            cloudDeviceService.createCloudDevice(request);
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+            resultVO.setResultData("新增成功");
+            resultVO.setResultMsg("success");
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultData(e.getMessage());
+        }
+        return resultVO;
+    }
+
+    @ApiOperation(value = "修改CloudDeviceDTO", notes = "接口支持根据num修改终端设备")
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "请求参数没填好"),
+            @ApiResponse(code = 404, message = "请求路径没有或页面跳转路径不对")
+    })
+    //云货架终端设备修改
+    @RequestMapping(value = "/editCloudDevice", method = RequestMethod.PUT)
+    public ResultVO updateCloudDeviceStatus(@RequestBody CloudDeviceDTO dto) {
+        ResultVO resultVO = new ResultVO();
+        try {
+            cloudDeviceService.editCloudDevice(dto);
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+            resultVO.setResultData("修改成功");
+            resultVO.setResultMsg("success");
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultData(e.getMessage());
+        }
+        return resultVO;
+    }
+
+    @ApiOperation(value = "修改CloudDeviceDTO", notes = "根据num，进行更新是否删除字段为1")
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "请求参数没填好"),
+            @ApiResponse(code = 404, message = "请求路径没有或页面跳转路径不对")
+    })
+    //云货架终端设备删除
+    @RequestMapping(value = "/deleteCloudDevice", method = RequestMethod.PUT)
+    public ResultVO deleteCloudDevice(@RequestBody CloudDeviceDTO dto) {
+        ResultVO resultVO = new ResultVO();
+        try {
+            cloudDeviceService.deleteCloudDevice(dto);
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+            resultVO.setResultData("删除成功");
+            resultVO.setResultMsg("success");
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultData(e.getMessage());
+        }
+        return resultVO;
+    }
+}
+

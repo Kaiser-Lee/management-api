@@ -1,0 +1,90 @@
+package com.iwhalecloud.retail.oms.manager;
+
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.iwhalecloud.retail.oms.dto.*;
+import com.iwhalecloud.retail.oms.dto.resquest.cloud.CloudShelfRequestDTO;
+import com.iwhalecloud.retail.oms.dto.resquest.CloudShelfPageReq;
+import com.iwhalecloud.retail.oms.entity.CloudShelf;
+import com.iwhalecloud.retail.oms.mapper.CloudShelfMapper;
+import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
+import java.util.*;
+
+/**
+ * @Auther: lin.wh
+ * @Date: 2018/10/21 20:15
+ * @Description:
+ */
+
+@Component
+public class CloudShelfManager {
+    @Resource
+    private CloudShelfMapper cloudShelfMapper;
+
+    public Page<CloudShelfDTO> queryCloudShelfList(CloudShelfPageReq pageReq) {
+        Page<CloudShelfDTO> page = new Page<CloudShelfDTO>(pageReq.getPageNo(), pageReq.getPageSize());
+        return cloudShelfMapper.queryCloudShelfList(page, pageReq);
+    }
+
+    public CloudShelfDTO queryCloudShelfListDetails(String num, Boolean isQryDevice) {
+        CloudShelfDTO cloudShelfDTO = cloudShelfMapper.queryCloudShelfListDetails(num);
+        List<CloudDeviceDTO> list1 = new ArrayList();
+        if (isQryDevice) {
+            list1 = cloudShelfMapper.queryCloudShelfListDetails3(num);
+            cloudShelfDTO.setCloudDeviceDetailDTOS(list1);
+        }
+        List<CloudShelfDetailDTO> list = cloudShelfMapper.queryCloudShelfListDetails1(num);
+        CloudShelfDetailDTO cloudShelfDetailDTO = new CloudShelfDetailDTO();
+        for (int i = 0; i < list.size(); i++) {
+            cloudShelfDetailDTO = list.get(i);
+            String operatingPositionId = cloudShelfDetailDTO.getOperatingPositionId();
+            OperatingPositionBindDTO operatingPositionBindDTO = cloudShelfMapper.queryCloudShelfListDetails2(operatingPositionId);
+            cloudShelfDetailDTO.setOperatingPositionBindDTO(operatingPositionBindDTO);
+            String contentNumber = operatingPositionBindDTO.getContentNumber();
+            List<ContentMaterialDTO> contentMaterialDTO = cloudShelfMapper.queryCloudShelfListDetails4(contentNumber);
+            operatingPositionBindDTO.setContentMaterials(contentMaterialDTO);
+        }
+        cloudShelfDTO.setCloudShelfDetailDTOS(list);
+        return cloudShelfDTO;
+    }
+
+    public CloudShelfDTO queryCloudShelfByNum(String num){
+        return cloudShelfMapper.queryCloudShelfListDetails(num);
+    }
+
+
+    public int createCloudShelf(CloudShelfDTO dto) {
+        dto.setGmtCreate(new Date());
+        dto.setGmtModified(new Date());
+        CloudShelf cloudShelf = new CloudShelf();
+        BeanUtils.copyProperties(dto, cloudShelf);
+        int t = cloudShelfMapper.insert(cloudShelf);
+        dto.setId(cloudShelf.getId());
+        return t;
+    }
+
+    public int editCloudShelf(CloudShelfDTO dto) {
+        dto.setGmtModified(new Date());
+        int t = cloudShelfMapper.editCloudShelf(dto);
+        return t;
+    }
+
+    public int deleteCloudShelf(CloudShelfDTO dto) {
+        int t = cloudShelfMapper.deleteCloudShelf(dto);
+        return t;
+    }
+
+    public int modifyCloudShelfByParam(CloudShelfRequestDTO cloudShelfRequestDTO) {
+        return cloudShelfMapper.modifyCloudShelfByParam(cloudShelfRequestDTO);
+    }
+
+    public List<CloudShelf> getCloudShelfByName(String name) {
+        Map<String, Object> map = new HashMap<>(16);
+        map.put("name", name);
+        return cloudShelfMapper.selectByMap(map);
+    }
+
+}
+

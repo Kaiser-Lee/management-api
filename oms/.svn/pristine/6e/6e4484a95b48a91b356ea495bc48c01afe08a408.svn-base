@@ -1,0 +1,29 @@
+package com.iwhalecloud.retail.oms.dto.resquest.order;
+
+import com.iwhalecloud.retail.oms.dto.ModifyBaseRequest;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+
+import java.io.Serializable;
+
+@Data
+public class UpdateOrderStatusRequestDTO extends ModifyBaseRequest implements Serializable {
+
+    @ApiModelProperty(value = "分销商id")
+    private String orderId;
+
+
+    @ApiModelProperty(value = "B下单;C支付;H发;J收货确认;QX取消;PJ评价")
+    private String flowType;
+
+    //当flowType=H时
+    @ApiModelProperty(value = "物流编号")
+    private String logiNo;
+    @ApiModelProperty(value = "物流公司")
+    private String logiName;
+    @ApiModelProperty(value = "是否需要物流 1需要 0 不需要")
+    private String needShipping;
+    @ApiModelProperty(value = "发货数量")
+    private String shipNum;
+
+}

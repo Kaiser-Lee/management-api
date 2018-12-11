@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iwhalecloud.retail.oms.mapper.ContentPublishMapper">
+
+    <sql id="allFields">
+    t.CONTENTID 
+    ,t.WAYTYPE 
+    ,t.AREA 
+    ,t.OPRID 
+    ,t.PUBLISHDATE 
+    ,t.EFFDATE 
+    ,t.EXPDATE 
+</sql>
+
+    <select id="queryContentPublishList" parameterType="Map"
+            resultType="com.iwhalecloud.retail.oms.dto.ContentPublishDTO">
+        SELECT * FROM t_content_publish t WHERE t.contentId=#{contentId}
+    </select>
+
+</mapper>

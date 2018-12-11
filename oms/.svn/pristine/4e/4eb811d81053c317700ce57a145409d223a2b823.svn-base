@@ -1,0 +1,76 @@
+package com.iwhalecloud.retail.oms.web.controller.fdfs;
+
+import com.alibaba.dubbo.config.annotation.Reference;
+import com.iwhalecloud.retail.oms.OmsCommonConsts;
+import com.iwhalecloud.retail.oms.dto.ResultVO;
+import com.iwhalecloud.retail.oms.dto.response.CommonResultResp;
+import com.iwhalecloud.retail.oms.dto.resquest.FileManagerDTO;
+import com.iwhalecloud.retail.oms.service.FileManagerService;
+import com.iwhalecloud.retail.oms.web.utils.ResponseComUtil;
+import org.apache.commons.codec.binary.Base64;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@CrossOrigin
+@RequestMapping("/api/fileManager")
+public class FileManagerController {
+
+    @Reference
+    private FileManagerService fileManagerService;
+
+    @RequestMapping(value = "/uploadImageString", method = RequestMethod.POST)
+    public ResultVO uploadImageString(@RequestBody List<FileManagerDTO> files) {
+        ResultVO resultVO = new ResultVO();
+        List<Map> list = new ArrayList<>();
+        try {
+            CommonResultResp resp = fileManagerService.uploadImage(files);
+            ResponseComUtil.RespToResultVO(resp, resultVO);
+        } catch (Exception e) {
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultMsg(e.getMessage());
+            e.printStackTrace();
+        }
+        return resultVO;
+    }
+
+    @RequestMapping(value = "/uploadImageByFile",headers = "content-type=multipart/form-data" ,method = RequestMethod.POST)
+    public ResultVO uploadImageByFile(@RequestParam("file") MultipartFile file) {
+        ResultVO resultVO = new ResultVO();
+        List<Map> list = new ArrayList<>();
+        try {
+            InputStream in = file.getInputStream();
+            FileManagerDTO fileManagerDTO = new FileManagerDTO();
+            byte[] data = new byte[file.getInputStream().available()];
+            in.read(data);
+            in.close();
+            fileManagerDTO.setImage(Base64.encodeBase64String(data));
+            fileManagerDTO.setFileSize(file.getSize());
+            fileManagerDTO.setFileName(file.getOriginalFilename());
+
+            CommonResultResp resp = fileManagerService.uploadImage(fileManagerDTO);
+            ResponseComUtil.RespToResultVO(resp, resultVO);
+        } catch (Exception e) {
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultMsg(e.getMessage());
+            e.printStackTrace();
+        }
+        return resultVO;
+    }
+
+    @RequestMapping(value = "/deleteImg", method = RequestMethod.POST)
+    public ResultVO deleteImg(@RequestBody FileManagerDTO fileManagerDTO) {
+        ResultVO resultVO = new ResultVO();
+        CommonResultResp resp = fileManagerService.deleteImg(fileManagerDTO);
+        ResponseComUtil.RespToResultVO(resp, resultVO);
+        return resultVO;
+    }
+
+
+}

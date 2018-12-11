@@ -1,0 +1,48 @@
+package com.iwhalecloud.retail.oms.service;
+
+import com.iwhalecloud.retail.oms.dto.response.CommonResultResp;
+import com.iwhalecloud.retail.oms.dto.response.OrderQueryListResp;
+import com.iwhalecloud.retail.oms.dto.resquest.order.*;
+import zte.params.order.resp.OrderApplyPageListResp;
+
+public interface OrderManagerService {
+
+    /**
+     * 创建订单
+     */
+    CommonResultResp builderOrder(BuilderOrderRequestDTO request);
+
+    /**
+     * 查询订单
+     */
+    OrderQueryListResp selectOrder(SelectOrderRequestDTO request);
+
+    /**
+     * 修改订单状态
+     */
+    CommonResultResp updateOrderStatus(UpdateOrderStatusRequestDTO request);
+
+
+
+    /**
+     * 添加退货、换货申请单
+     */
+    CommonResultResp addOrderApply(ApplyOrderRequestDTO request);
+
+    /**
+     * 查询售后单
+     */
+    OrderApplyPageListResp selectApplyOrder(SelectApplyOrderRequestDTO request);
+
+
+
+    /**
+     *  退货处理
+     */
+    CommonResultResp updateTHApplyOrder(UpdateApplyOrderRequestDTO request);
+
+    /**
+     *  换货处理
+     */
+    CommonResultResp updateHHApplyOrder(UpdateApplyOrderRequestDTO request);
+}

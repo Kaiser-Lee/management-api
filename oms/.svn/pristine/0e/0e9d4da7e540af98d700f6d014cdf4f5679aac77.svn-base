@@ -1,0 +1,39 @@
+package com.iwhalecloud.retail.oms.web.controller.partner;
+
+import com.alibaba.dubbo.config.annotation.Reference;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.iwhalecloud.retail.oms.web.controller.BaseController;
+import com.iwhalecloud.retail.partner.dto.PartnerDTO;
+import com.iwhalecloud.retail.partner.dto.ResultVO;
+import com.iwhalecloud.retail.partner.dto.req.SupplierReq;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import org.springframework.web.bind.annotation.*;
+
+import lombok.extern.slf4j.Slf4j;
+import com.iwhalecloud.retail.partner.service.PartnerService;
+
+@Slf4j
+@RestController
+@CrossOrigin
+@RequestMapping("/api/partner")
+public class PartnerController extends BaseController {
+	
+    @Reference
+    private PartnerService partnerService;
+
+
+    @ApiOperation(value = "可供代理商查询", notes = "可供代理商查询返回信息分页")
+    @ApiResponses({
+            @ApiResponse(code=400,message="请求参数没填好"),
+            @ApiResponse(code=404,message="请求路径没有或页面跳转路径不对")
+    })
+    @RequestMapping(value = "/querySupplyRel", method = RequestMethod.POST)
+    ResultVO<Page<PartnerDTO>> querySupplyRel(@RequestBody @ApiParam( value = "supplierReq", required = true )SupplierReq supplierReq)throws Exception{
+        return  partnerService.querySupplyRel(supplierReq);
+    }
+
+
+}

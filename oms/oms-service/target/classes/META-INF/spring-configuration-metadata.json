@@ -1,0 +1,44 @@
+{
+  "hints": [],
+  "groups": [
+    {
+      "sourceType": "com.iwhalecloud.retail.oms.properties.RopProperties",
+      "name": "rop",
+      "type": "com.iwhalecloud.retail.oms.properties.RopProperties"
+    },
+    {
+      "sourceType": "com.iwhalecloud.retail.oms.redis.RedisProperties",
+      "name": "spring.redis",
+      "type": "com.iwhalecloud.retail.oms.redis.RedisProperties"
+    }
+  ],
+  "properties": [
+    {
+      "sourceType": "com.iwhalecloud.retail.oms.properties.RopProperties",
+      "name": "rop.plat-url",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.iwhalecloud.retail.oms.properties.RopProperties",
+      "name": "rop.zf-url",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.iwhalecloud.retail.oms.redis.RedisProperties",
+      "name": "spring.redis.cluster-nodes",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.iwhalecloud.retail.oms.redis.RedisProperties",
+      "defaultValue": 0,
+      "name": "spring.redis.command-timeout",
+      "type": "java.lang.Integer"
+    },
+    {
+      "sourceType": "com.iwhalecloud.retail.oms.redis.RedisProperties",
+      "defaultValue": 0,
+      "name": "spring.redis.expire-seconds",
+      "type": "java.lang.Integer"
+    }
+  ]
+}

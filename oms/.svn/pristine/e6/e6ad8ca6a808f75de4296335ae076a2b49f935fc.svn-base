@@ -1,0 +1,24 @@
+package com.iwhalecloud.retail.oms.service;
+
+
+import com.iwhalecloud.retail.oms.dto.DefaultOperatingDTO;
+import com.iwhalecloud.retail.oms.entity.DefaultOperating;
+
+public interface DefaultOperationService{
+
+    /**
+     * 云货架运营位模版新增
+     * @param defaultOperatingDTO
+     * @return
+     */
+    int createDefaultOperation(DefaultOperatingDTO defaultOperatingDTO);
+
+
+    /**
+     * 云货架运营位模版修改
+     * @param defaultOperatingDTO
+     * @return
+     */
+    int editDefaultOperation(DefaultOperatingDTO defaultOperatingDTO);
+
+}

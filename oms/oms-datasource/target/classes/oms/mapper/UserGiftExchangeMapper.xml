@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+  
+<!-- 指定工作空间，要与接口名相同 -->  
+<mapper namespace="com.iwhalecloud.retail.oms.mapper.UserGiftExchangeMapper">
+                   
+                   
+	<!-- list gift -->
+	<select id="listUserGiftExchange"  parameterType="com.iwhalecloud.retail.oms.dto.resquest.gift.ListUserGiftExchangeDTO" 
+	resultType="com.iwhalecloud.retail.oms.dto.response.gift.UserGiftExchangeRespDTO">
+		
+		 SELECT * 
+		   FROM (SELECT tt.*, ROWNUM AS rowno FROM (  SELECT t.* FROM user_gift_exchange t ORDER BY create_date DESC) tt 
+           WHERE ROWNUM <![CDATA[ <= ]]> #{pageOffset}) table_alias
+         WHERE table_alias.rowno <![CDATA[ > ]]> #{pageStartset}
+	</select>
+
+	<!-- get newest exchange -->
+	<select id="getNewestExchange" resultType="com.iwhalecloud.retail.oms.dto.response.gift.UserGiftExchangeRespDTO">
+		SELECT user_id,gift_id,create_date,gift_name
+		,gift_type,need_point_amount,gain_amount,total_point
+		FROM user_gift_exchange
+		WHERE ROWNUM <![CDATA[ <= ]]> 1 ORDER BY create_date DESC
+	</select>
+	
+</mapper>

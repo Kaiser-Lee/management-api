@@ -1,0 +1,15 @@
+package com.iwhalecloud.retail.oms.manager;
+
+import org.springframework.stereotype.Component;
+import javax.annotation.Resource;
+import com.iwhalecloud.retail.oms.mapper.CloudShelfBindUserMapper;
+
+
+@Component
+public class CloudShelfBindUserManager{
+    @Resource
+    private CloudShelfBindUserMapper cloudShelfBindUserMapper;
+    
+    
+    
+}

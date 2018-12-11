@@ -1,0 +1,104 @@
+package com.iwhalecloud.retail.oms.web.controller.goods;
+
+import com.alibaba.dubbo.common.utils.CollectionUtils;
+import com.alibaba.dubbo.config.annotation.Reference;
+import com.iwhalecloud.retail.goods.dto.req.GoodGroupQueryReq;
+import com.iwhalecloud.retail.goods.dto.req.GoodsGroupAddReq;
+import com.iwhalecloud.retail.goods.entity.GoodsGroup;
+import com.iwhalecloud.retail.goods.service.GoodsGroupService;
+import com.iwhalecloud.retail.partner.dto.ResultVO;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+/**
+ * @Author My
+ * @Date 2018/11/6
+ **/
+@Slf4j
+@RestController
+@CrossOrigin
+@RequestMapping("/api/goodsGroup")
+public class GoodsGroupController {
+
+    @Reference
+    private GoodsGroupService goodsGroupService;
+
+    @ApiOperation(value = "新增商品分组", notes = "新增商品分组")
+    @ApiResponses({
+            @ApiResponse(code=400,message="请求参数没填好"),
+            @ApiResponse(code=404,message="请求路径没有或页面跳转路径不对")
+    })
+    @RequestMapping(value = "/saveGoodGroup", method = RequestMethod.POST)
+    public ResultVO saveGoodGroup(@RequestBody GoodsGroupAddReq req){
+        if(null == req){
+            return ResultVO.error();
+        }
+        try {
+            int resp = goodsGroupService.insertGoodsGroup(req);
+            if(resp>0){
+                return ResultVO.success(resp);
+            }
+           return ResultVO.error();
+        }catch (Exception e){
+            log.error("GoodsGroupController saveGoodGroup Exception={} ",e);
+            return ResultVO.error();
+        }
+    }
+
+    @ApiOperation(value = "根据商品ID查询商品分组", notes = "根据商品ID查询商品分组")
+    @ApiResponses({
+            @ApiResponse(code=400,message="请求参数没填好"),
+            @ApiResponse(code=404,message="请求路径没有或页面跳转路径不对")
+    })
+    @RequestMapping(value = "/listGoodsGroupByGoodsId", method = RequestMethod.GET)
+    public ResultVO listGoodsGroupByGoodsId(@RequestParam String goodsId){
+        if(StringUtils.isEmpty(goodsId)){
+            log.info("GoodsGroupController listGoodGroup goodsId={} ",goodsId);
+            return ResultVO.error("goodsId is empty");
+        }
+        try {
+            List<GoodsGroup> goodsGroupList= goodsGroupService.listGoodsGroupByGoodsId(goodsId);
+            if(CollectionUtils.isEmpty(goodsGroupList)){
+                log.info("GoodsGroupController listGoodGroup list={} ",goodsGroupList);
+                ResultVO.error("goodsGroupList is empty");
+            }
+            return ResultVO.success(goodsGroupList);
+        }catch (Exception e){
+            log.error("GoodsGroupController saveGoodGroup Exception={} ",e);
+            return ResultVO.error();
+        }
+    }
+
+    @ApiOperation(value = "查询商品分组", notes = "查询商品分组")
+    @ApiResponses({
+            @ApiResponse(code=400,message="请求参数没填好"),
+            @ApiResponse(code=404,message="请求路径没有或页面跳转路径不对")
+    })
+    @RequestMapping(value = "/listGoodGroup", method = RequestMethod.GET)
+    public ResultVO listGoodGroup(@RequestParam String groupName,@RequestParam String groupCode){
+        GoodGroupQueryReq req = new GoodGroupQueryReq();
+        if(StringUtils.isNotEmpty(groupName)){
+            req.setGroupName(groupName);
+        }
+        if(StringUtils.isNotEmpty(groupCode)){
+            req.setGroupCode(groupCode);
+        }
+        try {
+            List<GoodsGroup> goodsGroupList= goodsGroupService.listGoodsGroup(req);
+            if(CollectionUtils.isEmpty(goodsGroupList)){
+                log.info("GoodsGroupController listGoodGroup list={} ",goodsGroupList);
+                ResultVO.error("goodsGroupList is empty");
+            }
+            return ResultVO.success(goodsGroupList);
+        }catch (Exception e){
+            log.error("GoodsGroupController saveGoodGroup Exception={} ",e);
+            return ResultVO.error();
+        }
+    }
+}

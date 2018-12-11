@@ -1,0 +1,25 @@
+package com.iwhalecloud.retail.oms.mapper;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+@Mapper
+public interface EventOperationDeskMapper extends BaseMapper {
+
+    int getTodayEventCountByPartnerId(@Param("partnerId") String partnerId, @Param("eventCode") String eventCode);
+
+    int getTodayEventCountByArea(@Param("adscriptionCity") String adscriptionCity, @Param("eventCode") String eventCode);
+
+    List<Map<String,Object>> getShopVisitVolumeRankByArea(@Param("adscriptionCity")String adscriptionCity, @Param("beginTime")Date beginTime, @Param("endTime") Date endTime);
+
+    List<Map<String,Object>> getShopWorkTimeRankByArea(@Param("adscriptionCity")String adscriptionCity, @Param("beginTime")Date beginTime, @Param("endTime") Date endTime);
+
+    List<Map<String,Object>> getTimeIntervalVisitByArea(@Param("adscriptionCity")String adscriptionCity, @Param("beginTime")Date beginTime, @Param("endTime") Date endTime);
+
+    List<Map<String,Long>> getOnOffLineTimeAboutDevice(@Param("adscriptionCity")String adscriptionCity, @Param("beginTime")Date beginTime, @Param("endTime") Date endTime);
+}

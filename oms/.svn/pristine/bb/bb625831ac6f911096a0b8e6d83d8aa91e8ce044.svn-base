@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iwhalecloud.retail.oms.mapper.DefaultOperatingMapper">
+
+<sql id="allFields">
+       t.id,
+       t.gmt_create,
+       t.gmt_modified,
+       t.creator,
+       t.modifier,
+       t.is_deleted,
+       t.operating_position_id,
+       t.default_content_id,
+       t.operating_position_name,
+       t.operating_position_adscription,
+       t.operating_position_type,
+       t.operating_position_property,
+       t.operating_position_expiry_time,
+       t.operating_position_play_mode,
+       t.default_category_id,
+       t.OPERATING_POSITION_SEQUENCE,
+       t.is_recommended
+</sql>
+
+    <select id="qryDefaultOperation" resultType="com.iwhalecloud.retail.oms.dto.DefaultOperatingDTO">
+        SELECT  <include refid="allFields" />
+        from default_operating_postion t
+        <where>
+            <![CDATA[
+            t.default_category_id = #{defaultCategoryId}
+            ]]>
+        </where>
+    </select>
+
+    <update id="editDefaultOperation" parameterType="com.iwhalecloud.retail.oms.dto.DefaultOperatingDTO">
+        UPDATE default_operating_postion
+        <set>
+            <if test="defaultContentId != null">
+                default_content_id = #{defaultContentId},
+            </if>
+            <if test="defaultCategoryId != null">
+                default_category_id=#{defaultCategoryId},
+            </if>
+            <if test="isDeleted != null">
+                is_deleted=#{isDeleted},
+            </if>
+            <if test="operatingPositionName != null">
+                operating_position_name=#{operatingPositionName},
+            </if>
+            <if test="operatingPositionAdscription != null">
+                operating_position_adscription=#{operatingPositionAdscription},
+            </if>
+            <if test="operatingPositionType != null">
+                operating_position_type=#{operatingPositionType},
+            </if>
+            <if test="operatingPositionProperty != null">
+                operating_position_property=#{operatingPositionProperty},
+            </if>
+            <if test="operatingPositionExpiryTime != null">
+                operating_position_expiry_time=#{operatingPositionExpiryTime},
+            </if>
+            <if test="operatingPositionPlayMode != null">
+                operating_position_play_mode=#{operatingPositionPlayMode},
+            </if>
+            <if test="operatingPositionSequence != null">
+                OPERATING_POSITION_SEQUENCE=#{operatingPositionSequence},
+            </if>
+            <if test="isRecommended != null">
+                is_recommended=#{isRecommended},
+            </if>
+            <if test="creator != null">
+                creator=#{creator},
+            </if>
+            <if test="modifier != null">
+                modifier=#{modifier},
+            </if>
+            <if test="gmtCreate != null">
+                gmt_create=#{gmtCreate},
+            </if>
+            <if test="gmtModified != null">
+                gmt_modified=#{gmtModified},
+            </if>
+            <if test="operatingPositionId != null">
+                operating_position_id=#{operatingPositionId},
+            </if>
+        </set>
+        <where>
+            <if test="id != null">
+                id=#{id}
+            </if>
+        </where>
+    </update>
+
+
+</mapper>

@@ -1,0 +1,67 @@
+package com.iwhalecloud.retail.oms.web.controller.rop;
+
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import lombok.extern.slf4j.Slf4j;
+
+import org.apache.commons.lang.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import zte.params.region.req.RegionsListReq;
+import zte.params.region.resp.RegionsListResp;
+
+import com.alibaba.dubbo.config.annotation.Reference;
+import com.iwhalecloud.retail.oms.dto.ResultVO;
+import com.iwhalecloud.retail.oms.service.RegionService;
+
+/**
+ * @Author My
+ * @Date 2018/10/11
+ **/
+@RestController
+@RequestMapping("/api/rop/region")
+@Slf4j
+public class RegionROPController {
+
+	@Reference
+    private RegionService regionService;
+
+    /**
+     * 查询省、市、区列表
+     * @param regionType
+     * @param regionParentId
+     * @return
+     */
+    @GetMapping(value="listRegions")
+    @ApiOperation(value = "查询省、市、区列表", notes = "查询省、市、区列表，可根据父级获取子级列表或者查询省级区域。")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "regionType", value = "区域类型，参数值为0则会忽略regionParentId参数查询省级列表，为1时根据区域父级查询列表", paramType = "query", required = true, dataType = "String"),
+        @ApiImplicitParam(name = "regionParentId", value = "区域父级ID，如果不传则默认为湖南省", paramType = "query", required = false, dataType = "String")
+    })
+    @ApiResponses({
+        @ApiResponse(code=400,message="请求参数不全"),
+        @ApiResponse(code=404,message="请求路径没有或页面跳转路径不对")
+    })
+    public ResultVO<RegionsListResp> listRegions(@RequestParam(value = "regionType", required = true) String regionType, 
+    		@RequestParam(value = "regionParentId", required = false) String regionParentId) {
+        log.info("RegionController listRegions regionType={} , regionParentId={} ", regionType, regionParentId);
+        RegionsListReq req = new RegionsListReq();
+        if(StringUtils.isNotEmpty(regionType)){
+            req.setRegion_type(regionType);
+        }
+        if(StringUtils.isNotEmpty(regionParentId)){
+            req.setRegion_parent_id(regionParentId);
+        } else {
+        	req.setRegion_parent_id("430000"); //默认查询湖南
+        }
+        ResultVO<RegionsListResp> resultVO = regionService.listRegions(req);
+        return resultVO;
+    }
+
+}

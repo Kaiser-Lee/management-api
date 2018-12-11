@@ -1,0 +1,81 @@
+package com.iwhalecloud.retail.oms.manager;
+
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.iwhalecloud.retail.oms.dto.ContentBaseDTO;
+import com.iwhalecloud.retail.oms.dto.resquest.ContentBasePageReq;
+import com.iwhalecloud.retail.oms.entity.ContentBase;
+import com.iwhalecloud.retail.oms.mapper.ContentBaseMapper;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
+import java.util.List;
+
+
+@Component
+public class ContentBaseManager{
+    @Resource
+    private ContentBaseMapper contentBaseMapper;
+
+    /**
+     * 根据在页面上选择的目录、内容类型、内容状态、标签以及输入的关键字等查询内容
+     * @param pageReq
+     * @return
+     * @author Ji.kai
+     * @date 2018/10/29 15:27
+     */
+    public Page<ContentBaseDTO> qryContentBasePageList(ContentBasePageReq pageReq) {
+        Page<ContentBaseDTO> page = new Page<>(pageReq.getPageNo(), pageReq.getPageSize());
+
+        return contentBaseMapper.qryContentBasePageList(page, pageReq);
+    }
+
+    public ContentBase insertContentBase(ContentBase contentBase){
+        contentBaseMapper.insert(contentBase);
+        return contentBase;
+    }
+
+    public ContentBase updateContentBase(ContentBase contentBase){
+        contentBaseMapper.updateById(contentBase);
+        return contentBase;
+    }
+
+    public ContentBase queryContentBaseById(Long contentId){
+        ContentBase contentBase = contentBaseMapper.selectById(contentId);
+        return contentBase;
+    }
+
+    /**
+     * 根据条件查询内容列表
+     * @param contentBaseDTO
+     * @return
+     * @author Ji.kai
+     * @date 2018/10/29 15:27
+     */
+    public List<ContentBaseDTO> qryContentBaseList(ContentBaseDTO contentBaseDTO) {
+
+        return contentBaseMapper.qryContentBaseList(contentBaseDTO);
+    }
+
+    public ContentBaseDTO queryContentBase(ContentBaseDTO contentBaseDTO){
+        ContentBaseDTO ContentBaseRespDTO = new ContentBaseDTO();
+        Long contentId = contentBaseDTO.getContentId();
+        List<ContentBaseDTO> contentBaseList = contentBaseMapper.queryContentBase(contentId);
+        if(contentBaseList!=null&&contentBaseList.size()>0){
+            ContentBaseRespDTO = contentBaseList.get(0);
+        }
+        return ContentBaseRespDTO;
+    }
+
+
+    /**
+     * 查询失效内容列表
+     * @param days
+     * @return
+     * @author Ji.kai
+     * @date 2018/10/30 15:27
+     */
+    public List<ContentBaseDTO> getExpContentBases(int days) {
+
+        return contentBaseMapper.getExpContentBases(days);
+    }
+}

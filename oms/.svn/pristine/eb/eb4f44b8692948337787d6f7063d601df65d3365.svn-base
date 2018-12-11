@@ -1,0 +1,27 @@
+package com.iwhalecloud.retail.oms.manager;
+
+import com.iwhalecloud.retail.oms.entity.ContentVediolv2;
+import org.springframework.stereotype.Component;
+import javax.annotation.Resource;
+import com.iwhalecloud.retail.oms.mapper.ContentVediolv2Mapper;
+
+import java.util.List;
+
+
+@Component
+public class ContentVediolv2Manager{
+    @Resource
+    private ContentVediolv2Mapper contentVediolv2Mapper;
+
+
+    public List<ContentVediolv2> queryContentVediolTwoList(List<Long> matids){
+        return contentVediolv2Mapper.queryContentVediolTwoList(matids);
+    }
+
+
+    public ContentVediolv2 insertContentVediolv2(ContentVediolv2 contentVediolv2){
+        contentVediolv2Mapper.insert(contentVediolv2);
+        return contentVediolv2;
+    }
+
+}

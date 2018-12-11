@@ -1,0 +1,44 @@
+package com.iwhalecloud.retail.oms.service;
+
+import zte.params.brand.req.*;
+import zte.params.brand.resp.BrandGetResp;
+import zte.params.brand.resp.BrandListResp;
+import zte.params.brand.resp.BrandOperateResp;
+
+public interface GoodsBrandService {
+
+    /**
+     * 根据品牌ID获取品牌
+     * @param req
+     * @return
+     */
+    BrandGetResp getBrand(BrandGetReq req);
+
+    /**
+     * 获取所有有效品牌列表
+     * @param req
+     * @return
+     */
+    BrandListResp listBrand();
+
+    /**
+     * 添加品牌
+     * @param req
+     * @return
+     */
+    BrandOperateResp addBrand(BrandAddReq req);
+
+    /**
+     * 修改品牌
+     * @param req
+     * @return
+     */
+    BrandOperateResp updateBrand(BrandUpdateReq req);
+
+    /**
+     * 删除品牌
+     * @param req
+     * @return
+     */
+    BrandOperateResp deleteBrand(BrandDeleteReq req);
+}

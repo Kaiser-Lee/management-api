@@ -1,0 +1,85 @@
+package com.iwhalecloud.retail.oms.web.controller.cms;
+
+import com.iwhalecloud.retail.oms.OmsCommonConsts;
+import com.iwhalecloud.retail.oms.dto.ResultVO;
+import com.iwhalecloud.retail.oms.entity.ContentPublish;
+
+import org.springframework.web.bind.annotation.*;
+
+import com.alibaba.dubbo.config.annotation.Reference;
+import com.iwhalecloud.retail.oms.service.ContentPublishService;
+
+import java.util.HashMap;
+import java.util.List;
+
+@RestController
+@CrossOrigin
+@RequestMapping("/api/contentPublish")
+public class ContentPublishController {
+
+    @Reference
+    private ContentPublishService contentPublishService;
+
+    // 内容发布/变更
+    @RequestMapping(value = "/createContentPublish", method = RequestMethod.POST)
+    public ResultVO createContentPublish(@RequestBody ContentPublish dto) {
+        ResultVO resultVO = new ResultVO();
+        try {
+            contentPublishService.deleteContentPublish(dto);
+            contentPublishService.createContentPublish(dto);
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+            resultVO.setResultData("新增成功");
+            resultVO.setResultMsg("success");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultData(e.getMessage());
+        }
+        return resultVO;
+    }
+
+    // 内容发布查询
+    @GetMapping(value = "queryContentPublishList")
+    public ResultVO<List<ContentPublish>> queryContentPublishList(@RequestParam(value = "contentId", required = true) Integer contentId) {
+        ResultVO resultVO = new ResultVO();
+        HashMap<String, Object> map = new HashMap<String, Object>();
+        map.put("contentId", contentId);
+        try {
+            List<ContentPublish> contentPublish = contentPublishService.queryContentPublishList(map);
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+            resultVO.setResultData(contentPublish);
+            resultVO.setResultMsg("success");
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultData(e.getMessage());
+        }
+        return resultVO;
+    }
+
+    // 内容上下架
+    @RequestMapping(value = "/updateContentPublishStatus", method = RequestMethod.PUT)
+    public ResultVO updateContentPublishStatus(@RequestBody ContentPublish dto, String tag) {
+        ResultVO resultVO = new ResultVO();
+
+        try {
+            if (tag == "putOn") {
+                contentPublishService.updateContentPublishStatusToPutOn(dto);
+                resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+                resultVO.setResultData("上架成功");
+                resultVO.setResultMsg("success");
+            } else if (tag == "pullOff") {
+                contentPublishService.updateContentPublishStatusToPullOff(dto);
+                resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+                resultVO.setResultData("下架成功");
+                resultVO.setResultMsg("success");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultData(e.getMessage());
+        }
+        return resultVO;
+    }
+}

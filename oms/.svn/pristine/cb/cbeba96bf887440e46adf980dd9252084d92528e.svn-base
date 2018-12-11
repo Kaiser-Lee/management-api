@@ -1,0 +1,39 @@
+package com.iwhalecloud.retail.oms.service.impl;
+
+import com.iwhalecloud.retail.oms.dto.BindContentDTO;
+import com.iwhalecloud.retail.oms.dto.BindProductDTO;
+import com.iwhalecloud.retail.oms.manager.OperationPositionManager;
+import com.iwhalecloud.retail.oms.rop.ZteRopClient;
+import com.iwhalecloud.retail.oms.service.OperationPositionService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.alibaba.dubbo.config.annotation.Service;
+
+/**
+ * @Auther: lin.wh
+ * @Date: 2018/10/19 14:30
+ * @Description:
+ */
+@Slf4j
+@Service
+public class OperationPositionServiceImpl implements OperationPositionService {
+
+    @Autowired
+    private ZteRopClient client;
+
+    @Autowired
+    private OperationPositionManager operationPositionManager;
+
+    @Override
+    public int createBindProduct(BindProductDTO dto) {
+        int t = operationPositionManager.createBindProduct(dto);
+        return t;
+    }
+
+    @Override
+    public int createBindContent(BindContentDTO dto) {
+        int t = operationPositionManager.createBindContent(dto);
+        return t;
+    }
+}
+

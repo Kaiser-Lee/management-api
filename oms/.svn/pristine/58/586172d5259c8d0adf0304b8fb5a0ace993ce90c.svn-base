@@ -1,0 +1,135 @@
+package com.iwhalecloud.retail.oms.web.interceptor;
+
+import com.iwhalecloud.retail.oms.consts.OmsConst;
+import com.ztesoft.net.eop.resource.model.AdminUser;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import java.io.Serializable;
+
+public class UserContext implements Serializable {
+
+    private static ThreadLocal<String> userIdThreadLocal = new ThreadLocal<>();
+
+    private static ThreadLocal<String> sessionIdThreadLocal = new ThreadLocal<>();
+
+    private static ThreadLocal<AdminUser> adminUserThreadLocal = new ThreadLocal<>();
+
+    public static String getUserId() {
+        return userIdThreadLocal.get();
+    }
+
+    public static void setUserId(String userId) {
+        userIdThreadLocal.set(userId);
+    }
+
+    public static String getSessionId() {
+        return sessionIdThreadLocal.get();
+    }
+
+    public static void setSessionId(String sessionIdId) {
+        sessionIdThreadLocal.set(sessionIdId);
+    }
+
+    public static void removeUserSession() {
+        userIdThreadLocal.remove();
+        sessionIdThreadLocal.remove();
+    }
+    /**
+     * 获取当前servlet的request对象，不在servlet环境下返回null
+     *
+     * @return
+     * @author Ji.kai 2018-11-5
+     */
+    public static final HttpServletRequest getRequest() {
+        ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        if (attrs == null) {
+            return null;
+        }
+        HttpServletRequest request = attrs.getRequest();
+        return request;
+    }
+
+    /**
+     * 获取当前servlet的request对象，不在servlet环境下返回null.
+     *
+     * @return
+     * @author Ji.kai 2018-11-5
+     */
+    public static final HttpSession getSession() {
+        HttpServletRequest req = getRequest();
+        if (req == null) {
+            return null;
+        }
+        HttpSession session = req.getSession();
+        return session;
+    }
+    /**
+     * 获取当前登录的用户信息,没有登录则返回null
+     *
+     * @return
+     * @author Ji.kai 2018-11-5
+     */
+    public static final AdminUser getAdminUser() {
+
+        AdminUser adminUser = adminUserThreadLocal.get();
+        //优先从线程变量取，取到就返回
+        if(adminUser != null){
+            return adminUser;
+        }
+
+        //从httpsession中获取
+        HttpSession httpSession = getSession();
+        if (httpSession != null) {
+            adminUser = (AdminUser) httpSession.getAttribute(OmsConst.SESSION_USER);
+            return adminUser;
+        }
+
+        return null;
+    }
+
+    /**
+     * 设置登录信息到session中.
+     *
+     * @param adminUser 登录信息
+     * @author Ji.kai 2018-11-5
+     */
+    public static final void setAdminUser(AdminUser adminUser) {
+        HttpServletRequest req = getRequest();
+        if (req == null) {
+            return;
+        }
+        HttpSession session = req.getSession(true);
+        //清空这些信息，减轻写入session redis缓存的内容，读取的时候在增加从redis中读取
+        session.setAttribute(OmsConst.SESSION_USER, adminUser);
+
+        //设置线程变量
+        adminUserThreadLocal.set(adminUser);
+    }
+
+    /**
+     * 获取当前登录用户的门店,没有登录则返回null
+     *
+     * @return
+     * @author Ji.kai 2018-11-5
+     */
+    public static final String getRelcode() {
+
+        AdminUser adminUser = adminUserThreadLocal.get();
+        //优先从线程变量取，取到就返回
+        if(adminUser != null){
+            return adminUser.getRelcode();
+        }
+
+        //从httpsession中获取
+        HttpSession httpSession = getSession();
+        if (httpSession != null) {
+            adminUser = (AdminUser) httpSession.getAttribute(OmsConst.SESSION_USER);
+            return adminUser.getRelcode();
+        }
+
+        return null;
+    }
+}

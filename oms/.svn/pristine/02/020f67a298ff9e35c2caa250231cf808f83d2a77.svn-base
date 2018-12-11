@@ -1,0 +1,80 @@
+package com.iwhalecloud.retail.oms.service;
+
+
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.iwhalecloud.retail.oms.dto.ContentBaseDTO;
+import com.iwhalecloud.retail.oms.dto.resquest.ContentAddReq;
+import com.iwhalecloud.retail.oms.dto.resquest.ContentBasePageReq;
+import com.iwhalecloud.retail.oms.dto.resquest.ContentEditReq;
+import com.iwhalecloud.retail.oms.entity.ContentBase;
+import com.iwhalecloud.retail.oms.entity.ContentChkhis;
+
+import java.util.List;
+
+public interface ContentBaseService{
+
+
+    /**
+     * 根据在页面上选择的目录、内容类型、内容状态、标签以及输入的关键字等查询内容
+     * @param page
+     * @return
+     * @author Ji.kai
+     * @date 2018/10/29 15:27
+     */
+    Page<ContentBaseDTO> qryContentBasePageList(ContentBasePageReq page);
+
+    /**
+     * 将内容名称、内容说明信息等插入内容基础信息表
+     * @param contentAddReq,userId
+     * @return
+     */
+    boolean addContentBase(ContentAddReq contentAddReq, String userId) throws Exception;
+
+    /**
+     * 对内容基础信息的表中该记录的状态进行更新
+     * @param contentId,status
+     * @return
+     */
+    boolean contentBaseStatusChange(Long contentId,Integer status) throws Exception;
+
+    /**
+     * 对内容基础信息表以及对应的相关素材表的数据
+     * @param contentEditReq,userId
+     * @return
+     */
+    boolean editContentBase(ContentEditReq contentEditReq, String userId) throws Exception;
+
+    /**
+     * 根据条件查询内容列表
+     * @param contentBaseDTO
+     * @return
+     * @author Ji.kai
+     * @date 2018/10/29 15:27
+     */
+    List<ContentBaseDTO> qryContentBaseList(ContentBaseDTO contentBaseDTO);
+
+    /**
+     * 查询内容基础信息
+     * @param contentBaseDTO
+     * @return
+     */
+    ContentBaseDTO queryContentBase(ContentBaseDTO contentBaseDTO);
+
+    /**
+     *
+     * @param
+     * @return
+     * @author Ji.kai
+     * @date 2018/11/1 15:27
+     */
+    List<ContentBaseDTO> qryContentBaseList();
+
+
+    /**
+     * 更新内容信息
+     * @param contentBaseDTO
+     * @return
+     */
+    int updateContentBase(ContentBaseDTO contentBaseDTO, ContentChkhis contentChkhi);
+
+}

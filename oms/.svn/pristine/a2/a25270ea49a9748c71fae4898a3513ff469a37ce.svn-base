@@ -1,0 +1,176 @@
+package com.iwhalecloud.retail.oms.service.impl;
+
+import com.alibaba.fastjson.JSON;
+import com.iwhalecloud.retail.oms.OmsServiceApplication;
+import com.iwhalecloud.retail.oms.consts.OrderManagerConsts;
+import com.iwhalecloud.retail.oms.dto.ResultVO;
+import com.iwhalecloud.retail.oms.dto.response.CommonResultResp;
+import com.iwhalecloud.retail.oms.dto.resquest.order.ApplyOrderRequestDTO;
+import com.iwhalecloud.retail.oms.dto.resquest.order.OrderDetailDTO;
+import com.iwhalecloud.retail.oms.dto.resquest.order.SelectApplyOrderRequestDTO;
+import com.iwhalecloud.retail.oms.dto.resquest.order.UpdateApplyOrderRequestDTO;
+import com.iwhalecloud.retail.oms.rop.ZteRopClient;
+import com.iwhalecloud.retail.oms.service.OrderManagerService;
+import com.ztesoft.net.consts.OrderStatus;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+import zte.params.order.req.OrderApplyAddReq;
+import zte.params.order.req.OrderApplyAuditReq;
+import zte.params.order.resp.OrderApplyAddResp;
+import zte.params.order.resp.OrderApplyAuditResp;
+import zte.params.order.resp.OrderApplyPageListResp;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@RunWith(SpringRunner.class)
+@Slf4j
+@SpringBootTest(classes = OmsServiceApplication.class)
+public class OrderManagerTest {
+
+    @Autowired
+    private ZteRopClient zteRopClient;
+
+    @Autowired
+    private OrderManagerService orderManagerService;
+
+    /**
+     * 退货申请---待测试【发货时需要在es_order_items表中记录每个订单项的发货数量【ship_num】】
+     */
+    @Test
+    public void orderApplyReturnedGoodsAdd() {
+        String order_id = "2018101918461166600946284";
+        String memberId = "181018707000417651";
+        String order_itme = "181019915622750455";
+//        UpdateOrderStatusRequestDTO updateOrderStatusRequestDTO = new UpdateOrderStatusRequestDTO();
+//        updateOrderStatusRequestDTO.setFlowType(OrderManagerConsts.ORDER_HANDLER_FH);
+//        updateOrderStatusRequestDTO.setOrderId(order_id);
+//        updateOrderStatusRequestDTO.setLogiName("MES");
+//        updateOrderStatusRequestDTO.setShipNum("2");
+//        updateOrderStatusRequestDTO.setLogiNo("1111");
+//        updateOrderStatusRequestDTO.setMemberId(memberId);
+//        orderManagerService.updateOrderStatus(updateOrderStatusRequestDTO);
+
+
+        OrderApplyAddReq req = new OrderApplyAddReq();
+        String sessionId = "";
+        String service_type = OrderManagerConsts.ORDER_SERVICE_TYPE_TH;  //退货
+        req.setUserSessionId(sessionId);
+        req.setService_type(service_type);//退货
+        req.setOrder_id(order_id);//原订单ID 2018101918423087900168490
+//			req.setPayment_id("2");
+        req.setShipping_id("1");
+        req.setAction("new");//新增
+
+        Map<String, Object> orderApply = new HashMap<String, Object>();
+        orderApply.put("question_desc", "严重发烫，无法使用yy");//问题描述
+        orderApply.put("good_return_type", OrderStatus.GOOD_RETURN_TYPE_3);//物流
+        orderApply.put("refund_type", OrderStatus.APLY_RETURN_TYPE_3);//退至银行卡
+        orderApply.put("bank_info", "20");//退款银行
+        orderApply.put("account_holder_name", "张三");//开户名
+        orderApply.put("bank_account", "6225128182777238823");//账号
+        orderApply.put("linkman", "张三");//联系人
+        orderApply.put("phone_num", "18818808888");//手机号码
+        orderApply.put("depreciation_price", 0);//折旧金额
+        orderApply.put("ship_price", 0);//物流费用
+        orderApply.put("apply_state", OrderStatus.ORDER_APPLY_REL_STATE_0);//待处理
+
+        List<Map<String, Object>> ois = new ArrayList<Map<String, Object>>();
+        Map<String, Object> orderApplyItem = new HashMap<String, Object>();
+        orderApplyItem.put("item_type", service_type);//退货
+        orderApplyItem.put("old_order_item_id", order_itme);//原订单项ID
+        orderApplyItem.put("num", 0);//退货数量
+
+        ois.add(orderApplyItem);
+        req.setApplyItems(ois);
+        req.setOrderApply(orderApply);
+
+        OrderApplyAddResp resp = zteRopClient.execute(req, OrderApplyAddResp.class);
+
+        System.out.println(resp.getError_code() + "-" + resp.getError_msg());
+    }
+
+
+    /**
+     * 退货审核---
+     */
+    @Test
+    public void orderApplyReturnedGoodsAudit() {
+        String applyId = "181022291100046636";
+        OrderApplyAuditReq req = new OrderApplyAuditReq();
+        String sessionId = "AAAAB";
+        req.setUserSessionId(sessionId);
+        req.setApply_id(applyId);//申请单ID
+        req.setService_type(OrderStatus.ORDER_TYPE_4);
+        req.setApply_status(OrderStatus.ORDER_APPLY_STATUS_1);//通过
+
+        OrderApplyAuditResp resp = zteRopClient.execute(req, OrderApplyAuditResp.class);
+
+        System.out.println(JSON.toJSONString(resp));
+
+    }
+
+
+    @Test
+    public void selectTH() {
+
+        SelectApplyOrderRequestDTO resp = new SelectApplyOrderRequestDTO();
+        resp.setServiceType(OrderManagerConsts.ORDER_SERVICE_TYPE_TH);
+//        resp.setMemberId("");
+        resp.setPageNo(1);
+        resp.setPageSize(10);
+        OrderApplyPageListResp re = orderManagerService.selectApplyOrder(resp);
+
+        System.out.println(JSON.toJSONString(re));
+
+    }
+
+    @Test
+    public void updateTH() {
+        UpdateApplyOrderRequestDTO thApplyOrderRequestDTO = new UpdateApplyOrderRequestDTO();
+//        thApplyOrderRequestDTO.setAction(OrderManagerConsts.ORDER_TH_ACTION_STATUS_SH);
+        thApplyOrderRequestDTO.setAction(OrderManagerConsts.ORDER_TH_ACTION_STATUS_TH);
+        thApplyOrderRequestDTO.setUserSessionId("adfsfsfsfsfbnergrgrt");
+        thApplyOrderRequestDTO.setApplyId("181022291100046636");
+        thApplyOrderRequestDTO.setAuditingStatus(OrderManagerConsts.ORDER_AUDITING_STATUS_YES);
+        CommonResultResp resultVO = orderManagerService.updateTHApplyOrder(thApplyOrderRequestDTO);
+        System.out.println(JSON.toJSONString(thApplyOrderRequestDTO));
+        System.out.println(JSON.toJSONString(resultVO));
+
+    }
+
+
+    @Test
+    public void addTHapply() {
+
+        ApplyOrderRequestDTO th = new ApplyOrderRequestDTO();
+        th.setUserSessionId(System.currentTimeMillis() + "");
+        th.setOrderId("2018102316291840100471353");
+        th.setMemberId("181019293400418098");
+        th.setAction(OrderManagerConsts.ORDER_ACTION_STATUS_ADD);
+
+        th.setAccountHolderName("gs");
+        th.setBankAccount("101000");
+        th.setBankInfo("ZG");
+        th.setPhoneNum("13250299515");
+        th.setDepreciationPrice("0");
+        th.setLinkman("gs");
+
+        List<OrderDetailDTO> orderDetailDTOS = new ArrayList<>();
+        OrderDetailDTO ois = new OrderDetailDTO();
+        ois.setNum(0);
+        ois.setOldOrderItemId("181023948822753839");
+        orderDetailDTOS.add(ois);
+        th.setOis(orderDetailDTOS);
+        CommonResultResp resultVO = orderManagerService.addOrderApply(th);
+        System.out.println(JSON.toJSONString(th));
+        System.out.println(JSON.toJSONString(resultVO));
+    }
+
+}

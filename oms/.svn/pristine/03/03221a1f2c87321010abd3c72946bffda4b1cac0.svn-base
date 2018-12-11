@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iwhalecloud.retail.oms.mapper.ContentBaseMapper">
+
+
+    <sql id="allFields">
+    t.CONTENT_ID
+    ,t.TITLE
+    ,t.DESP
+    ,t.CATALOG_ID
+    ,t.EFF_DATE
+    ,t.EXP_DATE
+    ,t.TYPE
+    ,t.STATUS
+    ,t.OPR_ID
+    ,t.UPD_DATE
+    ,t.COPYWRITER
+    ,t.MAXPICNUM
+    ,t.PLAYINTERVAL
+  </sql>
+
+
+    <select id="queryContentBase"
+            resultType="com.iwhalecloud.retail.oms.dto.ContentBaseDTO">
+		SELECT  <include refid="allFields" />
+        FROM t_content_base t
+		WHERE content_id=#{contentId}
+	</select>
+
+    <select id="qryContentBasePageList" parameterType="com.iwhalecloud.retail.oms.dto.resquest.content.ContentBasePageReq"
+            resultType="com.iwhalecloud.retail.oms.dto.ContentBaseDTO">
+        SELECT  distinct t.CONTENT_ID,
+        t.TITLE,
+        t.DESP,
+        t.CATALOG_ID,
+        t.EFF_DATE,
+        t.EXP_DATE,
+        t.TYPE,
+        t.STATUS,
+        t.OPR_ID,
+        t.UPD_DATE,
+        t.MAXPICNUM,
+        t.PLAYINTERVAL
+        from t_content_base t,t_content_tag b,t_content_material c, t_catalog d
+        <where>
+            and t.content_id=b.content_id(+)
+            and c.contentid(+)=t.content_id
+            and t.catalog_Id = d.cata_id(+)
+            <if test="pageReq.catalogId!=null and pageReq.catalogId!=''">
+                and t.catalog_id=#{pageReq.catalogId}
+            </if>
+            <if test="pageReq.types!=null">
+                and t.type in
+                    <foreach item="item" index="index" collection="pageReq.types" open="("  separator="," close=")">
+                        #{item}
+                    </foreach>
+            </if>
+            <if test="pageReq.status!=null">
+                and t.status in
+                    <foreach item="item" index="index" collection="pageReq.status" open="("  separator="," close=")">
+                        #{item}
+                    </foreach>
+            </if>
+            <if test="pageReq.tagIds!=null">
+                and b.tag_id in
+                    <foreach item="item" index="index" collection="pageReq.tagIds" open="("  separator="," close=")">
+                        #{item}
+                    </foreach>
+            </if>
+            <if test="pageReq.oprid!=null and pageReq.oprid!=''">
+                and t.opr_id =#{pageReq.oprid}
+            </if>
+            <if test="pageReq.beginTime!=null">
+                and t.upd_date &gt;= #{pageReq.beginTime}
+            </if>
+            <if test="pageReq.endTime!=null">
+                and t.upd_date &lt;= #{pageReq.endTime}
+            </if>
+            <if test="pageReq.fieldVal!=null and pageReq.fieldVal!=''">
+                and (t.title like CONCAT(CONCAT('%', #{pageReq.fieldVal}), '%') or d.name like CONCAT(CONCAT('%', #{pageReq.fieldVal}), '%'))
+            </if>
+            <if test="pageReq.title!=null and pageReq.title!=''">
+                and t.title like CONCAT(CONCAT('%', #{pageReq.title}), '%')
+            </if>
+            <if test="pageReq.currentTime!=null">
+                and t.eff_date &lt;= #{pageReq.currentTime}
+                and t.exp_date >= #{pageReq.currentTime}
+            </if>
+        </where>
+        order by t.upd_date desc
+    </select>
+
+    <select id="qryContentBaseList" parameterType="com.iwhalecloud.retail.oms.dto.ContentBaseDTO"
+            resultType="com.iwhalecloud.retail.oms.dto.ContentBaseDTO">
+        SELECT  <include refid="allFields" />
+        from t_content_base t
+        <where>
+            <if test="catalogId!=null and catalogId!=''">
+                and t.catalog_id=#{catalogId}
+            </if>
+            <if test="type!=null and type!=''">
+                and t.type =#{type}
+            </if>
+            <if test="status!=null and status!=''">
+                and t.status =#{status}
+            </if>
+            <if test="oprid!=null and oprid!=''">
+                and t.opr_id =#{oprid}
+            </if>
+        </where>
+    </select>
+
+
+    <select id="getExpContentBases" resultType="com.iwhalecloud.retail.oms.dto.ContentBaseDTO">
+        SELECT  <include refid="allFields" />
+        from t_content_base t
+        <where>
+            <![CDATA[
+            exp_date < sysdate + #{days}
+            and t.status <>  ${@com.iwhalecloud.retail.oms.consts.OmsConst$ContentStatusEnum@OFF_SHELVE.getCode()}
+            and t.status <>  ${@com.iwhalecloud.retail.oms.consts.OmsConst$ContentStatusEnum@HAVE_DELETE.getCode()}
+            ]]>
+        </where>
+    </select>
+
+    <update id="invalidateContentBase">
+        UPDATE t_content_base t
+        <set>
+            t.status = ${@com.iwhalecloud.retail.oms.consts.OmsConst$ContentStatusEnum@OFF_SHELVE.getCode()}
+        </set>
+        <where>
+            <![CDATA[
+            exp_date < sysdate
+            and t.status <>  ${@com.iwhalecloud.retail.oms.consts.OmsConst$ContentStatusEnum@OFF_SHELVE.getCode()}
+            and t.status <>  ${@com.iwhalecloud.retail.oms.consts.OmsConst$ContentStatusEnum@HAVE_DELETE.getCode()}
+            ]]>
+        </where>
+    </update>
+
+
+    <update id="updateContentBase" parameterType="com.iwhalecloud.retail.oms.dto.ContentBaseDTO">
+        UPDATE t_content_base
+        <set>
+            <if test="status != null">
+                status = #{status},
+            </if>
+        </set>
+        WHERE content_id = #{contentId}
+    </update>
+
+
+    <select id="qryContentBaseByObjTypePageList" parameterType="com.iwhalecloud.retail.oms.dto.resquest.content.ContentBaseByObjTypePageReq"
+            resultType="com.iwhalecloud.retail.oms.dto.ContentBaseDTO">
+        SELECT  distinct t.CONTENT_ID,
+        t.TITLE,
+        t.DESP,
+        t.CATALOG_ID,
+        t.EFF_DATE,
+        t.EXP_DATE,
+        t.TYPE,
+        t.STATUS,
+        t.OPR_ID,
+        t.UPD_DATE,
+        t.MAXPICNUM,
+        t.PLAYINTERVAL
+        from t_content_base t, t_content_pic p
+        <where>
+            and t.content_id=p.contentid(+)
+            and p.objType = #{pageReq.objType}
+            <if test="pageReq.title!=null and pageReq.title!=''">
+                and t.title like CONCAT(CONCAT('%', #{pageReq.title}), '%')
+            </if>
+            <if test="pageReq.status!=null">
+                and t.status in
+                <foreach item="item" index="index" collection="pageReq.status" open="("  separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+        order by t.upd_date desc
+    </select>
+
+</mapper>

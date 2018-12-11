@@ -1,0 +1,48 @@
+package com.iwhalecloud.retail.oms.service.impl;
+
+import com.iwhalecloud.retail.oms.dto.ContentPublishDTO;
+import com.iwhalecloud.retail.oms.entity.ContentPublish;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.alibaba.dubbo.config.annotation.Service;
+import lombok.extern.slf4j.Slf4j;
+import com.iwhalecloud.retail.oms.manager.ContentPublishManager;
+import com.iwhalecloud.retail.oms.service.ContentPublishService;
+
+import java.util.HashMap;
+import java.util.List;
+
+
+@Service
+@Slf4j
+public class ContentPublishServiceImpl implements ContentPublishService {
+
+    @Autowired
+    private ContentPublishManager contentPublishManager;
+
+    @Override
+    public List<ContentPublishDTO> queryContentPublishList(String contentId) {
+        return contentPublishManager.queryContentPublishList(Long.parseLong(contentId));
+    }
+
+    @Override
+    public int deleteContentPublish(ContentPublishDTO dto) {
+        return contentPublishManager.deleteContentPublish(dto);
+    }
+
+    @Override
+    public int createContentPublish(ContentPublishDTO dto) {
+        return contentPublishManager.createContentPublish(dto);
+    }
+
+    @Override
+    public int updateContentPublishStatusToPutOn(ContentPublish dto) {
+        return 0;
+    }
+
+    @Override
+    public int updateContentPublishStatusToPullOff(ContentPublish dto) {
+        return 0;
+    }
+
+
+}

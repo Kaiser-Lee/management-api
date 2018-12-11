@@ -1,0 +1,122 @@
+package com.iwhalecloud.retail.oms.handler;
+
+import com.alibaba.fastjson.JSON;
+import com.iwhalecloud.retail.oms.consts.OrderManagerConsts;
+import com.iwhalecloud.retail.oms.dto.ResultVO;
+import com.iwhalecloud.retail.oms.dto.response.CommonResultResp;
+import com.iwhalecloud.retail.oms.dto.resquest.order.UpdateOrderStatusRequestDTO;
+import com.iwhalecloud.retail.oms.rop.ZteRopClient;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import zte.net.fjord.params.req.FJUserOrderdealReq;
+import zte.params.order.req.OrderStatusEditReq;
+import zte.params.order.resp.OrderStatusEditResp;
+import zte.params.ordercenter.req.UserOrderCancelReq;
+import zte.params.ordercenter.resp.UserOrderCancleResp;
+import zte.params.ordercenter.resp.UserOrderdealResp;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@Slf4j
+@Component
+public class OrderStatusHandler {
+
+    @Autowired
+    private ZteRopClient zteRopClient;
+
+    //发货
+    public CommonResultResp sendGoods(UpdateOrderStatusRequestDTO request) {
+        CommonResultResp resultVO=new CommonResultResp();
+        FJUserOrderdealReq req = new FJUserOrderdealReq();
+        req.setOrder_id(request.getOrderId());
+        Map<String, String> map = new HashMap<>();
+        //  H发
+        map.put("flow_id", OrderManagerConsts.ORDER_HANDLER_FH);
+        map.put("need_shipping", request.getNeedShipping());    //是否需要物流
+        map.put("logi_id", request.getLogiId());          //物流公司id
+        /**
+         SF0001	顺丰
+         SF0002	顺丰-省内
+         SF0003	顺丰-国内
+         EMS0001	EMS
+         EMS0002	EMS-省内
+         EMS0003	EMS-国内
+         ST0001	申通
+         */
+        map.put("logi_no", request.getLogiNo());    //物流单号
+        map.put("logi_name", request.getLogiName());      //物流公司
+
+        req.setAttrs(map);
+        UserOrderdealResp orderStatusResp = zteRopClient.execute(req, UserOrderdealResp.class);
+        log.info("gs_10010_sendGoods req{},resp{}", JSON.toJSONString(req), JSON.toJSONString(orderStatusResp));
+        resultVO.setResultMsg(orderStatusResp.getError_msg());
+        resultVO.setResultCode(orderStatusResp.getError_code());
+        return resultVO;
+    }
+
+    //支付
+    public CommonResultResp pay( UpdateOrderStatusRequestDTO request){
+        CommonResultResp resultVO=new CommonResultResp();
+        FJUserOrderdealReq req = new FJUserOrderdealReq();
+        req.setOrder_id(request.getOrderId());
+        Map<String, String> map = new HashMap<>();
+        // C支付
+        map.put("flow_id", OrderManagerConsts.ORDER_HANDLER_ZF);
+        req.setAttrs(map);
+        UserOrderdealResp orderStatusResp = zteRopClient.execute(req, UserOrderdealResp.class);
+        log.info("gs_10010_pay req{},resp{}", JSON.toJSONString(req), JSON.toJSONString(orderStatusResp));
+        resultVO.setResultMsg(orderStatusResp.getError_msg());
+        resultVO.setResultCode(orderStatusResp.getError_code());
+        return resultVO;
+    }
+
+    //收货
+    public CommonResultResp getGoods(UpdateOrderStatusRequestDTO request){
+        CommonResultResp resultVO=new CommonResultResp();
+        FJUserOrderdealReq req = new FJUserOrderdealReq();
+        req.setOrder_id(request.getOrderId());
+        Map<String, String> map = new HashMap<>();
+        // j收货
+        map.put("flow_id", OrderManagerConsts.ORDER_HANDLER_SH);
+        req.setAttrs(map);
+        UserOrderdealResp orderStatusResp = zteRopClient.execute(req, UserOrderdealResp.class);
+        log.info("gs_10010_getGoods req{},resp{}", JSON.toJSONString(req), JSON.toJSONString(orderStatusResp));
+        resultVO.setResultMsg(orderStatusResp.getError_msg());
+        resultVO.setResultCode(orderStatusResp.getError_code());
+        return resultVO;
+    }
+
+    //取消订单
+    public CommonResultResp cancelOrder( UpdateOrderStatusRequestDTO request){
+        CommonResultResp resultVO=new CommonResultResp();
+        UserOrderCancelReq cancelReq = new UserOrderCancelReq();
+        cancelReq.setOrder_id(request.getOrderId());
+        cancelReq.setUserSessionId(request.getUserSessionId());
+        UserOrderCancleResp cancelResp = zteRopClient.execute(cancelReq, UserOrderCancleResp.class);
+        log.info("gs_10010_cancelOrder cancelReq{},cancelResp{}", JSON.toJSONString(cancelReq), JSON.toJSONString(cancelResp));
+
+        resultVO.setResultCode(cancelResp.getError_code());
+        resultVO.setResultMsg(cancelResp.getError_msg());
+        return resultVO;
+    }
+
+    //修改订单状态
+    public CommonResultResp updateStatus(String orderId,String orderStatus){
+        CommonResultResp resultVO=new CommonResultResp();
+        OrderStatusEditReq statusEditReq = new OrderStatusEditReq();
+        statusEditReq.setOrder_id(orderId);
+        statusEditReq.setOrder_status(orderStatus);
+        OrderStatusEditResp statusEditResp =zteRopClient.execute(statusEditReq,OrderStatusEditResp.class);
+        log.info("gs_10010_updateStatus statusEditReq{},statusEditResp{}", JSON.toJSONString(statusEditReq), JSON.toJSONString(statusEditResp));
+        resultVO.setResultCode(statusEditResp.getError_code());
+        resultVO.setResultMsg(statusEditResp.getError_msg());
+        return resultVO;
+    }
+
+    public ResultVO thToExamine(){
+
+        return null;
+    }
+}

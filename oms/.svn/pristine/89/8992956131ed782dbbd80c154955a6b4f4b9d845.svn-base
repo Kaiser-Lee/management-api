@@ -1,0 +1,52 @@
+package com.iwhalecloud.retail.oms.service.impl;
+
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.iwhalecloud.retail.oms.dto.ShelfTemplatesDTO;
+import com.iwhalecloud.retail.oms.entity.ShelfTemplates;
+import com.iwhalecloud.retail.oms.manager.ShelfTemplatesManager;
+import com.iwhalecloud.retail.oms.rop.ZteRopClient;
+import com.iwhalecloud.retail.oms.service.ShelfTemplatesService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.alibaba.dubbo.config.annotation.Service;
+
+
+/**
+ * @Auther: lin.wh
+ * @Date: 2018/10/16 14:19
+ * @Description: 云货架模版实现类
+ */
+
+@Slf4j
+@Service
+public class ShelfTemplatesServiceImpl implements ShelfTemplatesService {
+
+    @Autowired
+    private ZteRopClient client;
+
+    @Autowired
+    private ShelfTemplatesManager shelfTemplatesManager;
+
+    @Override
+    public int createShelfTemplates(ShelfTemplatesDTO dto) {
+        int t = shelfTemplatesManager.createShelfTemplates(dto);
+        return t;
+    }
+
+    @Override
+    public int updateShelfTemplatesStatus(ShelfTemplatesDTO dto) {
+        int t = shelfTemplatesManager.updateShelfTemplatesStatus(dto);
+        return t;
+    }
+
+    @Override
+    public Page<ShelfTemplatesDTO> queryShelfTemplates(ShelfTemplatesDTO dto) {
+        return shelfTemplatesManager.queryShelfTemplates(dto);
+    }
+
+    @Override
+    public int deleteShelfTemplates(ShelfTemplates dto) {
+        return shelfTemplatesManager.deleteShelfTemplates(dto);
+    }
+}
+

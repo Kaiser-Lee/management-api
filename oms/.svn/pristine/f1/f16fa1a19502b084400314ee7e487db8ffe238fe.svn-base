@@ -1,0 +1,13 @@
+package com.iwhalecloud.retail.oms.dto.response;
+
+import com.ztesoft.net.framework.database.Page;
+import lombok.Data;
+import zte.params.order.resp.OrderQueryResp;
+
+import java.io.Serializable;
+
+@Data
+public class OrderQueryListResp extends OrderQueryResp implements Serializable {
+
+   private  Page page;
+}

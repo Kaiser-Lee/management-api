@@ -1,0 +1,57 @@
+package com.iwhalecloud.retail.oms.service;
+
+import zte.params.spec.req.*;
+import zte.params.spec.resp.*;
+
+public interface SpecService {
+
+    /**
+     * 获取规格列表
+     * @return
+     */
+    SpecListResp listSpec();
+
+    /**
+     * 添加一种规格，同时添加其规格值
+     * @param req
+     */
+    SpecOperatorResp addSpec(SpecAddReq req);
+
+    /**
+     * 修改一个规格，同时修改其规格值
+     * @param req
+     */
+    SpecOperatorResp updateSpec(SpecUpdateReq req);
+
+    /**
+     * 删除某组规格
+     */
+    SpecOperatorResp deleteSpec(SpecDeleteReq req);
+
+    /**
+     * 读取一个规格详细
+     * @return
+     */
+    SpecGetResp getSpec(SpecGetReq req);
+
+    /**
+     * 添加一个规格值
+     * @param req
+     */
+    SpecOperatorResp addSpecValue(SpecValueAddReq req);
+
+    /**
+     * 读取某个规格的规格值
+     * @param req
+     * @return
+     */
+    SpecValueListResp listSpecValue(SpecValueListReq req);
+
+
+    /**
+     * 根据id获取规格值的详细
+     * @param req
+     * @return
+     */
+    SpecValueGetResp getSpecValue(SpecValueGetReq req);
+}

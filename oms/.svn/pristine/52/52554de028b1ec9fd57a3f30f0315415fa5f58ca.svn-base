@@ -1,0 +1,9 @@
+package com.iwhalecloud.retail.oms.service.order;
+
+import com.iwhalecloud.retail.oms.dto.response.OrderQueryListResp;
+import com.iwhalecloud.retail.oms.dto.resquest.order.SelectOrderRequestDTO;
+
+public interface MemberOrderService {
+
+    OrderQueryListResp selectOrder(SelectOrderRequestDTO request);
+}

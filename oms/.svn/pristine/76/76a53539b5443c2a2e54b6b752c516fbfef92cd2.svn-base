@@ -1,0 +1,187 @@
+package com.iwhalecloud.retail.oms.handler;
+
+import com.alibaba.fastjson.JSON;
+import com.iwhalecloud.retail.oms.consts.OrderManagerConsts;
+import com.iwhalecloud.retail.oms.dto.ResultVO;
+import com.iwhalecloud.retail.oms.dto.resquest.order.ApplyOrderRequestDTO;
+import com.iwhalecloud.retail.oms.dto.resquest.order.BuilderOrderRequestDTO;
+import com.iwhalecloud.retail.oms.dto.resquest.order.OrderDetailDTO;
+import com.iwhalecloud.retail.oms.rop.ZteRopClient;
+import com.ztesoft.net.app.base.core.model.Member;
+import com.ztesoft.net.consts.OrderStatus;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import params.member.req.MemberQryReq;
+import params.member.resp.MemberQryResp;
+import zte.net.fjord.params.req.FJMemberLoginReq;
+import zte.params.member.resp.MemberLoginResp;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Component
+@Slf4j
+public class OrderMangerHandler {
+
+    public Map builderOrderInfo(BuilderOrderRequestDTO request) {
+//        +"member_id :会员id"
+//                +"shipping_id：物流ID"
+//                +"shipping_type：物流类型。     "
+//                +"shipping_area：物流区域 。                "
+//                +"shipping_amount：物流费用。          "
+//                +"order_amount:订单金额         "
+//                +"remark:订单备注"
+//                +"order_type：订单类型。      "
+//                +"bill_flag：是否需要对账(T 需要对账、 F 不需要对账)。      "
+//                +"order_coupon：订单促销优惠。            "
+//                +"dly_address_id：配送地址ID。            "
+//                +"ship_day：收货日期。          "
+//                +"ship_time：收货时间。              "
+//                +"app_key：客户端标示。        "
+//                +"need_shipping：是否需要发货(1：是，0：否)。            "
+//                +"invoice_flag：是否需要发票(1：是，0：否)。          "
+//                +"session_id：购物车session_id。         "
+//                +"coupon_code：优惠券。             "
+        Map order_info_dt = new HashMap();
+        order_info_dt.put("member_id", request.getMemberId());          //会员id
+        order_info_dt.put("session_id", request.getUserSessionId());
+        order_info_dt.put("remark", request.getRemark());                //订单备注
+        order_info_dt.put("type_code", request.getTypeCode());               //1:APP；2：微商城-普通单；3：微商城-商机单；4：其它
+
+        order_info_dt.put("coupon_code", request.getCouponCode());
+        order_info_dt.put("shipping_id", System.currentTimeMillis());  //物流id
+        order_info_dt.put("shipping_type", request.getShipType()); //配送方式
+        order_info_dt.put("shipping_amount", request.getShippingAmount());//金额
+
+        order_info_dt.put("pay_type", request.getPayType());
+        order_info_dt.put("order_type", request.getOrderType());   //1 订购 5预约单
+        order_info_dt.put("acc_nbr", request.getAccNbr()); //入网号码
+        order_info_dt.put("userid", request.getUserId());
+
+
+//        订单信息-入网信息
+        Map<java.lang.String, java.lang.String> order_item_dt = new HashMap<java.lang.String, java.lang.String>();
+        order_item_dt.put("cust_name", request.getCustName());//客户姓名
+        order_item_dt.put("ic_type", "身份证");//证件类型
+        order_item_dt.put("ic_no", request.getIcNo());//证件号码
+        order_item_dt.put("ic_addr", request.getIcAddr());//证件地址
+        order_item_dt.put("cust_addr", request.getCustAddr());//客户联系地址
+        order_item_dt.put("contact_name", request.getCustName());//联系人姓名
+        order_item_dt.put("contact_phone", request.getContactPhone());//联系人电话
+        order_info_dt.put("order_item", order_item_dt);
+
+        order_info_dt.put("invoice_type", request.getInvoiceType());                    //发票类型：1普通发票、2增值发票
+        order_info_dt.put("invoice_content", request.getInvoiceContent());                //发票内容：1 明细，2 办公用品，3 电脑配件，4 耗材
+        order_info_dt.put("invoice_detail", request.getInvoiceDetail());            //发票内容
+        order_info_dt.put("invoice_title", request.getInvoiceTitle());                //发票抬头：1 个人 2单位
+        order_info_dt.put("invoice_title_desc", request.getInvoiceTitleDesc());            //发票抬头描述
+
+        return order_info_dt;
+    }
+
+    public Map builderInvoiceInfo(BuilderOrderRequestDTO request) {
+        Map invotceInfo = new HashMap();
+        invotceInfo.put("invoice_type", request.getInvoiceType());                    //发票类型：1普通发票、2增值发票
+        invotceInfo.put("invoice_content", request.getInvoiceContent());                //发票内容：1 明细，2 办公用品，3 电脑配件，4 耗材
+        invotceInfo.put("invoice_detail", request.getInvoiceDetail());            //发票内容
+        invotceInfo.put("invoice_title", request.getInvoiceTitle());                //发票抬头：1 个人 2单位
+        invotceInfo.put("invoice_title_desc", request.getInvoiceTitleDesc());            //发票抬头描述
+        return invotceInfo;
+    }
+
+    public Map builderDeliveryInfo(BuilderOrderRequestDTO request) {
+//        +"type :物流类型"
+//                +"logi_id：物流公司ID"
+//                +"shipping_company：物流公司编码。     "
+//                +"logi_name：物流公司名称。                "
+//                +"province_id：收货地址省份ID。          "
+//                +"province_namet:收货地址省份名称        "
+//                +"city_id:收货地址城市ID"
+//                +"city_name：收货地址城市名称。      "
+//                +"region_id：收货地址区域ID。      "
+//                +"region_name：收货地址区域名称。            "
+//                +"ship_name：收货人姓名。            "
+//                +"ship_addr：收货人地址。          "
+//                +"ship_zip：收货人邮编。              "
+//                +"ship_email：收货人电子邮箱。        "
+//                +"ship_mobile：收货人手机号码。            "
+//                +"ship_tel：收货人电话号码。          "
+//                +"is_protect：是否保价。         "
+//                +"reason：原因。             "
+//                +"remark：备注。           ")
+        Map<String, String> delivery_info_dt = new HashMap<>();
+        delivery_info_dt.put("address_id", request.getAddressId());//es_member_address
+        delivery_info_dt.put("logi_id", request.getLogiId());
+        delivery_info_dt.put("logi_name", request.getLogiName());
+        delivery_info_dt.put("ship_name", request.getShipName());
+        delivery_info_dt.put("ship_zip", request.getShipZip());
+        delivery_info_dt.put("ship_mobile", request.getShipMobile());
+        delivery_info_dt.put("ship_addr", request.getShipAddr());
+
+        return delivery_info_dt;
+    }
+
+    @Autowired
+    private ZteRopClient zteRopClient;
+
+    public ResultVO<Member> login(String memberId,String userSessionId) {
+
+        Member member= selectMember(memberId);
+        //登录信息
+        ResultVO<Member> resultVO = new ResultVO<>();
+        FJMemberLoginReq loginReq = new FJMemberLoginReq();
+        loginReq.setUserName(member.getUname());
+        loginReq.setUserSessionId(userSessionId);
+        MemberLoginResp memberLoginResp = zteRopClient.execute(loginReq, MemberLoginResp.class);
+        log.info("gs_10010_builderOrder loginReq{},memberLoginResp{}", JSON.toJSONString(loginReq), JSON.toJSONString(memberLoginResp));
+        if (!"0".equals(memberLoginResp.getError_code())) {
+            resultVO.setResultMsg(memberLoginResp.getError_msg());
+            resultVO.setResultCode(memberLoginResp.getError_code());
+            return resultVO;
+        }
+        resultVO.setResultData(member);
+        return resultVO;
+    }
+
+    public Map<String, Object> builderAddOrderApply(ApplyOrderRequestDTO request) {
+
+        Map<String, Object> orderApply = new HashMap<String, Object>();
+        orderApply.put("question_desc", request.getQuestionDesc());//问题描述
+        orderApply.put("good_return_type", OrderStatus.GOOD_RETURN_TYPE_3);//物流
+        orderApply.put("refund_type", OrderStatus.APLY_RETURN_TYPE_3);//退至银行卡
+        orderApply.put("bank_info", request.getBankInfo());//退款银行
+        orderApply.put("account_holder_name", request.getAccountHolderName());//开户名
+        orderApply.put("bank_account", request.getBankAccount());//账号
+        orderApply.put("linkman", request.getLinkman());//联系人
+        orderApply.put("phone_num", request.getPhoneNum());//手机号码
+        orderApply.put("depreciation_price", request.getDepreciationPrice());//折旧金额
+        orderApply.put("ship_price", request.getDepreciationPrice());//物流费用
+        orderApply.put("apply_state", OrderStatus.ORDER_APPLY_REL_STATE_0);//待处理
+
+        return orderApply;
+    }
+
+    public List<Map<String, Object>> builderOrderDetail(ApplyOrderRequestDTO request) {
+
+        List<Map<String, Object>> oisMap = new ArrayList<>();
+        for (OrderDetailDTO orderItem : request.getOis()) {
+            Map<String, Object> orderApplyItem = new HashMap<>();
+            orderApplyItem.put("item_type", OrderManagerConsts.ORDER_SERVICE_TYPE_TH);//退货
+            orderApplyItem.put("old_order_item_id", orderItem.getOldOrderItemId());//原订单项ID
+            orderApplyItem.put("num", orderItem.getNum());//退货数量
+            oisMap.add(orderApplyItem);
+        }
+        return oisMap;
+    }
+
+    public Member selectMember(String memberId) {
+        MemberQryReq memberQryPageReq = new MemberQryReq();
+        memberQryPageReq.setQry_con_type(MemberQryReq.QRY_CON_TYPE.ID);
+        memberQryPageReq.setMember_id(memberId);
+        MemberQryResp memberLoginResp = zteRopClient.execute(memberQryPageReq, MemberQryResp.class);
+        return memberLoginResp.getMember();
+    }
+}

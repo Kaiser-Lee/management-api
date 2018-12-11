@@ -1,0 +1,27 @@
+package com.iwhalecloud.retail.oms.dto.resquest;
+
+import com.iwhalecloud.retail.oms.dto.ContentBaseDTO;
+import com.iwhalecloud.retail.oms.dto.ContentTagDTO;
+import com.iwhalecloud.retail.oms.dto.ContentTextDTO;
+import com.iwhalecloud.retail.oms.entity.*;
+import lombok.Data;
+
+import java.io.Serializable;
+import java.util.List;
+import java.util.Map;
+
+@Data
+public class ContentAddReq implements Serializable {
+
+    //内容基础信息
+    private ContentBaseDTO contentBase;
+
+    //内容标签
+    private List<ContentTagDTO> contentTagList;
+
+    //软文
+    private ContentTextDTO contentText;
+
+    //素材信息
+    private List<Map<String,Object>> itemInfo;
+}

@@ -1,0 +1,32 @@
+package com.iwhalecloud.retail.oms.manager;
+
+import com.iwhalecloud.retail.oms.dto.BindContentDTO;
+import com.iwhalecloud.retail.oms.dto.BindProductDTO;
+import com.iwhalecloud.retail.oms.mapper.OperationPositionMapper;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
+
+/**
+ * @Auther: lin.wh
+ * @Date: 2018/10/22 00:13
+ * @Description:
+ */
+
+@Component
+public class OperationPositionManager {
+
+    @Resource
+    private OperationPositionMapper operationPositionMapper;
+
+    public int createBindProduct(BindProductDTO dto) {
+        int t = operationPositionMapper.createBindProduct(dto);
+        return t;
+    }
+
+    public int createBindContent(BindContentDTO dto) {
+        int t = operationPositionMapper.createBindContent(dto);
+        return t;
+    }
+}
+

@@ -1,0 +1,187 @@
+package com.iwhalecloud.retail.oms.dto;
+
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+
+import java.io.Serializable;
+
+/**
+ * @Auther: lin.wh
+ * @Date: 2018/10/12 10:37
+ * @Description: 云货架实体类
+ */
+
+@Data
+@ApiModel(value = "对应模型cloud_shelf, 对应实体CloudShelfDTO类")
+public class CloudShelfDTO implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    @ApiModelProperty(value = "ID")
+    private Integer id; //ID
+
+    @ApiModelProperty(value = "创建时间")
+    private String gmtCreate; //创建时间
+
+    @ApiModelProperty(value = "修改时间")
+    private String gmtModified; //修改时间
+
+    @ApiModelProperty(value = "创建人")
+    private String creator; //创建人
+
+    @ApiModelProperty(value = "修改人")
+    private String modifier; //修改人
+
+    @ApiModelProperty(value = "是否删除")
+    private Integer isDeleted; //是否删除：0未删、1删除
+
+    @ApiModelProperty(value = "云货架编码")
+    private String number; //云货架编码:全局唯一
+
+    @ApiModelProperty(value = "云货架名称")
+    private String shelfName; //云货架名称
+
+    @ApiModelProperty(value = "绑定的货架模板编码")
+    private String shelfTemplatesNumber; //绑定的货架模板编码
+
+    @ApiModelProperty(value = "绑定的内容模板编码")
+    private String contentTemplatesNumber; //绑定的内容模板编码
+
+    @ApiModelProperty(value = "设备状态")
+    private Integer status; //设备状态:未激活、启用、停用
+
+    @ApiModelProperty(value = "货架类目id")
+    private String shelfCategoryId; //货架类目id:推荐、套餐、手机、智能家居、配件
+
+    @ApiModelProperty(value = "支持的设备类型")
+    private String supportDeviceType; //支持的设备类型
+
+    @ApiModelProperty(value = "所属厅店")
+    private String adscriptionShop; //所属厅店
+
+    @ApiModelProperty(value = "所属城市")
+    private String adscriptionCity; //所属城市
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getGmtCreate() {
+        return gmtCreate;
+    }
+
+    public void setGmtCreate(String gmtCreate) {
+        this.gmtCreate = gmtCreate;
+    }
+
+    public String getGmtModified() {
+        return gmtModified;
+    }
+
+    public void setGmtModified(String gmtModified) {
+        this.gmtModified = gmtModified;
+    }
+
+    public String getCreator() {
+        return creator;
+    }
+
+    public void setCreator(String creator) {
+        this.creator = creator;
+    }
+
+    public String getModifier() {
+        return modifier;
+    }
+
+    public void setModifier(String modifier) {
+        this.modifier = modifier;
+    }
+
+    public Integer getIsDeleted() {
+        return isDeleted;
+    }
+
+    public void setIsDeleted(Integer isDeleted) {
+        this.isDeleted = isDeleted;
+    }
+
+    public String getNumber() {
+        return number;
+    }
+
+    public void setNumber(String number) {
+        this.number = number;
+    }
+
+    public String getShelfName() {
+        return shelfName;
+    }
+
+    public void setShelfName(String shelfName) {
+        this.shelfName = shelfName;
+    }
+
+    public String getShelfTemplatesNumber() {
+        return shelfTemplatesNumber;
+    }
+
+    public void setShelfTemplatesNumber(String shelfTemplatesNumber) {
+        this.shelfTemplatesNumber = shelfTemplatesNumber;
+    }
+
+    public String getContentTemplatesNumber() {
+        return contentTemplatesNumber;
+    }
+
+    public void setContentTemplatesNumber(String contentTemplatesNumber) {
+        this.contentTemplatesNumber = contentTemplatesNumber;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
+    public String getShelfCategoryId() {
+        return shelfCategoryId;
+    }
+
+    public void setShelfCategoryId(String shelfCategoryId) {
+        this.shelfCategoryId = shelfCategoryId;
+    }
+
+    public String getSupportDeviceType() {
+        return supportDeviceType;
+    }
+
+    public void setSupportDeviceType(String supportDeviceType) {
+        this.supportDeviceType = supportDeviceType;
+    }
+
+    public String getAdscriptionShop() {
+        return adscriptionShop;
+    }
+
+    public void setAdscriptionShop(String adscriptionShop) {
+        this.adscriptionShop = adscriptionShop;
+    }
+
+    public String getAdscriptionCity() {
+        return adscriptionCity;
+    }
+
+    public void setAdscriptionCity(String adscriptionCity) {
+        this.adscriptionCity = adscriptionCity;
+    }
+}
+

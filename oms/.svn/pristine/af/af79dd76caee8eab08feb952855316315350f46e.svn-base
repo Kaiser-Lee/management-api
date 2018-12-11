@@ -1,0 +1,245 @@
+package com.iwhalecloud.retail.oms.service.impl;
+
+import com.alibaba.dubbo.config.annotation.Service;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.iwhalecloud.retail.oms.OmsCommonConsts;
+import com.iwhalecloud.retail.oms.consts.OmsConst;
+import com.iwhalecloud.retail.oms.dto.*;
+import com.iwhalecloud.retail.oms.dto.resquest.CloudShelfPageReq;
+import com.iwhalecloud.retail.oms.dto.resquest.cloud.CloudDeviceReqDTO;
+import com.iwhalecloud.retail.oms.dto.resquest.cloud.CloudShelfAddReq;
+import com.iwhalecloud.retail.oms.dto.resquest.cloud.CloudShelfRequestDTO;
+import com.iwhalecloud.retail.oms.entity.DefaultCategory;
+import com.iwhalecloud.retail.oms.exception.BaseException;
+import com.iwhalecloud.retail.oms.manager.CloudDeviceManager;
+import com.iwhalecloud.retail.oms.manager.CloudShelfDetailManager;
+import com.iwhalecloud.retail.oms.manager.CloudShelfManager;
+import com.iwhalecloud.retail.oms.manager.ContentBaseManager;
+import com.iwhalecloud.retail.oms.manager.DefaultCategoryManager;
+import com.iwhalecloud.retail.oms.manager.DefaultContentManager;
+import com.iwhalecloud.retail.oms.manager.DefaultOperatingManager;
+import com.iwhalecloud.retail.oms.manager.OperatingPositionBindManager;
+import com.iwhalecloud.retail.oms.manager.ShelfDetailManager;
+import com.iwhalecloud.retail.oms.service.CloudShelfService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+
+/**
+ * @Auther: lin.wh
+ * @Date: 2018/10/15 10:28
+ * @Description: 云货架实现类
+ */
+
+@Slf4j
+@Service
+public class CloudShelfServiceImpl implements CloudShelfService {
+
+    @Autowired
+    private CloudShelfManager cloudShelfManager;
+    @Autowired
+    private CloudDeviceManager cloudDeviceManager;
+    @Autowired
+    private DefaultCategoryManager defaultCategoryManager;
+
+    @Autowired
+    private CloudShelfDetailManager cloudShelfDetailManager;
+
+    @Autowired
+    private DefaultOperatingManager defaultOperatingManager;
+
+    @Autowired
+    private DefaultContentManager defaultContentManager;
+
+    @Autowired
+    private OperatingPositionBindManager operationPositionManager;
+
+    @Autowired
+    private ShelfDetailManager shelfDetailManager;
+
+    @Autowired
+    private ContentBaseManager contentBaseManager;
+
+
+    @Override
+    public Page<CloudShelfDTO> queryCloudShelfList(CloudShelfPageReq page) {
+        return cloudShelfManager.queryCloudShelfList(page);
+    }
+
+    @Override
+    public CloudShelfDTO queryCloudShelfListDetails(String num, Boolean isQryDevice) {
+        return cloudShelfManager.queryCloudShelfListDetails(num, isQryDevice);
+    }
+
+    @Override
+    @Transactional
+    public CloudShelfDTO createCloudShelf(CloudShelfAddReq req, String userId) throws ParseException, BaseException {
+
+        CloudShelfDTO cloudShelfDTO = new CloudShelfDTO();
+        List<CloudShelfDetailDTO> cloudShelfDetailDTOS = new ArrayList<>();
+        cloudShelfDTO.setCloudShelfDetailDTOS(cloudShelfDetailDTOS);
+
+        //新增云货架基础类
+        cloudShelfDTO.setShelfTemplatesNumber(req.getShelfTemplatesNumber());
+        Long date = System.currentTimeMillis();
+        cloudShelfDTO.setNum(date.toString());
+        cloudShelfDTO.setName(req.getShelfName());
+        cloudShelfDTO.setIsDeleted(OmsConst.IsDeleted.NOT_DELETED.getCode());
+        cloudShelfDTO.setStatus(OmsConst.CloudShelfStatus.USED.getCode());
+        cloudShelfDTO.setCreator(userId);
+        cloudShelfDTO.setAdscriptionShopId(req.getAdscriptionShopId());
+        cloudShelfDTO.setModifier(userId);
+        cloudShelfManager.createCloudShelf(cloudShelfDTO);
+
+        for (String shelfCategoryId : req.getShelfCategoryIds()) {
+            //新增云货架栏目相关信息
+            CloudShelfDetailDTO cloudShelfDetail = new CloudShelfDetailDTO();
+            DefaultOperatingDTO defaultOperation = defaultOperatingManager.qryDefaultOperation(shelfCategoryId);
+            if (defaultOperation == null) {
+                throw new BaseException("未能找到类目ID【" + shelfCategoryId + "】相关信息", "-1");
+            }
+            BeanUtils.copyProperties(defaultOperation, cloudShelfDetail);
+            cloudShelfDetail.setId(null);
+            cloudShelfDetail.setCloudShelfNumber(cloudShelfDTO.getNum());
+            date = System.currentTimeMillis();
+            cloudShelfDetail.setOperatingPositionId(date.toString());
+            cloudShelfDetail.setDefaultOperatingPositionId(defaultOperation.getOperatingPositionId());
+            cloudShelfDetail.setShelfCategoryId(shelfCategoryId);
+            cloudShelfDetail.setCreator(userId);
+            cloudShelfDetail.setModifier(userId);
+            cloudShelfDetail.setIsDeleted(OmsConst.IsDeleted.NOT_DELETED.getCode());
+            cloudShelfDetailManager.insert(cloudShelfDetail);
+
+            //根据默认内容 创建内容信息
+            ContentBaseDTO contentBaseDTO = defaultContentManager.CreateContentBase(defaultOperation.getDefaultContentId(), userId);
+
+            //新增云货架栏目关联内容相关信息
+            OperatingPositionBindDTO operatingPositionBindDTO = operationPositionManager.createOperatingPositionBindDTO(cloudShelfDetail.getOperatingPositionId(), contentBaseDTO.getContentId().toString(), userId);
+
+            operatingPositionBindDTO.setContentBase(contentBaseDTO);
+            cloudShelfDetail.setOperatingPositionBindDTO(operatingPositionBindDTO);
+            cloudShelfDetailDTOS.add(cloudShelfDetail);
+        }
+        if (req.getDevices() != null && req.getDevices().size() > 0) {
+            cloudDeviceManager.updateCloudDeviceByNum(req.getDevices(), cloudShelfDTO.getNum());
+        }
+        return cloudShelfDTO;
+    }
+
+    @Override
+    public int updateCloudShelfStatus(CloudShelfDTO dto) {
+        int t = cloudShelfManager.editCloudShelf(dto);
+        return t;
+    }
+
+    @Override
+    public int deleteCloudShelf(CloudShelfDTO dto) {
+        int t = cloudShelfManager.deleteCloudShelf(dto);
+        return t;
+    }
+
+    /**
+     * 接口逻辑：
+     * (1)云货架number,货架名称,状态更新模型cloud_shlef
+     * (2)关联设备列表根据
+     * 首先通过编码查找已经关联的设备把设备表的关联编码清空，然后根据请求传入的参数 找到对应的设备填上编码
+     * 操作number
+     * (3)货架类目列表
+     * 根据云货架编码查询原本的货架类目信息，对比传入的货架类目列表，进行新增，删除，修改
+     *
+     * @param cloudShelfRequestDTO
+     * @return
+     */
+    @Override
+    @Transactional
+    public ResultVO modifyCloudShelfByParam(CloudShelfRequestDTO cloudShelfRequestDTO) {
+        ResultVO resultVO = new ResultVO();
+        log.info("CloudShelfServiceImpl modifyCloudShelfByParam cloudShelfRequestDTO={} ", cloudShelfRequestDTO);
+        try {
+            int modifyReturnNumber = cloudShelfManager.modifyCloudShelfByParam(cloudShelfRequestDTO);
+            String num = cloudShelfRequestDTO.getNum();
+            Long date = System.currentTimeMillis();
+               if (modifyReturnNumber > 0) {
+                CloudDeviceDTO deleteCloudDeviceDTO = new CloudDeviceDTO();
+                deleteCloudDeviceDTO.setCloudShelfNumber(num);
+                List<CloudDeviceDTO> cloudDeviceDTOList = cloudDeviceManager.queryCloudDeviceBycloudShelfNumber(num);
+                if(cloudDeviceDTOList.size()>0) {
+                    List<String> list = new ArrayList<String>();
+                    for (int i = 0; i < cloudDeviceDTOList.size(); i++) {
+                        list.add(cloudDeviceDTOList.get(i).getNum());
+                    }
+                    //重置为空
+                    int updateNum = cloudDeviceManager.updateCloudDeviceByNum(list, "");
+                }
+                        List<String>  cloudDeviceList = cloudShelfRequestDTO.getCloudDevice();
+                        if(cloudDeviceList.size()>0){
+                            for (int i = 0; i < cloudDeviceList.size(); i++) {
+                                CloudDeviceDTO cloudDeviceReqDTO = new CloudDeviceDTO();
+                                cloudDeviceReqDTO.setNum(cloudDeviceList.get(i));
+                                cloudDeviceReqDTO.setCloudShelfNumber(num);
+                                cloudDeviceReqDTO.setGmtCreate(new Date());
+                                cloudDeviceReqDTO.setStatus(OmsConst.CloudDeviceStatus.USED.getCode());
+                                cloudDeviceReqDTO.setIsDeleted(OmsConst.IsDeleted.NOT_DELETED.getCode());
+                                CloudDeviceDTO cloudDeviceDTO = new CloudDeviceDTO();
+                                BeanUtils.copyProperties(cloudDeviceReqDTO,cloudDeviceDTO);
+                                cloudDeviceManager.editCloudDevice(cloudDeviceDTO);
+                            }
+                        }
+
+                HashMap<String, Object> map = new HashMap<String, Object>();
+                List<ShelfDetailDTO> existCloudShelfList = shelfDetailManager.queryShelfDetailList(num);
+                List<DefaultCategoryDTO> defaultCategorys = cloudShelfRequestDTO.getShelfCategory();
+                if(defaultCategorys!=null){
+                    for (int i = 0; i < defaultCategorys.size(); i++) {
+                        if(defaultCategorys.get(i).getAction().equals("add")){
+                            CloudShelfDetailDTO cloudShelfDetail = new CloudShelfDetailDTO();
+                            String shelfCategoryId  = String.valueOf(defaultCategorys.get(i).getId());
+                            DefaultOperatingDTO defaultOperation = defaultOperatingManager.qryDefaultOperation(shelfCategoryId);
+                            if (defaultOperation == null) {
+                                throw new BaseException("未能找到类目ID【" + shelfCategoryId + "】相关信息", "-1");
+                            }
+                            BeanUtils.copyProperties(defaultOperation, cloudShelfDetail);
+                            cloudShelfDetail.setId(null);
+                            cloudShelfDetail.setCloudShelfNumber(num);
+                            date = System.currentTimeMillis();
+                            cloudShelfDetail.setOperatingPositionId(date.toString());
+                            cloudShelfDetail.setDefaultOperatingPositionId(defaultOperation.getOperatingPositionId());
+                            cloudShelfDetail.setShelfCategoryId(shelfCategoryId);
+                            cloudShelfDetail.setCreator("");
+                            cloudShelfDetail.setModifier("");
+                            cloudShelfDetail.setIsDeleted(OmsConst.IsDeleted.NOT_DELETED.getCode());
+                            cloudShelfDetailManager.insert(cloudShelfDetail);
+                            //根据默认内容 创建内容信息
+                            ContentBaseDTO contentBaseDTO = defaultContentManager.CreateContentBase(defaultOperation.getDefaultContentId(), "");
+                            //新增云货架栏目关联内容相关信息
+                            OperatingPositionBindDTO operatingPositionBindDTO = operationPositionManager.createOperatingPositionBindDTO(cloudShelfDetail.getOperatingPositionId(), contentBaseDTO.getContentId().toString(), "");
+                        }
+                        if(defaultCategorys.get(i).getAction().equals("delete")){
+                            ShelfDetailDTO shelfDetailDTO = new ShelfDetailDTO();
+                            shelfDetailDTO.setCloudShelfNumber(num);
+                            shelfDetailDTO.setShelfCategoryId(String.valueOf(defaultCategorys.get(i).getId()));
+                            shelfDetailManager.deleteShelfDetail(shelfDetailDTO);
+                        }
+                    }
+                    resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+                    resultVO.setResultData("更新成功");
+                    resultVO.setResultMsg("success");
+                }
+            }
+        } catch (Exception e) {
+            log.info("CloudShelfServiceImpl modifyCloudShelfByParam Exception={} ", e);
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultData(e.getMessage());
+        }
+        return resultVO;
+    }
+
+}
+

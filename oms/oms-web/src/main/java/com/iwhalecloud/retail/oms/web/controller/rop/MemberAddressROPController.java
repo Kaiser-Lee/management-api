@@ -1,0 +1,94 @@
+package com.iwhalecloud.retail.oms.web.controller.rop;
+
+import com.alibaba.dubbo.config.annotation.Reference;
+import com.iwhalecloud.retail.oms.consts.DateUtils;
+import com.iwhalecloud.retail.oms.dto.ResultVO;
+import com.iwhalecloud.retail.oms.service.MemberAddressService;
+import com.iwhalecloud.retail.oms.web.annotation.UserLoginToken;
+import com.iwhalecloud.retail.oms.web.controller.BaseController;
+import com.iwhalecloud.retail.oms.web.interceptor.MemberContext;
+import com.ztesoft.net.app.base.core.model.MemberAddress;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.web.bind.annotation.*;
+import zte.params.addr.req.MemberAddressAddReq;
+import zte.params.addr.req.MemberAddressDeleteReq;
+import zte.params.addr.req.MemberAddressEditReq;
+import zte.params.addr.req.MemberAddressListReq;
+import zte.params.addr.resp.MemberAddressEditResp;
+
+import java.util.List;
+/**
+ * @author pjq
+ * @date 2018/10/8
+ */
+@RestController
+@RequestMapping("/api/rop/address")
+@Slf4j
+public class MemberAddressROPController extends BaseController {
+    @Reference
+    private MemberAddressService memberAddressService;
+
+    @GetMapping(value="listMemberAddress")
+    @UserLoginToken
+    public ResultVO<List<MemberAddress>> listMemberAddress(){
+        String memberId = MemberContext.getMemberId();
+        if(StringUtils.isEmpty(memberId)){
+            return failResultVO();
+        }
+        MemberAddressListReq req = new MemberAddressListReq();
+        req.setMember_id(memberId);
+        ResultVO<List<MemberAddress>> resultVO = memberAddressService.listMemberAddress(req);
+        log.info("MemberAddressController listMemberAddress resultVO={} ",resultVO);
+        return resultVO;
+    }
+
+    @RequestMapping(value="addMemberAddress",method = RequestMethod.POST)
+    @UserLoginToken
+    public ResultVO<MemberAddress> addMemeberAddress(@RequestBody MemberAddress memberAddress){
+        log.info("MemberAddressController addMemeberAddress memberAddress={} ",memberAddress);
+        if(null == memberAddress){
+            return failResultVO();
+        }
+        String memberId = MemberContext.getMemberId();
+        if(StringUtils.isEmpty(memberId)){
+            return failResultVO();
+        }
+        memberAddress.setMember_id(memberId);
+        MemberAddressAddReq req = new MemberAddressAddReq();
+        req.setMemberAddress(memberAddress);
+        ResultVO<MemberAddress> resultVO = memberAddressService.addMemeberAddress(req);
+        log.info("MemberAddressController addMemeberAddress resultVO={} ",resultVO);
+        return resultVO;
+    }
+
+    @RequestMapping(value="editMemberAddress",method = RequestMethod.POST)
+    @UserLoginToken
+    public ResultVO<MemberAddressEditResp> editMemberAddress(@RequestBody MemberAddress memberAddress){
+        log.info("MemberAddressController editMemberAddress memberAddress={} ",memberAddress);
+        if(null == memberAddress){
+            return failResultVO();
+        }
+        MemberAddressEditReq req = new MemberAddressEditReq();
+        String memberId = MemberContext.getMemberId();
+        memberAddress.setMember_id(memberId);
+        memberAddress.setLast_update(DateUtils.currentSysTimeForStr());
+        req.setAddress(memberAddress);
+        ResultVO resultVO = memberAddressService.editMemberAddress(req);
+        log.info("MemberAddressController editMemberAddress resultVO={} ",resultVO);
+        return resultVO;
+    }
+
+    @GetMapping(value="deleteMemberAddress")
+    public ResultVO deleteMemberAddress(@RequestParam(value = "addressId", required=false) String addressId){
+        log.info("MemberAddressController deleteMemberAddress addressId={} ",addressId);
+        if(StringUtils.isEmpty(addressId)){
+            return failResultVO();
+        }
+        MemberAddressDeleteReq req = new MemberAddressDeleteReq();
+        req.setAddress_id(addressId);
+        ResultVO resultVO = memberAddressService.deleteMemberAddress(req);
+        log.info("MemberAddressController deleteMemberAddress resultVO={} ",resultVO);
+        return resultVO;
+    }
+}

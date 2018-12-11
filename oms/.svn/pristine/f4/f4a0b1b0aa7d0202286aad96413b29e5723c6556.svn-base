@@ -1,0 +1,95 @@
+package com.iwhalecloud.retail.oms.dto.resquest.order;
+
+import com.iwhalecloud.retail.oms.dto.ModifyBaseRequest;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+
+import java.io.Serializable;
+
+@Data
+public class BuilderOrderRequestDTO extends ModifyBaseRequest implements Serializable {
+
+    /**
+     * 订单信息
+     */
+    @ApiModelProperty(value = "买家留言")
+    private String remark; 
+    @ApiModelProperty(value = "1在线支付  2货到付款")
+    private String payType;
+    @ApiModelProperty(value = "1:APP；2：微商城-普通单；3：微商城-商机单；4：其它")
+    private Integer typeCode; 
+    @ApiModelProperty(value = "是否需要上门安装,  需要：SMAZ;不需要：空")
+    private String shippingType;    
+    @ApiModelProperty(value = "1 订购 5 预约单")
+    private String orderType;  
+    @ApiModelProperty(value = "入网号码")
+    private String accNbr;  
+    @ApiModelProperty(value = "优惠券")
+    private String couponCode;
+
+    /**
+     * 发票信息
+     */
+    @ApiModelProperty(value = "发票类型：1普通发票、2增值发票")
+    private Integer invoiceType;    
+    @ApiModelProperty(value = "发票内容：1 明细，2 办公用品，3 电脑配件，4 耗材")
+    private String invoiceContent; 
+    @ApiModelProperty(value = "发票内容")
+    private String invoiceDetail;   
+    @ApiModelProperty(value = "发票抬头：1 个人 2单位")
+    private Integer invoiceTitle;  
+    @ApiModelProperty(value = "发票抬头描述")
+    private String invoiceTitleDesc; 	
+
+    /**
+     * 客户信息
+     */
+    @ApiModelProperty(value = "客户姓名")
+    private String custName;
+    @ApiModelProperty(value = "证件类型")
+    private String icType;
+    @ApiModelProperty(value = "证件号码")
+    private String icNo;
+    @ApiModelProperty(value = "证件地址")
+    private String icAddr;
+    @ApiModelProperty(value = "客户联系地址")
+    private String custAddr;
+    @ApiModelProperty(value = "联系人姓名")
+    private String contactName;
+    @ApiModelProperty(value = "联系人电话")
+    private String contactPhone;
+
+    @ApiModelProperty(value = "商品productId")
+    private String productId;
+    @ApiModelProperty(value = "分销商id")
+    private String userId; 
+    @ApiModelProperty(value = "下单类型：购物车：GWCGM,立即购买:LJGM")
+    private String sourceType;
+    @ApiModelProperty(value = "商品数量")
+    private Integer goodsNum;
+
+    /**
+     * 物流信息
+     */
+    @ApiModelProperty(value = "es_member_address")
+    private String addressId;
+    @ApiModelProperty(value = "公司id")
+    private String logiId; 
+    @ApiModelProperty(value = "物流方式：网点自取，快递发货")
+    private String shipType;  
+    @ApiModelProperty(value = "金额")
+    private String shippingAmount; 
+    @ApiModelProperty(value = "物流公司")
+    private String logiName; 
+    @ApiModelProperty(value = "联系人")
+    private String shipName; 
+    @ApiModelProperty(value = "收货人地址。")
+    private String shipAddr; 
+    @ApiModelProperty(value = "收货人邮编。")
+    private String shipZip; 
+    @ApiModelProperty(value = "电话")
+    private String shipMobile; 
+
+
+
+}

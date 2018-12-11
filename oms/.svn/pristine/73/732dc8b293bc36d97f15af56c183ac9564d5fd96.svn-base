@@ -1,0 +1,74 @@
+package com.iwhalecloud.retail.oms.service.impl;
+
+import com.iwhalecloud.retail.oms.common.ResultCodeEnum;
+import com.iwhalecloud.retail.oms.rop.ZteRopClient;
+import com.iwhalecloud.retail.oms.service.GoodsCatsService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.alibaba.dubbo.config.annotation.Service;
+import zte.params.goodscats.req.CatComplexAddReq;
+import zte.params.goodscats.resp.CatComplexAddResp;
+import zte.params.goodscats.req.CatsListByIdReq;
+import zte.params.goodscats.req.ComplexGoodsGetReq;
+import zte.params.goodscats.resp.CatAddResp;
+import zte.params.goodscats.resp.CatsListByIdResp;
+import zte.params.goodscats.resp.ComplexGoodsGetResp;
+
+/**
+ * @author mzl
+ * @date 2018/10/11
+ */
+@Slf4j
+@Service
+public class GoodsCatsServiceImpl implements GoodsCatsService {
+
+    @Autowired
+    private ZteRopClient client;
+
+    @Override
+    public CatsListByIdResp listCats(CatsListByIdReq req) {
+        log.info("GoodsCatsServiceImpl.listCats req={}", req);
+        CatsListByIdResp resp;
+        try {
+            resp = client.execute(req, CatsListByIdResp.class);
+        } catch (Exception ex) {
+            log.error("GoodsCatsServiceImpl.listCats Rop Invoke Exception, ex={}", ex);
+            resp = new CatsListByIdResp();
+            resp.setError_code(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getCode());
+            resp.setError_msg(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getDesc());
+        }
+        return resp;
+    }
+
+    @Override
+    public ComplexGoodsGetResp getComplexGoods(ComplexGoodsGetReq req) {
+        log.info("GoodsCatsServiceImpl.getComplexGoods req={}", req);
+        ComplexGoodsGetResp resp;
+        try {
+            resp = client.execute(req, ComplexGoodsGetResp.class);
+        } catch (Exception ex) {
+            log.error("GoodsCatsServiceImpl.listCats Rop Invoke Exception, ex={}", ex);
+            resp = new ComplexGoodsGetResp();
+            resp.setError_code(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getCode());
+            resp.setError_msg(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getDesc());
+        }
+        return resp;
+    }
+
+    @Override
+    public CatComplexAddResp addCatComplex(CatComplexAddReq req) {
+        log.info("GoodsCatsServiceImpl.addCatComplex req={}", req);
+        CatComplexAddResp resp;
+        try {
+            resp = client.execute(req, CatComplexAddResp.class);
+        } catch (Exception ex) {
+            log.error("GoodsCatsServiceImpl.addCatComplex Rop Invoke Exception, ex={}", ex);
+            resp = new CatComplexAddResp();
+            resp.setError_code(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getCode());
+            resp.setError_msg(ResultCodeEnum.ROP_INVOKE_EXCEPTION.getDesc());
+        }
+        return resp;
+    }
+
+
+}

@@ -1,0 +1,18 @@
+package com.iwhalecloud.retail.oms.entity;
+
+import io.swagger.annotations.ApiModel;
+import lombok.Data;
+
+/**
+ * @Auther: lin.wh
+ * @Date: 2018/10/30 17:31
+ * @Description:
+ */
+
+@Data
+@ApiModel(value = "对应模型ShelfTemplatesDTO, 对应实体CloudDeviceDTO类")
+public class ShelfTemplates {
+
+
+}
+

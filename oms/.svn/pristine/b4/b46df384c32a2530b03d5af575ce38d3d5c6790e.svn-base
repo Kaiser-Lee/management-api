@@ -1,0 +1,81 @@
+package com.iwhalecloud.retail.oms.service;
+
+import zte.params.comments.req.CommentsPageListReq;
+import zte.params.comments.resp.CommentsPageListResp;
+import zte.params.goods.req.*;
+import zte.params.goods.resp.*;
+import zte.params.goodstype.req.GoodsTypeListReq;
+import zte.params.goodstype.resp.GoodsTypeListResp;
+
+public interface GoodsService {
+
+    /**
+     * 获取商品列表
+     * @param req
+     * @return
+     */
+    GoodsPageListResp queryGoodsForPage(GoodsPageListReq req);
+
+    /**
+     * 获取商品详情
+     * @param req
+     * @return
+     */
+    GoodsIntroResp queryGoodsDetail(GoodsIntroReq req);
+
+    /**
+     * 获取商品评论
+     * @param req
+     * @return
+     */
+    CommentsPageListResp listGoodsComments(CommentsPageListReq req);
+
+    /**
+     * 获取商品规格
+     * @param req
+     * @return
+     */
+    GoodsSpecListResp listGoodsSpec(GoodsSpecListReq req);
+
+    /**
+     * 根据SessionId进行查询
+     * @param req
+     * @return
+     */
+    GoodsTypeListResp getTypeList(GoodsTypeListReq req);
+
+    /**
+     * 新增商品
+     * @param req
+     * @return
+     */
+    GoodsAddResp addGoods(GoodsAddReq req);
+
+    /**
+     * 修改商品
+     * @param req
+     * @return
+     */
+    GoodsEditResp editGoods(GoodsEditReq req);
+
+    /**
+     * 删除商品
+     * @param req
+     * @return
+     */
+    GoodsDeleteResp deleteGoods(GoodsDeleteReq req);
+
+    /**
+     * 根据名称查询商品列表
+     * @param req
+     * @return
+     */
+    GoodsPageListResp queryGoodsByIdsAndName(GoodsPageByIdsReq req);
+
+    /**
+     * 更新上架状态
+     * @param req
+     * @return
+     */
+    UpdateMarketEnableResp updateMarketEnable(UpdateMarketEnableReq req);
+}

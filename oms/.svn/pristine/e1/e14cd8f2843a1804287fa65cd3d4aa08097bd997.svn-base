@@ -1,0 +1,25 @@
+package com.iwhalecloud.retail.oms.manager;
+
+import com.iwhalecloud.retail.oms.entity.ContentVideosDefaultContent;
+import org.springframework.stereotype.Component;
+import javax.annotation.Resource;
+import com.iwhalecloud.retail.oms.mapper.ContentVideosDefaultContentMapper;
+
+import java.util.List;
+
+
+@Component
+public class ContentVideosDefaultContentManager{
+    @Resource
+    private ContentVideosDefaultContentMapper contentVideosDefaultContentMapper;
+
+    public ContentVideosDefaultContent insertContentVideosDefaultContent(ContentVideosDefaultContent contentVideosDefaultContent){
+        contentVideosDefaultContentMapper.insert(contentVideosDefaultContent);
+        return contentVideosDefaultContent;
+    }
+
+    public List<ContentVideosDefaultContent> queryContentVideoDefalutList(List<Long> contentIds){
+        return contentVideosDefaultContentMapper.queryContentVideoDefalutList(contentIds);
+    }
+
+}

@@ -1,0 +1,19 @@
+package com.iwhalecloud.retail.oms.dto.response;
+
+import lombok.Data;
+import zte.net.ecsord.params.base.req.OrderBusiReq;
+
+import java.io.Serializable;
+import java.util.List;
+
+@Data
+public class OrderDetailListDTO extends OrderBusiReq implements Serializable {
+
+
+    private List orderItems;
+
+    private List deliveryList;
+
+    private Object partnerShop;
+
+}

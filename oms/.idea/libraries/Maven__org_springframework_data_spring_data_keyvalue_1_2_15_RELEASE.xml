@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: org.springframework.data:spring-data-keyvalue:1.2.15.RELEASE">
+    <CLASSES>
+      <root url="jar://H:/m2/repostories/tempRepo_svn/org/springframework/data/spring-data-keyvalue/1.2.15.RELEASE/spring-data-keyvalue-1.2.15.RELEASE.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://H:/m2/repostories/tempRepo_svn/org/springframework/data/spring-data-keyvalue/1.2.15.RELEASE/spring-data-keyvalue-1.2.15.RELEASE-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://H:/m2/repostories/tempRepo_svn/org/springframework/data/spring-data-keyvalue/1.2.15.RELEASE/spring-data-keyvalue-1.2.15.RELEASE-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

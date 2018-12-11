@@ -1,0 +1,12 @@
+package com.iwhalecloud.retail.oms.service;
+
+import zte.params.tags.resp.TagListResp;
+
+public interface GoodsTagsService {
+
+    /**
+     * 标签列表
+     * @return
+     */
+    TagListResp listTag();
+}

@@ -1,0 +1,58 @@
+package com.iwhalecloud.retail.oms.service;
+
+
+import com.iwhalecloud.retail.oms.dto.CloudShelfDTO;
+import com.iwhalecloud.retail.oms.dto.resquest.cloud.CloudShelfAddReq;
+
+import java.util.HashMap;
+import java.util.List;
+
+/**
+ * @author lin.wh
+ * @date 2018/10/12 15:10
+ * @Description: 云货架
+ */
+
+public interface CloudShelfService {
+
+    /**
+     * 查询
+     *
+     * @param map
+     * @return
+     */
+    List<CloudShelfDTO> queryCloudShelfList(HashMap<String, Object> map);
+
+    /**
+     * 查询详情
+     *
+     * @param num
+     * @return
+     */
+    CloudShelfDTO queryCloudShelfListDetails(String num);
+
+    /**
+     * 添加
+     *
+     * @param req
+     * @return
+     */
+     List<CloudShelfDTO> createCloudShelf(CloudShelfAddReq req);
+
+    /**
+     * 修改
+     *
+     * @param dto
+     * @return
+     */
+    int updateCloudShelfStatus(CloudShelfDTO dto);
+
+    /**
+     * 删除
+     *
+     * @param dto
+     * @return
+     */
+    int deleteCloudShelf(CloudShelfDTO dto);
+
+}

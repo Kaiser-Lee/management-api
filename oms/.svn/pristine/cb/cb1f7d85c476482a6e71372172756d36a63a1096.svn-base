@@ -1,0 +1,32 @@
+package com.iwhalecloud.retail.oms.web.controller.partner;
+
+import com.alibaba.dubbo.config.annotation.Reference;
+import com.iwhalecloud.retail.partner.dto.ResultVO;
+import com.iwhalecloud.retail.partner.entity.GoodsRel;
+import com.iwhalecloud.retail.partner.service.GoodsRelService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.*;
+
+@Slf4j
+@RestController
+@CrossOrigin
+@RequestMapping("/api/goodsRel")
+public class GoodsRelController {
+	
+    @Reference
+    private GoodsRelService goodsRelService;
+
+
+    @PostMapping("/addGoodsRel")
+    public ResultVO addGoodsRel(@RequestParam(value = "aGoodsId") String aGoodsId, @RequestParam(value = "zGoodsId") String zGoodsId) {
+        GoodsRel goodsRel = new GoodsRel();
+        goodsRel.setAGoodsId(aGoodsId);
+        goodsRel.setZGoodsId(zGoodsId);
+        return goodsRelService.addGoodsRel(goodsRel);
+    }
+
+    @GetMapping("/getRecommendGoodsByGoodsId")
+    public ResultVO getRecommendGoodsByGoodsId(@RequestParam(value = "goodsId") String goodsId) {
+        return goodsRelService.getRecommendGoodsByGoodsId(goodsId);
+    }
+}

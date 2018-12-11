@@ -1,0 +1,55 @@
+package com.iwhalecloud.retail.oms.service.impl;
+
+import com.alibaba.dubbo.config.annotation.Service;
+import com.iwhalecloud.retail.oms.dto.ResultVO;
+import com.iwhalecloud.retail.oms.rop.ZteRopClient;
+import com.iwhalecloud.retail.oms.service.RegionService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import zte.params.region.req.RegionsGetReq;
+import zte.params.region.req.RegionsListReq;
+import zte.params.region.resp.RegionsGetResp;
+import zte.params.region.resp.RegionsListResp;
+
+/**
+ * @Author pjq
+ * @Date 2018/10/11
+ **/
+@Slf4j
+@Service
+public class RegionServiceImpl implements RegionService {
+    @Autowired
+    private ZteRopClient client;
+
+    @Override
+    public ResultVO<RegionsListResp> listRegions(RegionsListReq req) {
+        log.info("RegionServiceImpl listRegions req={} ",req);
+        RegionsListResp resp = null;
+        try {
+            resp = client.execute(req,RegionsListResp.class);
+        }catch (Exception e){
+            log.error("RegionServiceImpl listRegions Exception={} ",e);
+            return ResultVO.error();
+        }
+        if(null == resp){
+            return ResultVO.error();
+        }
+        return ResultVO.success(resp);
+    }
+
+    @Override
+    public ResultVO<RegionsGetResp> getRegion(RegionsGetReq req) {
+        log.info("RegionServiceImpl getRegion req={} ",req);
+        RegionsGetResp resp = null;
+        try {
+            resp = client.execute(req, RegionsGetResp.class);
+        }catch (Exception e){
+            log.error("RegionServiceImpl listRegions Exception={} ",e);
+            return ResultVO.error();
+        }
+        if(null == resp){
+            return ResultVO.error();
+        }
+        return ResultVO.success(resp);
+    }
+}

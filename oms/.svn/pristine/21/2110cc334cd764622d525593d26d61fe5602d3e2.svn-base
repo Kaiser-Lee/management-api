@@ -1,0 +1,384 @@
+package com.iwhalecloud.retail.oms.web.controller.cms;
+
+
+import com.iwhalecloud.retail.oms.consts.OmsConst;
+import com.iwhalecloud.retail.oms.dto.*;
+import com.iwhalecloud.retail.oms.dto.response.contentbase.ContentBaseBatchResponse;
+import com.iwhalecloud.retail.oms.dto.response.contentbase.ContentBasePersonalDTO;
+import com.iwhalecloud.retail.oms.dto.response.contentbase.ContentBaseResponseDTO;
+import com.iwhalecloud.retail.oms.dto.resquest.content.ContentAddReq;
+import com.iwhalecloud.retail.oms.dto.resquest.content.ContentEditReq;
+import com.iwhalecloud.retail.oms.dto.resquest.content.ContentBaseBatchReq;
+import com.iwhalecloud.retail.oms.dto.resquest.content.ContentBaseRequestDTO;
+import com.iwhalecloud.retail.oms.entity.*;
+import com.iwhalecloud.retail.oms.service.*;
+
+import com.iwhalecloud.retail.oms.web.interceptor.UserContext;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.web.bind.annotation.*;
+
+import com.alibaba.dubbo.config.annotation.Reference;
+import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.iwhalecloud.retail.oms.OmsCommonConsts;
+import com.iwhalecloud.retail.oms.dto.resquest.content.ContentBasePageReq;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Date;
+
+/**
+ *
+ * @author Ji.kai
+ * @date 2018/10/28 15:27
+ */
+@Slf4j
+@RestController
+@CrossOrigin
+@RequestMapping("/api/contentBase")
+public class ContentBaseController {
+	
+	@Reference
+    private ContentBaseService contentBaseService;
+    @Reference
+    private ContentOrderpicService contentOrderpicService;
+    @Reference
+    private ContentPicService contentPicService;
+    @Reference
+    private ContentPicsetService contentPicsetService;
+    @Reference
+    private CatalogService catalogService;
+    @Reference
+    private ContentTagService contentTagService;
+    @Reference
+    private TagService tagService;
+    @Reference
+    private ContentMaterialService contentMaterialService;
+    @Reference
+    private ContentVideosDefaultContentService contentVideosDefaultContentService;
+    @Reference
+    private ContentVediolv2Service contentVediolv2Service;
+    @Reference
+    private ContentTextService contentTextService;
+    @Reference
+    private ContentChkhisService contentChkhisService;
+
+    /**
+     * 内容列表分页查询接口.
+     *
+     * @param page
+     * @return
+     * @author Ji.kai
+     * @date 2018/10/29 15:27
+     */
+    @ApiOperation(value = "内容列表分页查询接口", notes = "根据在页面上选择的目录、内容类型、内容状态、标签以及输入的关键字等查询内容")
+    @ApiResponses({
+            @ApiResponse(code=400,message="请求参数没填好"),
+            @ApiResponse(code=404,message="请求路径没有或页面跳转路径不对")
+    })
+    @RequestMapping(value = "/qryPagelist", method = RequestMethod.POST)
+    public ResultVO<Page<ContentBaseDTO>> qryContentBasePageList(@RequestBody @ApiParam( value = "查询条件", required = true )ContentBasePageReq page) {
+        ResultVO<Page<ContentBaseDTO>> resultVO = new ResultVO<>();
+        log.info("page:{}", JSON.toJSONString(page));
+        try {
+            Page<ContentBaseDTO> res = contentBaseService.qryContentBasePageList(page);
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+            resultVO.setResultData(res);
+            resultVO.setResultMsg("成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultMsg(e.getMessage());
+        }
+        return resultVO;
+    }
+
+
+    @ApiOperation(value = "查看当前内容的详情", notes = "根据内容类型查询内容基础信息")
+    @ApiResponses({
+            @ApiResponse(code=400,message="请求参数没填好"),
+            @ApiResponse(code=404,message="请求路径没有或页面跳转路径不对")
+    })
+    @RequestMapping(value = "/queryContentDeatil", method = RequestMethod.POST)
+    public ResultVO<ContentBaseResponseDTO> queryContentDeatil(@RequestBody ContentBaseRequestDTO contentBaseRequestDTO) {
+        ResultVO<ContentBaseResponseDTO> resultVO = new ResultVO<ContentBaseResponseDTO>();
+        log.info("contentBaseRequestDTO:{}", JSON.toJSONString(contentBaseRequestDTO));
+        ContentBaseResponseDTO contentBaseResponseDTO = new ContentBaseResponseDTO();
+        try {
+            ContentBasePersonalDTO contentBasePersonalDTO = new ContentBasePersonalDTO();
+            ContentBaseDTO contentBaseDTO = new ContentBaseDTO();
+            contentBaseDTO.setContentId(contentBaseRequestDTO.getContentId());
+            //调用各个原子服务
+            ContentBaseDTO contentBase = contentBaseService.queryContentBase(contentBaseDTO);
+            if(contentBase!=null){
+                contentBaseResponseDTO.setContentBase(contentBase);
+            }
+            Long cataId = contentBase.getCatalogId();
+            //类型	0：软文 1：单图 2：轮播图 3：推广图集 4：纯视频 5：关联视频
+            Integer type = contentBase.getType();
+            List<CataLogDTO> catalogs = catalogService.queryCatalog(cataId);
+            if(catalogs!=null){
+                contentBasePersonalDTO.setCataLogs(catalogs);
+            }
+            Long contentId = contentBaseRequestDTO.getContentId();
+            ContentTagDTO contentTagDTO = new ContentTagDTO();
+            contentTagDTO.setContentId(contentId);
+            List<ContentTagDTO> contentTags  = contentTagService.queryContentTag(contentTagDTO);
+            List<Long> tagIds = new ArrayList<Long>();
+            if(contentTags!=null){
+                contentBasePersonalDTO.setContentTags(contentTags);
+                for (int i = 0; i < contentTags.size() ; i++) {
+                    tagIds.add(contentTags.get(i).getTagId());
+                }
+            }
+            if(tagIds.size()>0){
+                List<TagDTO> tTags  = tagService.queryTagListByParam(tagIds);
+                if (tTags!=null){
+                    contentBasePersonalDTO.setTags(tTags);
+                }
+            }
+            List<Long> matids = new ArrayList<>();
+            List<ContentMaterialDTO> contentMaterials = contentMaterialService.queryContentMaterialList(contentId);
+            if(contentMaterials!=null){
+                contentBasePersonalDTO.setContentMaterials(contentMaterials);
+                for (int i = 0; i < contentMaterials.size() ; i++) {
+                    matids.add(contentMaterials.get(i).getMatid());
+                }
+            }
+            if(OmsConst.ContentTypeEnum.CONTENT_TEXT.getCode().equals(String.valueOf(type).trim())){
+                List<ContentTextDTO> contentTexts = contentTextService.queryContentText(contentId);
+                if(contentTexts!=null){
+                    contentBasePersonalDTO.setContentTexts(contentTexts);
+                }
+            }
+            if(OmsConst.ContentTypeEnum.CONTENT_PIC.getCode().equals(String.valueOf(type).trim())){
+                List<ContentPicDTO> contentPics = contentPicService.queryContentPicList(contentId);
+                if(contentPics!=null){
+                    contentBasePersonalDTO.setContentPics(contentPics);
+                }
+            }
+            if(OmsConst.ContentTypeEnum.CONTENT_ORDERPIC.getCode().equals(String.valueOf(type).trim())){
+                List<ContentOrderpicDTO> contentOrderpics =contentOrderpicService.queryContentOrderPicList(contentId);
+                if(contentOrderpics!=null){
+                    contentBasePersonalDTO.setContentOrderpics(contentOrderpics);
+                }
+            }
+            if(OmsConst.ContentTypeEnum.CONTENT_PICSET.getCode().equals(String.valueOf(type).trim())){
+                List<ContentPicsetDTO>  contentPicsets = contentPicsetService.queryContentPicsetList(contentId);
+                if(contentPicsets!=null){
+                    contentBasePersonalDTO.setContentPicsets(contentPicsets);
+                }
+            }
+            if(OmsConst.ContentTypeEnum.CONTENT_VIDEO.getCode().equals(String.valueOf(type).trim())){
+                List<Long> contentIds = new ArrayList<>();
+                contentIds.add(contentId);
+                List<ContentVideosDefaultContentDTO> contentVideosDefaultContents = contentVideosDefaultContentService.queryContentVideoDefalutList(contentIds);
+                if(contentVideosDefaultContents!=null){
+                    contentBasePersonalDTO.setContentVedios(contentVideosDefaultContents);
+                }
+            }
+            if(OmsConst.ContentTypeEnum.CONTENT_VIDEO_REL.getCode().equals(String.valueOf(type).trim())){
+                if(matids!=null){
+                    List<ContentVediolv2DTO>  contentVediolv2s = contentVediolv2Service.queryContentVediolTwoList(matids);
+                    if(contentVediolv2s!=null){
+                        contentBasePersonalDTO.setContentVediolv2s(contentVediolv2s);
+                    }
+                }
+            }
+            contentBaseResponseDTO.setContentBasePersonal(contentBasePersonalDTO);
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+            resultVO.setResultData(contentBaseResponseDTO);
+            resultVO.setResultMsg("成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultMsg(e.getMessage());
+        }
+        return resultVO;
+    }
+
+    @ApiOperation(value = "批量查看当前内容的详情", notes = "批量查看根据内容类型查询内容基础信息")
+    @ApiResponses({
+            @ApiResponse(code=400,message="请求参数没填好"),
+            @ApiResponse(code=404,message="请求路径没有或页面跳转路径不对")
+    })
+    @RequestMapping(value = "/queryBatchContentDeatil", method = RequestMethod.POST)
+    public ResultVO<ContentBaseBatchResponse> queryBatchContentDeatil(@RequestBody ContentBaseBatchReq contentBaseBatchReq) {
+        ResultVO<ContentBaseBatchResponse> resultVO = new ResultVO<ContentBaseBatchResponse>();
+        log.info("contentBaseBatchReq:{}", JSON.toJSONString(contentBaseBatchReq));
+        List<ContentBaseResponseDTO> contentBaseResponses = new ArrayList<ContentBaseResponseDTO>();
+        try {
+            List<Long> contentIds = contentBaseBatchReq.getContentIds();
+            if(contentIds.size()>0){
+                for (int i = 0; i < contentIds.size(); i++) {
+                    ContentBaseRequestDTO contentBaseRequestDTO = new ContentBaseRequestDTO();
+                    contentBaseRequestDTO.setContentId(contentIds.get(i));
+                    ResultVO<ContentBaseResponseDTO> responseDTOResultVO = queryContentDeatil(contentBaseRequestDTO);
+                    contentBaseResponses.add(responseDTOResultVO.getResultData());
+                }
+                ContentBaseBatchResponse contentBaseBatchResponse= new ContentBaseBatchResponse();
+                contentBaseBatchResponse.setContentBaseResponses(contentBaseResponses);
+                resultVO.setResultData(contentBaseBatchResponse);
+                resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+                resultVO.setResultMsg("成功");
+            }
+        }catch (Exception e) {
+            e.printStackTrace();
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultMsg(e.getMessage());
+        }
+        return resultVO;
+    }
+
+    @ApiOperation(value = "内容新增", notes = "登记内容相关信息，提交后上传素材文件，并对相应的素材登记库表登记")
+    @ApiResponses({
+            @ApiResponse(code=400,message="请求参数没填好"),
+            @ApiResponse(code=404,message="请求路径没有或页面跳转路径不对")
+    })
+    @RequestMapping(value = "/addContentBase", method = RequestMethod.POST)
+    public ResultVO<Boolean> addContentBase(@RequestBody @ApiParam( value = "插入内容", required = true ) ContentAddReq contentAddReq) {
+        ResultVO<Boolean> resultVO = new ResultVO<>();
+        log.info("contentAddReq:{}", JSON.toJSONString(contentAddReq));
+        try {
+//            String userId = UserContext.getUserId();
+            String userId = "1";
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+            resultVO.setResultData(contentBaseService.addContentBase(contentAddReq, userId));
+            resultVO.setResultMsg("插入成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultMsg(e.getMessage());
+        }
+        return resultVO;
+    }
+
+    @ApiOperation(value = "内容删除", notes = "对内容基础信息进行删除操作，将表中该记录的状态更新为已作废/删除")
+    @ApiResponses({
+            @ApiResponse(code=400,message="请求参数没填好"),
+            @ApiResponse(code=404,message="请求路径没有或页面跳转路径不对")
+    })
+    @RequestMapping(value = "/deleteContentBase/{contentId}", method = RequestMethod.DELETE)
+    public ResultVO deleteContentBase(@PathVariable @ApiParam( value = "删除内容", required = true ) String contentId) {
+        ResultVO resultVO = new ResultVO<>();
+        log.info("contentId:", contentId);
+        try {
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+            if(contentBaseService.contentBaseStatusChange(Long.parseLong(contentId),OmsConst.ContentStatusEnum.HAVE_CANCELLATION.getCode())){
+                resultVO.setResultData("删除成功");
+                resultVO.setResultMsg("success");
+            }else {
+                resultVO.setResultData("删除失败");
+                resultVO.setResultMsg("fail");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultMsg(e.getMessage());
+        }
+        return resultVO;
+    }
+
+    @ApiOperation(value = "内容编辑", notes = "点击编辑按钮，在弹出的页面上自动带入内容的相关信息，对相应字段进行修改并提交")
+    @ApiResponses({
+            @ApiResponse(code=400,message="请求参数没填好"),
+            @ApiResponse(code=404,message="请求路径没有或页面跳转路径不对")
+    })
+    @RequestMapping(value = "/editContentBase", method = RequestMethod.PUT)
+    public ResultVO<Boolean> editContentBase(@RequestBody @ApiParam( value = "编辑内容", required = true ) ContentEditReq contentEditReq) {
+        ResultVO<Boolean> resultVO = new ResultVO<>();
+        log.info("contentEditeq:{}", JSON.toJSONString(contentEditReq));
+        try {
+//            String userId = UserContext.getUserId();
+            String userId = "1";
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+            resultVO.setResultData(contentBaseService.editContentBase(contentEditReq, userId));
+            resultVO.setResultMsg("编辑成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultMsg(e.getMessage());
+        }
+        return resultVO;
+    }
+
+    @ApiOperation(value = "提交审核", notes = "提交审核")
+    @ApiResponses({
+            @ApiResponse(code=400,message="请求参数没填好"),
+            @ApiResponse(code=404,message="请求路径没有或页面跳转路径不对")
+    })
+    @RequestMapping(value = "/commitCheck", method = RequestMethod.GET)
+    public ResultVO<Boolean> commitCheck(@RequestParam(value = "contentId", required = true)String contentId) {
+        ResultVO<Boolean> resultVO = new ResultVO<>();
+        log.info("contentId:{}", contentId);
+        try {
+            String userId = UserContext.getUserId();
+            ContentBaseDTO contentBaseDTO = new ContentBaseDTO();
+            contentBaseDTO.setContentId(Long.valueOf(contentId));
+            contentBaseDTO.setOprId(userId);
+            contentBaseDTO.setUpdDate(new Date());
+            contentBaseDTO.setStatus(OmsConst.ContentStatusEnum.FOR_AUDIT.getCode());
+            //内容审核表
+            ContentChkhis contentChkhi = new ContentChkhis();
+            contentChkhi.setContentid(Long.valueOf(contentId));
+            contentChkhi.setOprid("1111111");
+            contentChkhi.setCommitdate(new Date());
+            contentChkhi.setChkdate(new Date());
+            contentChkhi.setResult(OmsConst.ValidStatusEnum.NOT_VALID.getCode());
+            contentChkhi.setCommitoprid("1111111");//暂时写死
+            contentBaseService.updateContentBase(contentBaseDTO,contentChkhi);
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+            resultVO.setResultMsg("提交审核成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultMsg(e.getMessage());
+        }
+        return resultVO;
+    }
+
+    @ApiOperation(value = "失效前提醒", notes = "后台定时程序，每天0:20自动扫描内容基础信息表中状态不为6（已失效）和7（已删除/作废）且失效时间和当天相差小于3天的记录，发送短信和系统通知到内容的创建人，短信和通知内容可参考“你好，你提交的内容【内容名称】将于3天内到期，如需延期，请在系统中调整。”")
+    @ApiResponses({
+            @ApiResponse(code=400,message="请求参数没填好"),
+            @ApiResponse(code=404,message="请求路径没有或页面跳转路径不对")
+    })
+    @RequestMapping(value = "/remindBeforeInvalidate", method = RequestMethod.GET)
+    public ResultVO<List<ContentBaseDTO>> remindBeforeInvalidate() {
+        ResultVO<List<ContentBaseDTO>> resultVO = new ResultVO<>();
+        try {
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+            resultVO.setResultData(contentBaseService.remindBeforeInvalidate());
+            resultVO.setResultMsg("编辑成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultMsg(e.getMessage());
+        }
+        return resultVO;
+    }
+
+    @ApiOperation(value = "内容失效", notes = "后台定时程序，每天0:10自动扫描内容基础信息表中状态不为6（已失效）和7（已删除/作废）的记录，取记录的失效时间，如果失效时间小于当前时间，则将该记录的状态改为6，并删除内容在发布表中的记录。")
+    @ApiResponses({
+            @ApiResponse(code=400,message="请求参数没填好"),
+            @ApiResponse(code=404,message="请求路径没有或页面跳转路径不对")
+    })
+    @RequestMapping(value = "/invalidate", method = RequestMethod.GET)
+    public ResultVO<Integer> invalidateContentBase() {
+        ResultVO<Integer> resultVO = new ResultVO<>();
+        try {
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_SUCCESS);
+            resultVO.setResultData(contentBaseService.invalidateContentBase());
+            resultVO.setResultMsg("编辑成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO.setResultCode(OmsCommonConsts.RESULE_CODE_FAIL);
+            resultVO.setResultMsg(e.getMessage());
+        }
+        return resultVO;
+    }
+
+}

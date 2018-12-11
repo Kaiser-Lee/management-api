@@ -1,0 +1,33 @@
+package com.iwhalecloud.retail.oms.manager;
+
+import com.iwhalecloud.retail.oms.entity.ContentPicset;
+import com.iwhalecloud.retail.oms.dto.ContentPicsetDTO;
+import com.iwhalecloud.retail.oms.dto.response.ContentPicsetListRespDTO;
+import com.iwhalecloud.retail.oms.entity.ContentPicset;
+import org.springframework.stereotype.Component;
+import javax.annotation.Resource;
+import com.iwhalecloud.retail.oms.mapper.ContentPicsetMapper;
+
+import java.util.List;
+
+
+@Component
+public class ContentPicsetManager{
+    @Resource
+    private ContentPicsetMapper contentPicsetMapper;
+
+    /**
+     * 查询推广内容信息
+     * @param contentId
+     * @return
+     */
+    public List<ContentPicset> queryContentPicsetList(Long contentId){
+        return contentPicsetMapper.queryContentPicsetList(contentId);
+    }
+
+    public ContentPicset insertContentPicset(ContentPicset contentPicset){
+        contentPicsetMapper.insert(contentPicset);
+        return contentPicset;
+    }
+
+}

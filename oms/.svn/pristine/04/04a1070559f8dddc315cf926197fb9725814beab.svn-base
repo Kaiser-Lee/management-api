@@ -1,0 +1,162 @@
+package com.iwhalecloud.retail.oms.web.controller.report;
+
+import com.alibaba.dubbo.config.annotation.Reference;
+import com.google.common.collect.Maps;
+import com.iwhalecloud.retail.oms.consts.OmsConst;
+import com.iwhalecloud.retail.oms.dto.ResultVO;
+import com.iwhalecloud.retail.oms.web.annotation.UserLoginToken;
+import com.iwhalecloud.retail.oms.web.controller.BaseController;
+import com.iwhalecloud.retail.oms.web.interceptor.UserContext;
+import com.iwhalecloud.retail.order.dto.response.OrderAmountCategoryRespDTO;
+import com.iwhalecloud.retail.order.dto.response.PastWeekOrderAmountRespDTO;
+import com.iwhalecloud.retail.order.dto.resquest.*;
+import com.iwhalecloud.retail.order.service.OrderSummaryService;
+import com.ztesoft.form.util.StringUtil;
+import com.ztesoft.net.eop.resource.model.AdminUser;
+import io.swagger.annotations.*;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.*;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * @author zwl
+ * @date 2018-11-09
+ * 订单统计相关 (分销商 供货商）
+ */
+@Slf4j
+@RestController
+@CrossOrigin
+@RequestMapping("/api/orderSummary")
+public class OrderSummaryController extends BaseController {
+
+    @Reference
+    private OrderSummaryService orderSummaryService;
+
+    /**
+     * 获取 分销商或供货商的今日数据：待处理订单、订单数量 、销售额、 加购数
+     * @return
+     */
+    @ApiOperation(value = "获取供货商或分销商的今日数据：待处理订单、订单数量 、销售额、 加购数", notes = "后端会区分角色类型查出对应的数据")
+    @ApiImplicitParams({
+    })
+    @ApiResponses({
+            @ApiResponse(code=400,message="请求参数没填好"),
+            @ApiResponse(code=404,message="请求路径没有或页面跳转路径不对")
+    })
+    @GetMapping("/getTodayData")
+    @UserLoginToken
+    public ResultVO getTodayData() {
+        AdminUser adminUser = UserContext.getAdminUser();
+        if(adminUser == null){
+            return failResultVO("用户未登陆，请重新登陆");
+        }
+
+        TodayTodoOrderCountReq todoCountReq = new TodayTodoOrderCountReq();
+        TodayOrderCountReq countReq = new TodayOrderCountReq();
+        TodayOrderAmountReq amountReq = new TodayOrderAmountReq();
+        // TODO 加购数
+//        TodayOrderAmountReq amountReq = new TodayOrderAmountReq();
+        if(adminUser.getFounder() == OmsConst.CURR_FOUNDER3
+                && !StringUtil.isEmpty(adminUser.getRelcode())){
+            // 分销商
+            todoCountReq.setPartnerId(adminUser.getRelcode());
+            countReq.setPartnerId(adminUser.getRelcode());
+            amountReq.setPartnerId(adminUser.getRelcode());
+//            amountReq.setPartnerId(adminUser.getRelcode());
+        } else if(adminUser.getFounder() == OmsConst.CURR_FOUNDER4
+                && !StringUtil.isEmpty(adminUser.getRelcode())){
+            // 供货商
+            todoCountReq.setSupplierId(adminUser.getRelcode());
+            countReq.setSupplierId(adminUser.getRelcode());
+            amountReq.setSupplierId(adminUser.getRelcode());
+//            amountReq.setSupplierId(adminUser.getRelcode());
+        } else {
+            return failResultVO("用户信息有误，未能查到数据！");
+        }
+
+        Map objMap = Maps.newConcurrentMap();
+        objMap.put("todoOrderCount", orderSummaryService.getTodayTodoOrderCount(todoCountReq));
+        objMap.put("orderCount", orderSummaryService.getTodayOrderCount(countReq));
+        objMap.put("orderAmount", orderSummaryService.getTodayOrderAmount(amountReq));
+        objMap.put("cartCount", 0);
+        return successResultVO(objMap);
+    }
+
+    /**
+     * 获取 分销商或供货商的 过去一周的订单销售额
+     * @return
+     */
+    @ApiOperation(value = "获取供货商或分销商的过去一周的订单销售额", notes = "后端会区分角色类型查出对应的数据")
+    @ApiImplicitParams({
+    })
+    @ApiResponses({
+            @ApiResponse(code=400,message="请求参数没填好"),
+            @ApiResponse(code=404,message="请求路径没有或页面跳转路径不对")
+    })
+    @GetMapping("/getPastWeekOrderAmount")
+    @UserLoginToken
+    public ResultVO getPastWeekOrderAmount() {
+        AdminUser adminUser = UserContext.getAdminUser();
+        if(adminUser == null){
+            return failResultVO("用户未登陆，请重新登陆");
+        }
+        PastWeekOrderAmountReq req = new PastWeekOrderAmountReq();
+        if(adminUser.getFounder() == OmsConst.CURR_FOUNDER3
+                && !StringUtil.isEmpty(adminUser.getRelcode())){
+            // 分销商
+            req.setPartnerId(adminUser.getRelcode());
+        } else if(adminUser.getFounder() == OmsConst.CURR_FOUNDER4
+                && !StringUtil.isEmpty(adminUser.getRelcode())){
+            // 供货商
+            req.setSupplierId(adminUser.getRelcode());
+        } else {
+            return failResultVO("用户信息有误，未能查到数据！");
+        }
+        List<PastWeekOrderAmountRespDTO> result = orderSummaryService.getPastWeekOrderAmount(req);
+        return successResultVO(result);
+    }
+
+
+    /**
+     * 获取 分销商或供货商的 过去一周的订单销售额
+     * @return
+     */
+    @ApiOperation(value = "获取供货商或分销商的过去一周的订单销售额", notes = "后端会区分角色类型查出对应的数据")
+    @ApiImplicitParams({
+    })
+    @ApiResponses({
+            @ApiResponse(code=400,message="请求参数没填好"),
+            @ApiResponse(code=404,message="请求路径没有或页面跳转路径不对")
+    })
+    @GetMapping("/getOrderAmountCategory")
+    @UserLoginToken
+    public ResultVO getOrderAmountCategory(
+            @RequestParam(value = "queryType", required = true) int queryType
+            ) {
+        AdminUser adminUser = UserContext.getAdminUser();
+        if(adminUser == null){
+            return failResultVO("用户未登陆，请重新登陆");
+        }
+        OrderAmountCategoryReq req = new OrderAmountCategoryReq();
+        if(adminUser.getFounder() == OmsConst.CURR_FOUNDER3
+                && !StringUtil.isEmpty(adminUser.getRelcode())){
+            // 分销商
+            req.setPartnerId(adminUser.getRelcode());
+        } else if(adminUser.getFounder() == OmsConst.CURR_FOUNDER4
+                && !StringUtil.isEmpty(adminUser.getRelcode())){
+            // 供货商
+            req.setSupplierId(adminUser.getRelcode());
+        } else {
+            return failResultVO("用户信息有误，未能查到数据！");
+        }
+        req.setQueryType(queryType);
+        List<OrderAmountCategoryRespDTO> resultList = orderSummaryService.getOrderAmountCategory(req);
+        //TODO 待处理结果列表
+        return successResultVO(resultList);
+    }
+
+}
